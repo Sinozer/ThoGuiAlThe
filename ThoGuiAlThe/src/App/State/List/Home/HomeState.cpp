@@ -13,7 +13,22 @@ void HomeState::m_InitBackground()
 }
 void HomeState::m_InitUI()
 {
-	m_UIManager.AddText("TITLE");
+	auto* title = m_UIManager.AddText("TITLE", "TIC TAC TOE");
+	title->setCharacterSize(100);
+	title->setOutlineColor(sf::Color::Black);
+	title->setOutlineThickness(4.f);
+	title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
+
+	auto* start = m_UIManager.AddButton("START", "PLAY", [this]() { StateManager::GetInstance()->AddState(new GameState()); });
+	start->setCharacterSize(50);
+	start->setOutlineColor(sf::Color::Black);
+	start->setOutlineThickness(2.f);
+	start->setPosition(WINDOW_SCREEN_WIDTH / 2 - start->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - start->getGlobalBounds().height - 300.f);
+
+	auto* exit = m_UIManager.AddButton("EXIT", "EXIT", [this]() { StateManager::GetInstance()->RemoveAllStates(); });
+	exit->setOutlineColor(sf::Color::Black);
+	exit->setOutlineThickness(2.f);
+	exit->setPosition(WINDOW_SCREEN_WIDTH / 2 - exit->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - exit->getGlobalBounds().height - 50.f);
 }
 void HomeState::Init()
 {
@@ -25,11 +40,13 @@ void HomeState::End()
 {
 }
 
+void HomeState::m_HandleUiEvents(sf::Event& event)
+{
+	m_UIManager.HandleEvents(event);
+}
 void HomeState::HandleEvents(sf::Event& event)
 {
-	if (event.type == sf::Event::KeyPressed)
-		if (event.key.code == sf::Keyboard::Enter)
-			StateManager::GetInstance()->AddState(new GameState());
+	m_HandleUiEvents(event);
 }
 
 void HomeState::m_UpdateUI(const float& dt)

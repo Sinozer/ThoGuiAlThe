@@ -12,6 +12,7 @@ protected:
 	UIManager m_UIManager;
 
 	virtual void m_InitUI() = 0;
+	virtual void m_HandleUiEvents(sf::Event& event) = 0;
 	virtual void m_UpdateUI(const float& dt) = 0;
 	virtual void m_RenderUI(sf::RenderTarget* target) = 0;
 public:

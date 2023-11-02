@@ -9,6 +9,7 @@ public:
 	UIButton(std::string text, std::function<void()> callback);
 	~UIButton() = default;
 
+	void HandleEvents(sf::Event& event);
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target);
 

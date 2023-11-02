@@ -18,6 +18,14 @@ UIManager::~UIManager()
 	m_UIButtons.clear();
 }
 
+void UIManager::HandleEvents(sf::Event& event)
+{
+	for (auto& i : m_UIButtons)
+	{
+		i.second->HandleEvents(event);
+	}
+}
+
 void UIManager::m_UpdateButtons(const float& dt)
 {
 	for (auto& i : m_UIButtons)

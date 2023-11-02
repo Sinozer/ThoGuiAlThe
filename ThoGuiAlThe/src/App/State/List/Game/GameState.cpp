@@ -22,11 +22,20 @@ void GameState::End()
 {
 }
 
+void GameState::m_HandleUiEvents(sf::Event& event)
+{
+	m_UIManager.HandleEvents(event);
+}
+
 void GameState::HandleEvents(sf::Event& event)
 {
 	if (event.type == sf::Event::KeyPressed)
 		if (event.key.code == sf::Keyboard::Escape)
+		{
 			StateManager::GetInstance()->RemoveState();
+			return;
+		}
+	m_HandleUiEvents(event);
 }
 
 void GameState::m_UpdateUI(const float& dt)

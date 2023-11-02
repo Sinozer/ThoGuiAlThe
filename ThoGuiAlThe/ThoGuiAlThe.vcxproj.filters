@@ -79,6 +79,18 @@
     <Filter Include="Fichiers d%27en-tête\App\UI\Nodes\UIButtons">
       <UniqueIdentifier>{a99c11e5-7960-4d1d-a71e-d8290be5ba19}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\App\Game">
+      <UniqueIdentifier>{20d2d072-0b74-4400-9c79-c87665466ddf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\App\Game">
+      <UniqueIdentifier>{2bc692f5-cea1-4300-9391-b925fef84c30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\App\Game\Player">
+      <UniqueIdentifier>{91cac007-d7a1-4bba-8cca-16673dd13351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\App\Game\Player">
+      <UniqueIdentifier>{92aa7c52-ea80-4486-8e5f-9ef051305e30}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -120,6 +132,12 @@
     <ClCompile Include="src\App\UI\Nodes\UIElements.cpp">
       <Filter>Fichiers sources\App\UI\Nodes</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\Game\Game.cpp">
+      <Filter>Fichiers sources\App\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="src\App\Game\Player\Player.cpp">
+      <Filter>Fichiers sources\App\Game\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Constants.h">
@@ -160,6 +178,12 @@
     </ClInclude>
     <ClInclude Include="src\App\UI\Nodes\UIElements.h">
       <Filter>Fichiers d%27en-tête\App\UI\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\Game\Game.h">
+      <Filter>Fichiers d%27en-tête\App\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\Game\Player\Player.h">
+      <Filter>Fichiers d%27en-tête\App\Game\Player</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

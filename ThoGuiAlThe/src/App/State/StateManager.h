@@ -17,6 +17,11 @@ private:
 
 	bool m_Adding;
 	bool m_Removing;
+	bool m_Clearing;
+
+	void m_Add();
+	void m_Remove();
+	void m_Clear();
 
 public:
 	StateManager();

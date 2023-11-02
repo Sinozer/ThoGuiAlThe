@@ -6,6 +6,7 @@ private:
 	void m_InitBackground();
 
 	virtual void m_InitUI();
+	virtual void m_HandleUiEvents(sf::Event& event);
 	virtual void m_UpdateUI(const float& dt);
 	virtual void m_RenderUI(sf::RenderTarget* target);
 

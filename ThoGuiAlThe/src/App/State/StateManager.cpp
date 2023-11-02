@@ -42,11 +42,7 @@ void StateManager::RemoveState()
 
 void StateManager::RemoveAllStates()
 {
-	while (!m_States.empty())
-	{
-		delete m_States.top();
-		m_States.pop();
-	}
+	m_Clearing = true;
 }
 
 bool StateManager::IsEmpty()
@@ -54,24 +50,43 @@ bool StateManager::IsEmpty()
 	return m_States.empty();
 }
 
+void StateManager::m_Add()
+{
+	m_Adding = false;
+	m_States.push(m_NewState);
+	m_NewState = nullptr;
+
+	m_States.top()->Init();
+}
+void StateManager::m_Remove()
+{
+	m_Removing = false;
+
+	m_States.top()->End();
+	delete m_States.top();
+	m_States.pop();
+}
+void StateManager::m_Clear()
+{
+	m_Clearing = false;
+
+	while (!m_States.empty())
+	{
+		m_States.top()->End();
+		delete m_States.top();
+		m_States.pop();
+	}
+}
 void StateManager::ProcessStateChanges()
 {
 	if (m_Removing && !m_States.empty())
-	{
-		m_Removing = false;
+		m_Remove();
 
-		m_States.top()->End();
-		m_States.pop();
-	}
+	if (m_Clearing && !m_States.empty())
+		m_Clear();
 
 	if (m_Adding)
-	{
-		m_Adding = false;
-		m_States.push(m_NewState);
-		m_NewState = nullptr;
-
-		m_States.top()->Init();
-	}
+		m_Add();
 }
 
 State* StateManager::GetActiveState()
