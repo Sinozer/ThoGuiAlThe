@@ -13,7 +13,7 @@ void HomeState::m_InitBackground()
 }
 void HomeState::m_InitUI()
 {
-	auto* title = m_UIManager.AddText("TITLE", "TIC TAC TOE");
+	auto* title = m_UIManager.AddText("TITLE", "THOGUIALTHE");
 	title->setCharacterSize(100);
 	title->setOutlineColor(sf::Color::Black);
 	title->setOutlineThickness(4.f);

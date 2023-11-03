@@ -22,8 +22,8 @@ void Game::m_InitBoard()
 }
 void Game::m_InitPlayers()
 {
-	m_Players.push_back(new Player(sf::Color::Red));
-	m_Players.push_back(new Player(sf::Color::Blue));
+	m_Players.push_back(new Player(sf::Color(231, 111, 81)));
+	m_Players.push_back(new Player(sf::Color(42, 157, 143)));
 }
 void Game::Init()
 {
@@ -59,7 +59,6 @@ void Game::Update(const float& dt)
 {
 	m_UpdateBoard(dt);
 	m_UpdatePlayers(dt);
-	std::cout << m_Turn << std::endl;
 }
 
 void Game::m_RenderBoard(sf::RenderTarget* target)

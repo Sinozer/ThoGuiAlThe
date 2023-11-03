@@ -14,6 +14,16 @@ void GameState::m_InitBackground()
 }
 void GameState::m_InitUI()
 {
+	auto* title = m_UIManager.AddText("TITLE", "TICTACTOE");
+	title->setCharacterSize(100);
+	title->setFillColor(sf::Color(38, 70, 83));
+	title->setOutlineColor(sf::Color::White);
+	title->setOutlineThickness(4.f);
+	title->setPosition(
+		(WINDOW_SCREEN_WIDTH - title->getGlobalBounds().width) / 2,
+		100.f
+	);
+
 }
 void GameState::m_InitGame()
 {

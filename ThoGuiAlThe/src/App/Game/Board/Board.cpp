@@ -37,7 +37,7 @@ void Board::Init()
 	setSize(sf::Vector2f(CELL_SIZE_X * BOARD_SIZE_X, CELL_SIZE_Y * BOARD_SIZE_Y));
 	setPosition(
 		(WINDOW_SCREEN_WIDTH - getGlobalBounds().width) / 2,
-		(WINDOW_SCREEN_HEIGHT - getGlobalBounds().height) / 2
+		(WINDOW_SCREEN_HEIGHT - getGlobalBounds().height) / 1.5f
 	);
 	setOutlineThickness(2.f);
 	setOutlineColor(sf::Color::Black);
@@ -68,6 +68,9 @@ void Board::HandleEvents(sf::Event* event)
 					(event->mouseButton.y - getPosition().y) / CELL_SIZE_Y
 				);
 				m_Cells[cellPosition.x][cellPosition.y]->HandleEvents(event);
+
+				if (m_Cells[cellPosition.x][cellPosition.y]->GetPlayer() != nullptr)
+					return;
 				m_Cells[cellPosition.x][cellPosition.y]->SetPlayer(m_Players[m_Turn % 2]);
 				m_Turn++;
 			}

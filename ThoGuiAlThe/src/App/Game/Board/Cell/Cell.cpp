@@ -18,7 +18,7 @@ void Cell::Init()
 	setSize(sf::Vector2f(CELL_SIZE_X, CELL_SIZE_Y));
 	setPosition(
 		m_Position.x * CELL_SIZE_X + WINDOW_SCREEN_WIDTH / 2 - getGlobalBounds().width / 2 * BOARD_SIZE_X,
-		m_Position.y * CELL_SIZE_Y + WINDOW_SCREEN_HEIGHT / 2 - getGlobalBounds().height / 2 * BOARD_SIZE_Y
+		m_Position.y * CELL_SIZE_Y + WINDOW_SCREEN_HEIGHT / 1.5f - getGlobalBounds().height / 1.5f * BOARD_SIZE_Y
 	);
 	setFillColor(sf::Color::Transparent);
 	setOutlineThickness(1.f);
@@ -43,8 +43,8 @@ void Cell::Render(sf::RenderTarget* target)
 		sf::RectangleShape player(sf::Vector2f(PLAYER_SIZE_X, PLAYER_SIZE_Y));
 		player.setFillColor(m_Player->GetColor());
 		player.setPosition(
-			m_Position.x * CELL_SIZE_X + PLAYER_MARGIN_X * 1.5f + WINDOW_SCREEN_WIDTH / 2 - getGlobalBounds().width / 2 * BOARD_SIZE_X,
-			m_Position.y * CELL_SIZE_Y + PLAYER_MARGIN_Y * 1.5f + WINDOW_SCREEN_HEIGHT / 2 - getGlobalBounds().height / 2 * BOARD_SIZE_Y
+			getPosition().x + PLAYER_MARGIN_X,
+			getPosition().y + PLAYER_MARGIN_Y
 		);
 
 		target->draw(player);
