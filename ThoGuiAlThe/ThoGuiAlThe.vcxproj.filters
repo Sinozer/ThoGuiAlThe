@@ -91,6 +91,18 @@
     <Filter Include="Fichiers sources\App\Game\Player">
       <UniqueIdentifier>{92aa7c52-ea80-4486-8e5f-9ef051305e30}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\App\Game\Board">
+      <UniqueIdentifier>{667b02d4-adb2-4271-9fbd-d1106fc1a088}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\App\Game\Board">
+      <UniqueIdentifier>{dcd63039-8203-4024-a987-06ca82dc5ae9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\App\Game\Board\Cell">
+      <UniqueIdentifier>{e9aae439-a87f-4ea2-9fe7-6e6e269f9c43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\App\Game\Board\Cell">
+      <UniqueIdentifier>{82e60cf3-cfda-4706-8a7d-0572222e25dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -138,6 +150,12 @@
     <ClCompile Include="src\App\Game\Player\Player.cpp">
       <Filter>Fichiers sources\App\Game\Player</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\Game\Board\Board.cpp">
+      <Filter>Fichiers sources\App\Game\Board</Filter>
+    </ClCompile>
+    <ClCompile Include="src\App\Game\Board\Cell\Cell.cpp">
+      <Filter>Fichiers sources\App\Game\Board\Cell</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Constants.h">
@@ -184,6 +202,12 @@
     </ClInclude>
     <ClInclude Include="src\App\Game\Player\Player.h">
       <Filter>Fichiers d%27en-tête\App\Game\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\Game\Board\Board.h">
+      <Filter>Fichiers d%27en-tête\App\Game\Board</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\Game\Board\Cell\Cell.h">
+      <Filter>Fichiers d%27en-tête\App\Game\Board\Cell</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

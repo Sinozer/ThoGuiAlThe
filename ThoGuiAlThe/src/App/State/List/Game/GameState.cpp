@@ -4,7 +4,10 @@
 GameState::GameState()
 {
 }
-
+GameState::~GameState()
+{
+	delete m_Game;
+}
 
 void GameState::m_InitBackground()
 {
@@ -12,21 +15,27 @@ void GameState::m_InitBackground()
 void GameState::m_InitUI()
 {
 }
+void GameState::m_InitGame()
+{
+	m_Game = new Game();
+	m_Game->Init();
+}
 void GameState::Init()
 {
 	m_ClearColor = sf::Color(233, 196, 106);
 	m_InitBackground();
-}
-
-void GameState::End()
-{
+	m_InitUI();
+	m_InitGame();
 }
 
 void GameState::m_HandleUiEvents(sf::Event& event)
 {
 	m_UIManager.HandleEvents(event);
 }
-
+void GameState::m_HandleGameEvents(sf::Event& event)
+{
+	m_Game->HandleEvents(&event);
+}
 void GameState::HandleEvents(sf::Event& event)
 {
 	if (event.type == sf::Event::KeyPressed)
@@ -36,20 +45,30 @@ void GameState::HandleEvents(sf::Event& event)
 			return;
 		}
 	m_HandleUiEvents(event);
+	m_HandleGameEvents(event);
 }
 
 void GameState::m_UpdateUI(const float& dt)
 {
 	m_UIManager.Update(dt);
 }
+void GameState::m_UpdateGame(const float& dt)
+{
+	m_Game->Update(dt);
+}
 void GameState::Update(const float& dt)
 {
 	m_UpdateUI(dt);
+	m_UpdateGame(dt);
 }
 
 void GameState::m_RenderUI(sf::RenderTarget* target)
 {
 	m_UIManager.Render(target);
+}
+void GameState::m_RenderGame(sf::RenderTarget* target)
+{
+	m_Game->Render(target);
 }
 void GameState::Render(sf::RenderTarget* target)
 {
@@ -59,4 +78,9 @@ void GameState::Render(sf::RenderTarget* target)
 	target->draw(m_Background);
 
 	m_RenderUI(target);
+	m_RenderGame(target);
+}
+
+void GameState::End()
+{
 }
