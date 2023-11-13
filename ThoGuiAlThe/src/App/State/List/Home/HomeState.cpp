@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "HomeState.h"
 
 #include "App/State/List/Game/GameState.h"

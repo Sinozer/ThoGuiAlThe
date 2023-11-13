@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Cell.h"
 
 #include "Constants.h"

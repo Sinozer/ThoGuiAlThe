@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Board.h"
 
 Board::Board(unsigned int& turn, std::vector<Player*>& players)

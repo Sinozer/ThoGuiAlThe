@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "App.h"
 
 #include "App/State/List/Home/HomeState.h"

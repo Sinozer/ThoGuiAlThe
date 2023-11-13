@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "UIButton.h"
 
 UIButton::UIButton()
