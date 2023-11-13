@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "AssetManager.h"
 
 #pragma region Singleton

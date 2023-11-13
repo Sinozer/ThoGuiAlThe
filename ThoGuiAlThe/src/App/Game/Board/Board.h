@@ -13,6 +13,10 @@ public:
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target);
 
+public:
+	bool IsFull() const;
+	bool IsWin() const;
+
 private:
 	std::vector<std::vector<Cell*>> m_Cells;
 

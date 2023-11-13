@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Board.h"
 
 Board::Board(const std::vector<Player*>& players) : m_Turn(0), m_Players(players)
@@ -127,4 +126,32 @@ void Board::Render(sf::RenderTarget* target)
     target->draw(*this);
 
     RenderCells(target);
+}
+
+bool Board::IsFull() const
+{
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			if (m_Cells[i][j]->GetPlayer() == nullptr)
+				return false;
+	return true;
+}
+
+bool Board::IsWin() const
+{
+	// Check rows and columns
+	for (int i = 0; i < 3; i++) {
+		if ((m_Cells[i][0]->GetPlayer() == m_Cells[i][1]->GetPlayer() && m_Cells[i][1]->GetPlayer() == m_Cells[i][2]->GetPlayer() && m_Cells[i][0]->GetPlayer() != nullptr) ||
+			(m_Cells[0][i]->GetPlayer() == m_Cells[1][i]->GetPlayer() && m_Cells[1][i]->GetPlayer() == m_Cells[2][i]->GetPlayer() && m_Cells[0][i]->GetPlayer() != nullptr)) {
+			return true;
+		}
+	}
+
+	// Check diagonals
+	if ((m_Cells[0][0]->GetPlayer() == m_Cells[1][1]->GetPlayer() && m_Cells[1][1]->GetPlayer() == m_Cells[2][2]->GetPlayer() && m_Cells[0][0]->GetPlayer() != nullptr) ||
+		(m_Cells[0][2]->GetPlayer() == m_Cells[1][1]->GetPlayer() && m_Cells[1][1]->GetPlayer() == m_Cells[2][0]->GetPlayer() && m_Cells[0][2]->GetPlayer() != nullptr)) {
+		return true;
+	}
+
+	return false;
 }

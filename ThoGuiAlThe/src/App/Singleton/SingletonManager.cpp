@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "SingletonManager.h"
 
 void SingletonManager::DestroyAllInstances()

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "App/App.h"
 
 int main()
