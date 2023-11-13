@@ -2,11 +2,11 @@
 
 #include "Cell/Cell.h"
 
-class Board : public sf::RectangleShape
+class Board final : public sf::RectangleShape
 {
 public:
-	Board(unsigned int& turn, std::vector<Player*>& players);
-	~Board();
+	explicit Board(const std::vector<Player*>& players);
+	~Board() override;
 
 	void Init();
 	void HandleEvents(sf::Event* event);
@@ -16,12 +16,15 @@ public:
 private:
 	std::vector<std::vector<Cell*>> m_Cells;
 
-	void m_InitCells();
-	void m_HandleCellsEvents(sf::Event* event);
-	void m_UpdateCells(const float& dt);
-	void m_RenderCells(sf::RenderTarget* target);
+	void InitCells();
+	void HandleCellsEvents(sf::Event* event);
+
+	// Returns true if the clicked cell is already occupied
+	bool HandleMouseLeftClick(sf::Event* event);
+	void UpdateCells(const float& dt);
+	void RenderCells(sf::RenderTarget* target);
 
 private:
-	unsigned int& m_Turn;
-	std::vector<Player*>& m_Players;
+	unsigned int m_Turn;
+	std::vector<Player*> m_Players;
 };

@@ -22,10 +22,7 @@ const void StateManager::DestroyInstance()
 }
 #pragma endregion
 
-StateManager::StateManager()
-	: m_Adding(false)
-	, m_Removing(false)
-	, m_NewState(nullptr)
+StateManager::StateManager() : m_NewState(nullptr), m_Adding(false), m_Removing(false), m_Clearing(false)
 {
 }
 
@@ -50,7 +47,7 @@ bool StateManager::IsEmpty()
 	return m_States.empty();
 }
 
-void StateManager::m_Add()
+void StateManager::Add()
 {
 	m_Adding = false;
 	m_States.push(m_NewState);
@@ -58,7 +55,7 @@ void StateManager::m_Add()
 
 	m_States.top()->Init();
 }
-void StateManager::m_Remove()
+void StateManager::Remove()
 {
 	m_Removing = false;
 
@@ -66,7 +63,7 @@ void StateManager::m_Remove()
 	delete m_States.top();
 	m_States.pop();
 }
-void StateManager::m_Clear()
+void StateManager::Clear()
 {
 	m_Clearing = false;
 
@@ -80,13 +77,13 @@ void StateManager::m_Clear()
 void StateManager::ProcessStateChanges()
 {
 	if (m_Removing && !m_States.empty())
-		m_Remove();
+		Remove();
 
 	if (m_Clearing && !m_States.empty())
-		m_Clear();
+		Clear();
 
 	if (m_Adding)
-		m_Add();
+		Add();
 }
 
 State* StateManager::GetActiveState()

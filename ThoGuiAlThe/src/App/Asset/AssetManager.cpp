@@ -2,27 +2,27 @@
 #include "AssetManager.h"
 
 #pragma region Singleton
-AssetManager* AssetManager::s_Instance = nullptr;
+AssetManager* AssetManager::m_sInstance = nullptr;
 
 AssetManager* AssetManager::GetInstance()
 {
-	if (s_Instance == nullptr)
-		s_Instance = new AssetManager();
+	if (m_sInstance == nullptr)
+		m_sInstance = new AssetManager();
 
-	return s_Instance;
+	return m_sInstance;
 }
 
-const void AssetManager::DestroyInstance()
+void AssetManager::DestroyInstance()
 {
-	if (s_Instance == nullptr)
+	if (m_sInstance == nullptr)
 		return;
-	delete s_Instance;
-	s_Instance = nullptr;
+	delete m_sInstance;
+	m_sInstance = nullptr;
 }
 #pragma endregion
 
 #pragma region Textures
-sf::Texture& AssetManager::LoadTexture(std::string name, std::string fileName, sf::IntRect area)
+sf::Texture& AssetManager::LoadTexture(const std::string& name, const std::string& fileName, const sf::IntRect area)
 {
 	if (!TextureExists(name))
 	{
@@ -33,7 +33,7 @@ sf::Texture& AssetManager::LoadTexture(std::string name, std::string fileName, s
 	return GetTexture(name);
 }
 
-sf::Texture& AssetManager::GetTexture(std::string name)
+sf::Texture& AssetManager::GetTexture(const std::string& name)
 {
 	if (!TextureExists(name))
 		throw std::exception("Texture not found");
@@ -41,14 +41,14 @@ sf::Texture& AssetManager::GetTexture(std::string name)
 	return m_Textures.at(name);
 }
 
-const bool AssetManager::TextureExists(std::string name) const
+bool AssetManager::TextureExists(const std::string& name) const
 {
 	return m_Textures.find(name) != m_Textures.end();
 }
 #pragma endregion
 
 #pragma region Fonts
-sf::Font& AssetManager::LoadFont(std::string name, std::string fileName)
+sf::Font& AssetManager::LoadFont(const std::string& name, const std::string& fileName)
 {
 	if (!FontExists(name))
 	{
@@ -59,7 +59,7 @@ sf::Font& AssetManager::LoadFont(std::string name, std::string fileName)
 	return GetFont(name);
 }
 
-sf::Font& AssetManager::GetFont(std::string name)
+sf::Font& AssetManager::GetFont(const std::string& name)
 {
 	if (!FontExists(name))
 		throw std::exception("Font not found");
@@ -67,7 +67,7 @@ sf::Font& AssetManager::GetFont(std::string name)
 	return m_Fonts.at(name);
 }
 
-const bool AssetManager::FontExists(std::string name) const
+bool AssetManager::FontExists(const std::string& name) const
 {
 	return m_Fonts.find(name) != m_Fonts.end();
 }

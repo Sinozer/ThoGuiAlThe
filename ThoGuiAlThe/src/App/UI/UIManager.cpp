@@ -3,120 +3,120 @@
 
 UIManager::~UIManager()
 {
-	for (auto& i : m_UITexts)
+	for (auto& i : m_UiTexts)
 	{
 		delete i.second;
 		i.second = nullptr;
 	}
-	m_UITexts.clear();
+	m_UiTexts.clear();
 
-	for (auto& i : m_UIButtons)
+	for (auto& i : m_UiButtons)
 	{
 		delete i.second;
 		i.second = nullptr;
 	}
-	m_UIButtons.clear();
+	m_UiButtons.clear();
 }
 
 void UIManager::HandleEvents(sf::Event& event)
 {
-	for (auto& i : m_UIButtons)
+	for (auto& i : m_UiButtons)
 	{
 		i.second->HandleEvents(event);
 	}
 }
 
-void UIManager::m_UpdateButtons(const float& dt)
+void UIManager::UpdateButtons(const float& dt)
 {
-	for (auto& i : m_UIButtons)
+	for (auto& i : m_UiButtons)
 	{
 		i.second->Update(dt);
 	}
 }
 void UIManager::Update(const float& dt)
 {
-	m_UpdateButtons(dt);
+	UpdateButtons(dt);
 }
 
-void UIManager::m_RenderTexts(sf::RenderTarget* target)
+void UIManager::RenderTexts(sf::RenderTarget* target)
 {
-	for (auto& i : m_UITexts)
+	for (auto& i : m_UiTexts)
 	{
 		i.second->Render(target);
 	}
 }
-void UIManager::m_RenderButtons(sf::RenderTarget* target)
+void UIManager::RenderButtons(sf::RenderTarget* target)
 {
-	for (auto& i : m_UIButtons)
+	for (const auto& [_, second] : m_UiButtons)
 	{
-		i.second->Render(target);
+		second->Render(target);
 	}
 }
 void UIManager::Render(sf::RenderTarget* target)
 {
-	m_RenderTexts(target);
-	m_RenderButtons(target);
+	RenderTexts(target);
+	RenderButtons(target);
 }
 
 
-UIText* UIManager::AddText(std::string name)
+UIText* UIManager::AddText(const std::string& name)
 {
-	if (m_UITexts.find(name) != m_UITexts.end())
+	if (m_UiTexts.contains(name))
 	{
 		std::cout << "UIText with name: " << name << " already exists!" << std::endl;
 		return nullptr;
 	}
 
 	UIText* newText = new UIText();
-	m_UITexts[name] = newText;
+	m_UiTexts[name] = newText;
 	return newText;
 }
-UIText* UIManager::AddText(std::string name, std::string text)
+UIText* UIManager::AddText(const std::string& name, const std::string& text)
 {
-	if (m_UITexts.find(name) != m_UITexts.end())
+	if (m_UiTexts.contains(name))
 	{
 		std::cout << "UIText with name: " << name << " already exists!" << std::endl;
 		return nullptr;
 	}
 
 	UIText* newText = new UIText(text);
-	m_UITexts[name] = newText;
+	m_UiTexts[name] = newText;
 	return newText;
 }
 
-UIButton* UIManager::AddButton(std::string name)
+UIButton* UIManager::AddButton(const std::string& name)
 {
-	if (m_UIButtons.find(name) != m_UIButtons.end())
+	if (m_UiButtons.contains(name))
 	{
 		std::cout << "UIButton with name: " << name << " already exists!" << std::endl;
 		return nullptr;
 	}
 
 	UIButton* newButton = new UIButton();
-	m_UIButtons[name] = newButton;
+	m_UiButtons[name] = newButton;
 	return newButton;
 }
-UIButton* UIManager::AddButton(std::string name, std::string text)
+UIButton* UIManager::AddButton(const std::string& name, const std::string& text)
 {
-	if (m_UIButtons.find(name) != m_UIButtons.end())
+	if (m_UiButtons.contains(name))
 	{
 		std::cout << "UIButton with name: " << name << " already exists!" << std::endl;
 		return nullptr;
 	}
 
 	UIButton* newButton = new UIButton(text);
-	m_UIButtons[name] = newButton;
+	m_UiButtons[name] = newButton;
 	return newButton;
 }
-UIButton* UIManager::AddButton(std::string name, std::string text, std::function<void()> callback)
+UIButton* UIManager::AddButton(const std::string& name, const std::string& text, const std::function<void()>& callback)
 {
-	if (m_UIButtons.find(name) != m_UIButtons.end())
+	if (m_UiButtons.contains(name))
 	{
 		std::cout << "UIButton with name: " << name << " already exists!" << std::endl;
 		return nullptr;
 	}
 
 	UIButton* newButton = new UIButton(text, callback);
-	m_UIButtons[name] = newButton;
+	m_UiButtons[name] = newButton;
 	return newButton;
 }

@@ -5,24 +5,24 @@ class AssetManager
 #pragma region Singleton
 public:
 	static AssetManager* GetInstance();
-	static const void DestroyInstance();
+	static void DestroyInstance();
 private:
-	static AssetManager* s_Instance;
+	static AssetManager* m_sInstance;
 #pragma endregion
-
-private:
-	std::map<std::string, sf::Texture> m_Textures;
-	std::map<std::string, sf::Font> m_Fonts;
 
 public:
 	AssetManager() = default;
 	~AssetManager() = default;
 
-	sf::Texture& LoadTexture(std::string name, std::string fileName, sf::IntRect area = sf::IntRect());
-	sf::Texture& GetTexture(std::string name);
-	const bool TextureExists(std::string name) const;
+	sf::Texture& LoadTexture(const std::string& name, const std::string& fileName, sf::IntRect area = sf::IntRect());
+	sf::Texture& GetTexture(const std::string& name);
+	bool TextureExists(const std::string& name) const;
 
-	sf::Font& LoadFont(std::string name, std::string fileName);
-	sf::Font& GetFont(std::string name);
-	const bool FontExists(std::string name) const;
+	sf::Font& LoadFont(const std::string& name, const std::string& fileName);
+	sf::Font& GetFont(const std::string& name);
+	bool FontExists(const std::string& name) const;
+	
+private:
+	std::map<std::string, sf::Texture> m_Textures;
+	std::map<std::string, sf::Font> m_Fonts;
 };

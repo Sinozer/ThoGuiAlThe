@@ -9,12 +9,12 @@ GameState::~GameState()
 	delete m_Game;
 }
 
-void GameState::m_InitBackground()
+void GameState::InitBackground()
 {
 }
-void GameState::m_InitUI()
+void GameState::InitUi()
 {
-	auto* title = m_UIManager.AddText("TITLE", "TICTACTOE");
+	auto* title = m_UiManager.AddText("TITLE", "TICTACTOE");
 	title->setCharacterSize(100);
 	title->setFillColor(sf::Color(38, 70, 83));
 	title->setOutlineColor(sf::Color::White);
@@ -25,7 +25,7 @@ void GameState::m_InitUI()
 	);
 
 }
-void GameState::m_InitGame()
+void GameState::InitGame()
 {
 	m_Game = new Game();
 	m_Game->Init();
@@ -33,16 +33,16 @@ void GameState::m_InitGame()
 void GameState::Init()
 {
 	m_ClearColor = sf::Color(233, 196, 106);
-	m_InitBackground();
-	m_InitUI();
-	m_InitGame();
+	InitBackground();
+	InitUi();
+	InitGame();
 }
 
-void GameState::m_HandleUiEvents(sf::Event& event)
+void GameState::HandleUiEvents(sf::Event& event)
 {
-	m_UIManager.HandleEvents(event);
+	m_UiManager.HandleEvents(event);
 }
-void GameState::m_HandleGameEvents(sf::Event& event)
+void GameState::HandleGameEvents(sf::Event& event)
 {
 	m_Game->HandleEvents(&event);
 }
@@ -54,29 +54,29 @@ void GameState::HandleEvents(sf::Event& event)
 			StateManager::GetInstance()->RemoveState();
 			return;
 		}
-	m_HandleUiEvents(event);
-	m_HandleGameEvents(event);
+	HandleUiEvents(event);
+	HandleGameEvents(event);
 }
 
-void GameState::m_UpdateUI(const float& dt)
+void GameState::UpdateUi(const float& dt)
 {
-	m_UIManager.Update(dt);
+	m_UiManager.Update(dt);
 }
-void GameState::m_UpdateGame(const float& dt)
+void GameState::UpdateGame(const float& dt)
 {
 	m_Game->Update(dt);
 }
 void GameState::Update(const float& dt)
 {
-	m_UpdateUI(dt);
-	m_UpdateGame(dt);
+	UpdateUi(dt);
+	UpdateGame(dt);
 }
 
-void GameState::m_RenderUI(sf::RenderTarget* target)
+void GameState::RenderUi(sf::RenderTarget* target)
 {
-	m_UIManager.Render(target);
+	m_UiManager.Render(target);
 }
-void GameState::m_RenderGame(sf::RenderTarget* target)
+void GameState::RenderGame(sf::RenderTarget* target)
 {
 	m_Game->Render(target);
 }
@@ -87,8 +87,8 @@ void GameState::Render(sf::RenderTarget* target)
 
 	target->draw(m_Background);
 
-	m_RenderUI(target);
-	m_RenderGame(target);
+	RenderUi(target);
+	RenderGame(target);
 }
 
 void GameState::End()
