@@ -6,7 +6,7 @@ private:
 	sf::Color m_Color;
 
 public:
-	Player(sf::Color color);
+	explicit Player(sf::Color color);
 	~Player() = default;
 
 	void Init();
@@ -14,5 +14,5 @@ public:
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target);
 
-	sf::Color GetColor() const { return m_Color; };
+	sf::Color GetColor() const { return m_Color; }
 };

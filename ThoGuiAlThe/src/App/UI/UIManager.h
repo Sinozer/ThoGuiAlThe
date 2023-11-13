@@ -12,21 +12,19 @@ public:
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target);
 
+	UIText* AddText(const std::string& name);
+	UIText* AddText(const std::string& name, const std::string& text);
+
+	UIButton* AddButton(const std::string& name);
+	UIButton* AddButton(const std::string& name, const std::string& text);
+	UIButton* AddButton(const std::string& name, const std::string& text, const std::function<void()>& callback);
+
 private:
-	std::map<std::string, UIText*> m_UITexts;
-	std::map<std::string, UIButton*> m_UIButtons;
+	std::map<std::string, UIText*> m_UiTexts;
+	std::map<std::string, UIButton*> m_UiButtons;
 
-	void m_UpdateButtons(const float& dt);
+	void UpdateButtons(const float& dt);
 
-	void m_RenderTexts(sf::RenderTarget* target);
-	void m_RenderButtons(sf::RenderTarget* target);
-
-public:
-	UIText* AddText(std::string name);
-	UIText* AddText(std::string name, std::string text);
-
-	UIButton* AddButton(std::string name);
-	UIButton* AddButton(std::string name, std::string text);
-	UIButton* AddButton(std::string name, std::string text, std::function<void()> callback);
-
+	void RenderTexts(sf::RenderTarget* target);
+	void RenderButtons(sf::RenderTarget* target);
 };
