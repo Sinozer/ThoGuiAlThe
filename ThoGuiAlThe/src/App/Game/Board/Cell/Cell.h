@@ -2,19 +2,19 @@
 
 #include "App/Game/Player/Player.h"
 
-class Cell : public sf::RectangleShape
+class Cell final : public sf::RectangleShape
 {
 public:
-	Cell(sf::Vector2u position);
-	~Cell();
+	explicit Cell(sf::Vector2u position);
+	~Cell() override;
 
 	void Init();
 	void HandleEvents(sf::Event* event);
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target);
 
-	void SetPlayer(Player* player) { m_Player = player; };
-	Player* GetPlayer() const { return m_Player; };
+	void SetPlayer(Player* player) { m_Player = player; }
+	Player* GetPlayer() const { return m_Player; }
 
 private:
 	Player* m_Player;

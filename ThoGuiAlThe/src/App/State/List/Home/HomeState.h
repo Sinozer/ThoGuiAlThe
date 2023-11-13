@@ -1,24 +1,24 @@
 #pragma once
 
-class HomeState : public State
+class HomeState final : public State
 {
-private:
-	void m_InitBackground();
-
-	virtual void m_InitUI();
-	virtual void m_HandleUiEvents(sf::Event& event);
-	virtual void m_UpdateUI(const float& dt);
-	virtual void m_RenderUI(sf::RenderTarget* target);
-
 public:
 	HomeState();
-	~HomeState() = default;
+	~HomeState() override = default;
 
-	void Init();
-	void End();
+	void Init() override;
+	void End() override;
 
-	void HandleEvents(sf::Event& event);
+	void HandleEvents(sf::Event& event) override;
 
-	void Update(const float& dt);
-	void Render(sf::RenderTarget* target = nullptr);
+	void Update(const float& dt) override;
+	void Render(sf::RenderTarget* target = nullptr) override;
+	
+private:
+	void InitBackground() override;
+
+	void InitUi() override;
+	void HandleUiEvents(sf::Event& event) override;
+	void UpdateUi(const float& dt) override;
+	void RenderUi(sf::RenderTarget* target) override;
 };

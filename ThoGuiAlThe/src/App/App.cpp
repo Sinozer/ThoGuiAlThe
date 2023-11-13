@@ -2,12 +2,11 @@
 
 #include "App/State/List/Home/HomeState.h"
 
-App::App()
-	: m_StateManager(StateManager::GetInstance())
+App::App() : m_Event(), m_DeltaTime(0.f), m_StateManager(StateManager::GetInstance())
 {
 }
 
-void App::m_InitWindow()
+void App::InitWindow()
 {
 	m_Window.create(
 		sf::VideoMode(WINDOW_SCREEN_WIDTH, WINDOW_SCREEN_HEIGHT),
@@ -15,19 +14,19 @@ void App::m_InitWindow()
 	);
 	m_Window.setFramerateLimit(WINDOW_SCREEN_FRAMERATE_MED);
 }
-void App::m_InitStates()
+void App::InitStates() const
 {
 	m_StateManager->AddState(new HomeState());
 }
 void App::Init()
 {
-	m_InitWindow();
-	m_InitStates();
+	InitWindow();
+	InitStates();
 
 	AssetManager::GetInstance()->LoadFont("DEFAULT", "assets/fonts/super_squad/super_squad.ttf");
 }
 
-void App::m_HandleEvents()
+void App::HandleEvents()
 {
 	while (m_Window.pollEvent(m_Event))
 	{
@@ -41,13 +40,13 @@ void App::Run()
 {
 	while (m_Window.isOpen())
 	{
-		m_UpdateDt();
+		UpdateDt();
 
 		m_StateManager->ProcessStateChanges();
 
 		if (m_StateManager->IsEmpty()) break;
 
-		m_HandleEvents();
+		HandleEvents();
 		m_StateManager->GetActiveState()->Update(m_DeltaTime);
 
 		m_Window.clear(m_StateManager->GetActiveState()->GetClearColor());
@@ -58,14 +57,14 @@ void App::Run()
 	}
 }
 
-void App::End()
+void App::End() const
 {
 	m_StateManager->RemoveAllStates();
 	
 	SingletonManager::DestroyAllInstances();
 }
 
-void App::m_UpdateDt()
+void App::UpdateDt()
 {
 	m_DeltaTime = m_Clock.restart().asSeconds();
 }

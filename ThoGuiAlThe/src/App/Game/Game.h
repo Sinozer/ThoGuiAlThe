@@ -14,21 +14,17 @@ public:
 	void Render(sf::RenderTarget* target);
 
 private:
-	Board* m_Board;
-
-	void m_InitBoard();
-	void m_HandleBoardEvents(sf::Event* event);
-	void m_UpdateBoard(const float& dt);
-	void m_RenderBoard(sf::RenderTarget* target);
+	void InitBoard();
+	void HandleBoardEvents(sf::Event* event);
+	void UpdateBoard(const float& dt);
+	void RenderBoard(sf::RenderTarget* target);
+	
+	void InitPlayers();
+	void HandlePlayersEvents(sf::Event* event);
+	void UpdatePlayers(const float& dt);
+	void RenderPlayers(sf::RenderTarget* target);
 
 private:
 	std::vector<Player*> m_Players;
-
-	void m_InitPlayers();
-	void m_HandlePlayersEvents(sf::Event* event);
-	void m_UpdatePlayers(const float& dt);
-	void m_RenderPlayers(sf::RenderTarget* target);
-
-private:
-	unsigned int m_Turn = 0;
+	Board* m_Board;
 };

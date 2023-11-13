@@ -1,6 +1,7 @@
 #pragma once
 
 class State;
+
 class StateManager
 {
 #pragma region Singleton
@@ -10,18 +11,6 @@ public:
 private:
 	static StateManager* s_Instance;
 #pragma endregion
-private:
-	std::stack<State*> m_States;
-
-	State* m_NewState;
-
-	bool m_Adding;
-	bool m_Removing;
-	bool m_Clearing;
-
-	void m_Add();
-	void m_Remove();
-	void m_Clear();
 
 public:
 	StateManager();
@@ -36,4 +25,18 @@ public:
 	void ProcessStateChanges();
 
 	State* GetActiveState();
+
+private:
+	std::stack<State*> m_States;
+
+	State* m_NewState;
+
+	bool m_Adding;
+	bool m_Removing;
+	bool m_Clearing;
+
+	void Add();
+	void Remove();
+	void Clear();
+
 };
