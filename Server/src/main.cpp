@@ -2,12 +2,8 @@
 
 int main()
 {
-	Server* server = new Server();
+	Server::GetInstance().StartServer();
+	Server::GetInstance().ProcessMessages();
 
-	server->StartServer();
-
-	server->AcceptNewClient();
-
-	delete server;
 	return 0;
 }

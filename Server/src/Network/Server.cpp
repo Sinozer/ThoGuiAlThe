@@ -1,17 +1,10 @@
 #include "Server.h"
 
-Server::Server() : m_Port{"6969"}, m_ServerSocket(INVALID_SOCKET)
-{
-	WSADATA wsaData;
-	if (int r = WSAStartup(MAKEWORD(2, 2), &wsaData); r != 0)
-	{
-		// Gestion de l'erreur
-		LOG("WSAStartup failed with error: " << r);
-		throw std::exception("WSAStartup failed");
-	}
-	else 
-		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
-}
+#define MSG_SERVER (WM_USER + 1)
+#define MSG_CLIENT (WM_USER + 2)
+
+Server::Server() : m_hWnd(nullptr), m_Port{"6969"}, m_ServerSocket(INVALID_SOCKET)
+{}
 
 Server::~Server()
 {
@@ -22,6 +15,18 @@ Server::~Server()
 
 void Server::StartServer()
 {
+	InitWindow();
+	
+	// Initialize Winsock
+	WSADATA wsaData;
+	if (int r = WSAStartup(MAKEWORD(2, 2), &wsaData); r != 0)
+	{
+		LOG("WSAStartup failed with error: " << r);
+		throw std::exception("WSAStartup failed");
+	}
+	else
+		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
+
 	addrinfo* result = nullptr;
 	addrinfo hints{};
 
@@ -76,6 +81,27 @@ void Server::StartServer()
 	}
 	else
 		LOG("listen success");
+
+	// Setup asynchronous socket for listening to new clients in the window message loop
+	if (WSAAsyncSelect(m_ServerSocket, m_hWnd, MSG_SERVER, FD_ACCEPT) == SOCKET_ERROR)
+	{
+		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
+		closesocket(m_ServerSocket);
+		WSACleanup();
+		throw std::exception("WSAAsyncSelect failed");
+	}
+	else
+		LOG("WSAAsyncSelect success");
+}
+
+void Server::ProcessMessages()
+{
+	MSG msg{};
+	while (GetMessage(&msg, m_hWnd, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
 }
 
 void Server::CloseServer()
@@ -93,22 +119,37 @@ void Server::CloseServer()
 	}
 }
 
-void Server::AcceptNewClient()
+void Server::AcceptNewClient(SOCKET& clientSocket)
 {
-	SOCKET clientSocket = accept(m_ServerSocket, NULL, NULL);
 	if (clientSocket == INVALID_SOCKET)
 	{
-        throw std::exception("accept failed");
-    }
+		throw std::exception("accept failed");
+	}
 	else
 		LOG("accept success");
 
-    m_ClientSockets.push_back(clientSocket);
+	if (WSAAsyncSelect(clientSocket, m_hWnd, MSG_CLIENT, FD_READ | FD_WRITE | FD_CLOSE) == SOCKET_ERROR)
+	{
+		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
+		closesocket(clientSocket);
+		return;
+	}
+	else
+		LOG("WSAAsyncSelect success");
+
+	m_ClientSockets.push_back(clientSocket);
+	LOG("Number of clients: " << m_ClientSockets.size());
 }
 
 void Server::CloseClient(SOCKET clientSocket)
 {
-	closesocket(clientSocket);
+	if (int r = closesocket(clientSocket) != 0)
+	{
+		LOG("closesocket failed with error: " << r);
+		return;
+	}
+    else
+        LOG("closesocket success");
 	// Retirez le client de la liste des clients
 
 	for (int i = 0; i < m_ClientSockets.size(); i++)
@@ -119,6 +160,7 @@ void Server::CloseClient(SOCKET clientSocket)
 			break;
 		}
 	}
+	LOG("Number of clients: " << m_ClientSockets.size());
 }
 
 // Implémentez des méthodes pour gérer la communication avec les clients ici
@@ -175,4 +217,79 @@ bool Server::ReceiveFromAllClients(char* data, int size)
 	}
 
 	return true;
+}
+
+void Server::InitWindow()
+{
+	// Create an invisible window for message processing
+	WNDCLASSEX wcex =
+	{
+		.cbSize = sizeof(WNDCLASSEX),
+		.style = 0,
+		.lpfnWndProc = WndProc,
+		.cbClsExtra = 0,
+		.cbWndExtra = 0,
+		.hInstance = GetModuleHandle(nullptr),
+		.hIcon = nullptr,
+		.hCursor = nullptr,
+		.hbrBackground = nullptr,
+		.lpszMenuName = nullptr,
+		.lpszClassName = L"ServerWindow",
+		.hIconSm = nullptr
+	};
+	RegisterClassEx(&wcex);
+
+	m_hWnd = CreateWindowEx(0, L"ServerWindow", L"ServerWindow", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, GetModuleHandle(nullptr), nullptr);
+
+	if (m_hWnd == nullptr)
+	{
+		LOG("CreateWindowEx failed with error: " << GetLastError());
+		throw std::exception("CreateWindowEx failed");
+	}
+	else
+		LOG("CreateWindowEx success");
+}
+
+LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case MSG_SERVER:
+	{
+		if (WSAGETSELECTERROR(lParam))
+		{
+			LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
+			break;
+		}
+
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_ACCEPT:
+			SOCKET clientSocket = accept(wParam, nullptr, nullptr);
+			Server::GetInstance().AcceptNewClient(clientSocket);
+			break;
+		}
+
+		return 0;
+	}
+	case MSG_CLIENT:
+		if (WSAGETSELECTERROR(lParam))
+		{
+			LOG("FD_READ failed with error: " << WSAGetLastError());
+			break;
+		}
+
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_READ:
+			break;
+		case FD_WRITE:
+			break;
+		case FD_CLOSE:
+			Server::GetInstance().CloseClient(wParam);
+            break;
+		}
+		return 0;
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam); // Call default message handler
 }
