@@ -31,6 +31,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\App\UI\Nodes\TextInput\UITextInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App\App.h" />
@@ -50,6 +51,7 @@
     <ClInclude Include="src\App\UI\UIManager.h" />
     <ClInclude Include="src\Constants.h" />
     <ClInclude Include="src\stdafx.h" />
+    <ClInclude Include="src\App\UI\Nodes\TextInput\UITextInput.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -1,6 +1,7 @@
 #pragma once
 #include "Nodes/Text/UIText.h"
 #include "Nodes/Button/UIButton.h"
+#include "Nodes/TextInput/UITextInput.h"
 
 class UIManager
 {
@@ -19,12 +20,18 @@ public:
 	UIButton* AddButton(const std::string& name, const std::string& text);
 	UIButton* AddButton(const std::string& name, const std::string& text, const std::function<void()>& callback);
 
+	UITextInput* AddTextInput(const std::string& name);
+	UITextInput* AddTextInput(const std::string& name, const std::string& text);
+
 private:
 	std::map<std::string, UIText*> m_UiTexts;
 	std::map<std::string, UIButton*> m_UiButtons;
+	std::map<std::string, UITextInput*> m_UiTextInputs;
 
 	void UpdateButtons(const float& dt);
+	void UpdateTextInputs(const float& dt);
 
 	void RenderTexts(sf::RenderTarget* target);
 	void RenderButtons(sf::RenderTarget* target);
+	void RenderTextInputs(sf::RenderTarget* target);
 };
