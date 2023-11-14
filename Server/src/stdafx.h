@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <WinSock2.h>
 #include <Winerror.h>
