@@ -103,6 +103,12 @@
     <Filter Include="Fichiers d%27en-tête\App\Game\Board\Cell">
       <UniqueIdentifier>{82e60cf3-cfda-4706-8a7d-0572222e25dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\App\UI\Nodes\UITextInput">
+      <UniqueIdentifier>{2e0c95dc-f73e-4662-8213-634d5d35423e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\App\UI\Nodes\UITextInput">
+      <UniqueIdentifier>{ea7bced3-2eea-4e1f-8ad7-70d03beade2b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -156,6 +162,9 @@
     <ClCompile Include="src\App\Game\Board\Cell\Cell.cpp">
       <Filter>Fichiers sources\App\Game\Board\Cell</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\UI\Nodes\TextInput\UITextInput.cpp">
+      <Filter>Fichiers sources\App\UI\Nodes\UITextInput</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Constants.h">
@@ -208,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="src\App\Game\Board\Cell\Cell.h">
       <Filter>Fichiers d%27en-tête\App\Game\Board\Cell</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\UI\Nodes\TextInput\UITextInput.h">
+      <Filter>Fichiers d%27en-tête\App\UI\Nodes\UITextInput</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
