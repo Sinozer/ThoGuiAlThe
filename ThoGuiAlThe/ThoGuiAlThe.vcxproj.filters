@@ -108,6 +108,11 @@
     </Filter>
     <Filter Include="Fichiers d%27en-tête\App\UI\Nodes\UITextInput">
       <UniqueIdentifier>{ea7bced3-2eea-4e1f-8ad7-70d03beade2b}</UniqueIdentifier>
+    <Filter Include="Fichiers d%27en-tête\App\State\List\Select">
+      <UniqueIdentifier>{4dd5e988-e46d-4827-8e0e-26ff810b069e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\App\State\List\Select">
+      <UniqueIdentifier>{cb7d6409-b9a0-490b-94db-778fb1ffaccf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +169,8 @@
     </ClCompile>
     <ClCompile Include="src\App\UI\Nodes\TextInput\UITextInput.cpp">
       <Filter>Fichiers sources\App\UI\Nodes\UITextInput</Filter>
+    <ClCompile Include="src\App\State\List\Select\SelectState.cpp">
+      <Filter>Fichiers sources\App\State\List\Select</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +227,8 @@
     </ClInclude>
     <ClInclude Include="src\App\UI\Nodes\TextInput\UITextInput.h">
       <Filter>Fichiers d%27en-tête\App\UI\Nodes\UITextInput</Filter>
+    <ClInclude Include="src\App\State\List\Select\SelectState.h">
+      <Filter>Fichiers d%27en-tête\App\State\List\Select</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
