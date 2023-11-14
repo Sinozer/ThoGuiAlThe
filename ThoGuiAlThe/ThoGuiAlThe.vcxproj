@@ -20,6 +20,7 @@
     <ClCompile Include="src\App\Singleton\SingletonManager.cpp" />
     <ClCompile Include="src\App\State\List\Game\GameState.cpp" />
     <ClCompile Include="src\App\State\List\Home\HomeState.cpp" />
+    <ClCompile Include="src\App\State\List\Select\SelectState.cpp" />
     <ClCompile Include="src\App\State\State.cpp" />
     <ClCompile Include="src\App\State\StateManager.cpp" />
     <ClCompile Include="src\App\UI\Nodes\Button\UIButton.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="src\App\Singleton\SingletonManager.h" />
     <ClInclude Include="src\App\State\List\Game\GameState.h" />
     <ClInclude Include="src\App\State\List\Home\HomeState.h" />
+    <ClInclude Include="src\App\State\List\Select\SelectState.h" />
     <ClInclude Include="src\App\State\State.h" />
     <ClInclude Include="src\App\State\StateManager.h" />
     <ClInclude Include="src\App\UI\Nodes\Button\UIButton.h" />

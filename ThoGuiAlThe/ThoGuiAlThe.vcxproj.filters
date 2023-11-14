@@ -103,6 +103,12 @@
     <Filter Include="Fichiers d%27en-tête\App\Game\Board\Cell">
       <UniqueIdentifier>{82e60cf3-cfda-4706-8a7d-0572222e25dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\App\State\List\Select">
+      <UniqueIdentifier>{4dd5e988-e46d-4827-8e0e-26ff810b069e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\App\State\List\Select">
+      <UniqueIdentifier>{cb7d6409-b9a0-490b-94db-778fb1ffaccf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -156,6 +162,9 @@
     <ClCompile Include="src\App\Game\Board\Cell\Cell.cpp">
       <Filter>Fichiers sources\App\Game\Board\Cell</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\State\List\Select\SelectState.cpp">
+      <Filter>Fichiers sources\App\State\List\Select</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Constants.h">
@@ -208,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="src\App\Game\Board\Cell\Cell.h">
       <Filter>Fichiers d%27en-tête\App\Game\Board\Cell</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\State\List\Select\SelectState.h">
+      <Filter>Fichiers d%27en-tête\App\State\List\Select</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
