@@ -23,7 +23,10 @@ void App::Init()
 	InitWindow();
 	InitStates();
 
-	AssetManager::GetInstance()->LoadFont("DEFAULT", "assets/fonts/super_squad/super_squad.ttf");
+	AssetManager* assetManager = AssetManager::GetInstance();
+
+	assetManager->LoadFont("DEFAULT", "assets/fonts/super_squad/super_squad.ttf");
+	assetManager->LoadTexture("DEFAULT", "assets/textures/angry_winnie_thumb.png");
 }
 
 void App::HandleEvents()

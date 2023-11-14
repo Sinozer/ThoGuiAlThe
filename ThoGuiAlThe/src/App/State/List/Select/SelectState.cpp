@@ -19,13 +19,13 @@ void SelectState::InitUi()
 		100.f
 	);
 
-	auto* create = m_UiManager.AddButton("CREATE", "CREATE", [this]() { /*StateManager::GetInstance()->AddState(new CreatingState());*/ });
+	auto* create = m_UiManager.AddTextButton("CREATE", "CREATE", [this]() { /*StateManager::GetInstance()->AddState(new CreatingState());*/ });
 	create->setCharacterSize(50);
 	create->setOutlineColor(sf::Color::Black);
 	create->setOutlineThickness(2.f);
 	create->setPosition(WINDOW_SCREEN_WIDTH / 2 - create->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - create->getGlobalBounds().height - 350.f);
 
-	auto* join = m_UiManager.AddButton("JOIN", "JOIN", [this]() { /*StateManager::GetInstance()->AddState(new JoiningState());*/ });
+	auto* join = m_UiManager.AddTextButton("JOIN", "JOIN", [this]() { /*StateManager::GetInstance()->AddState(new JoiningState());*/ });
 	join->setCharacterSize(50);
 	join->setOutlineColor(sf::Color::Black);
 	join->setOutlineThickness(2.f);

@@ -13,7 +13,7 @@
     <ClCompile Include="src\App\State\List\Select\SelectState.cpp" />
     <ClCompile Include="src\App\State\State.cpp" />
     <ClCompile Include="src\App\State\StateManager.cpp" />
-    <ClCompile Include="src\App\UI\Nodes\Button\UIButton.cpp" />
+    <ClCompile Include="src\App\UI\Nodes\Button\TextButton\UITextButton.cpp" />
     <ClCompile Include="src\App\UI\Nodes\Text\UIText.cpp" />
     <ClCompile Include="src\App\UI\Nodes\UIElements.cpp" />
     <ClCompile Include="src\App\UI\UIManager.cpp" />
@@ -21,6 +21,8 @@
     <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\App\UI\Nodes\TextInput\UITextInput.cpp" />
     <ClCompile Include="src\App\User\User.cpp" />
+    <ClCompile Include="src\App\State\List\Profile\ProfileState.cpp" />
+    <ClCompile Include="src\App\UI\Nodes\Button\TextureButton\UITextureButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App\App.h" />
@@ -35,7 +37,7 @@
     <ClInclude Include="src\App\State\List\Select\SelectState.h" />
     <ClInclude Include="src\App\State\State.h" />
     <ClInclude Include="src\App\State\StateManager.h" />
-    <ClInclude Include="src\App\UI\Nodes\Button\UIButton.h" />
+    <ClInclude Include="src\App\UI\Nodes\Button\TextButton\UITextButton.h" />
     <ClInclude Include="src\App\UI\Nodes\Text\UIText.h" />
     <ClInclude Include="src\App\UI\Nodes\UIElements.h" />
     <ClInclude Include="src\App\UI\UIManager.h" />
@@ -43,5 +45,7 @@
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\App\UI\Nodes\TextInput\UITextInput.h" />
     <ClInclude Include="src\App\User\User.h" />
+    <ClInclude Include="src\App\State\List\Profile\ProfileState.h" />
+    <ClInclude Include="src\App\UI\Nodes\Button\TextureButton\UITextureButton.h" />
   </ItemGroup>
 </Project>
