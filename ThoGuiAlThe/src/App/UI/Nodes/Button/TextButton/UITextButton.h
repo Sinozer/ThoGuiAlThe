@@ -1,13 +1,13 @@
 #pragma once
 #include "App/UI/Nodes/Text/UIText.h"
 
-class UIButton : public UIText
+class UITextButton : public UIText
 {
 public:
-	UIButton();
-	UIButton(std::string text);
-	UIButton(std::string text, std::function<void()> callback);
-	~UIButton() = default;
+	UITextButton();
+	UITextButton(std::string text);
+	UITextButton(std::string text, std::function<void()> callback);
+	~UITextButton() = default;
 
 	void HandleEvents(sf::Event& event);
 	void Update(const float& dt);
