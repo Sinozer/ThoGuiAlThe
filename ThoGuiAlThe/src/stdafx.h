@@ -11,7 +11,7 @@
 #include <SFML/Graphics.hpp>
 /* ##################  SFML  ################## */
 
-/* ################# STANDART ################# */
+/* ################# STANDARD ################# */
 #include <functional>
 #include <iostream>
 
@@ -19,7 +19,22 @@
 #include <vector>
 #include <stack>
 #include <string>
-/* ################# STANDART ################# */
+/* ################# STANDARD ################# */
+
+/* ##################  WINSOCK  ############### */
+#include <WinSock2.h>
+#include <Winerror.h>
+#include <WS2tcpip.h>
+/* ##################  WINSOCK  ############### */
+
+/* #################  DEBUG  ################## */
+#include <assert.h>
+#if defined(_DEBUG) || defined(DEBUG) && !defined(LOG)
+#define LOG(x) std::cout << x << '\n'
+#else
+#define LOG(x)
+#endif
+/* #################  DEBUG  ################## */
 
 /* ##################  SELF  ################## */
 #include "App/Singleton/SingletonManager.h"

@@ -156,6 +156,9 @@
     <ClCompile Include="src\App\Game\Board\Cell\Cell.cpp">
       <Filter>Fichiers sources\App\Game\Board\Cell</Filter>
     </ClCompile>
+    <ClCompile Include="src\App\Network\NetworkManager.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Constants.h">
@@ -208,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="src\App\Game\Board\Cell\Cell.h">
       <Filter>Fichiers d%27en-tête\App\Game\Board\Cell</Filter>
+    </ClInclude>
+    <ClInclude Include="src\App\Network\NetworkManager.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

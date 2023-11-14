@@ -1,6 +1,7 @@
 #include "HomeState.h"
 
 #include "App/State/List/Game/GameState.h"
+#include "App/Network/NetworkManager.h"
 
 HomeState::HomeState()
 = default;
@@ -17,7 +18,11 @@ void HomeState::InitUi()
 	title->setOutlineThickness(4.f);
 	title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
 
-	auto* start = m_UiManager.AddButton("START", "PLAY", [this]() { StateManager::GetInstance()->AddState(new GameState()); });
+	auto* start = m_UiManager.AddButton("START", "PLAY", [this]() 
+		{
+			NetworkManager::GetInstance().Connect();
+			StateManager::GetInstance()->AddState(new GameState());
+		});
 	start->setCharacterSize(50);
 	start->setOutlineColor(sf::Color::Black);
 	start->setOutlineThickness(2.f);
