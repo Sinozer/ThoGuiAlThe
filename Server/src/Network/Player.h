@@ -6,6 +6,7 @@ public:
     ~Player() {};
 
     SOCKET GetSocket() const { return m_Socket; }
+    uint32_t GetId() const { return m_Id; }
 
     bool operator==(const Player& other) const
     {

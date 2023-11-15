@@ -21,7 +21,7 @@ public:
 	void RemovePlayer(Player& player);
 	void RemovePlayer(SOCKET socket);
 
-	bool SendToClient(SOCKET clientSocket, const char* message, int messageSize);
+	void SendDataToPlayer(const Player& player, const nlohmann::json& data);
 
 	void HandleJson(const nlohmann::json& json);
 

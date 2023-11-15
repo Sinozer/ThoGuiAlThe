@@ -140,6 +140,14 @@ void Server::AcceptNewPlayer(Player newPlayer)
 
 	m_Players.emplace(std::move(newPlayer));
 	LOG("Number of clients: " << m_Players.size());
+
+	nlohmann::json jsonData = 
+	{ 
+		{"eventType", "INIT_PLAYER"},
+		{"playerId", newPlayer.GetId()}
+	};
+
+	SendDataToPlayer(newPlayer, jsonData);
 }
 
 void Server::RemovePlayer(Player& player)
@@ -149,8 +157,8 @@ void Server::RemovePlayer(Player& player)
 		LOG("closesocket failed with error: " << r);
 		return;
 	}
-    else
-        LOG("closesocket success");
+	else
+		LOG("closesocket success");
 	// Retirez le client de la liste des clients
 
 	m_Players.erase(player);
@@ -179,21 +187,17 @@ void Server::RemovePlayer(SOCKET socket)
 	}
 }
 
-// Implémentez des méthodes pour gérer la communication avec les clients ici
-
-bool Server::SendToClient(SOCKET clientSocket, const char* data, int size)
+void Server::SendDataToPlayer(const Player& player, const nlohmann::json& data)
 {
-	int bytesSent = send(clientSocket, data, size, 0);
-	if (bytesSent == SOCKET_ERROR)
-	{
-		// Gestion de l'erreur
+	std::string dataString = data.dump();
+	int size = dataString.size();
 
-		std::cout << "Error sending data." << std::endl;
-
-		return false;
-	}
-
-	return true;
+if (int r = send(player.GetSocket(), dataString.c_str(), size, 0); r == SOCKET_ERROR)
+    {
+        LOG("send failed with error: " << WSAGetLastError());
+    }
+    else
+        LOG("send success");
 }
 
 void Server::HandleJson(const nlohmann::json& json)
@@ -313,7 +317,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case FD_CLOSE:
 			Server::GetInstance().RemovePlayer(wParam);
-            break;
+			break;
 		}
 		return 0;
 	}
