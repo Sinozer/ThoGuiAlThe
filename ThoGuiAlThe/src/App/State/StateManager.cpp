@@ -16,12 +16,11 @@ const void StateManager::DestroyInstance()
 	if (s_Instance == nullptr)
 		return;
 
-	delete s_Instance;
-	s_Instance = nullptr;
+	DELPTR(s_Instance);
 }
 #pragma endregion
 
-StateManager::StateManager() : m_NewState(nullptr), m_Adding(false), m_Removing(false), m_Clearing(false)
+StateManager::StateManager() : m_NewState(nullptr), m_Adding(false), m_Removing(0), m_Clearing(false)
 {
 }
 
@@ -31,14 +30,19 @@ void StateManager::AddState(State* state)
 	m_NewState = state;
 }
 
-void StateManager::RemoveState()
+void StateManager::RemoveState(unsigned char amount)
 {
-	m_Removing = true;
+	m_Removing = amount;
 }
 
 void StateManager::RemoveAllStates()
 {
 	m_Clearing = true;
+}
+
+void StateManager::GoToFirstState()
+{
+	m_Removing = m_States.size() - 1;
 }
 
 bool StateManager::IsEmpty()
@@ -56,11 +60,20 @@ void StateManager::Add()
 }
 void StateManager::Remove()
 {
-	m_Removing = false;
+	if (m_Removing > m_States.size())
+	{
+		Clear();
+		return;
+	}
 
-	m_States.top()->End();
-	delete m_States.top();
-	m_States.pop();
+	for (unsigned char i = 0; i < m_Removing; i++)
+	{
+		m_States.top()->End();
+		DELPTR(m_States.top());
+		m_States.pop();
+	}
+
+	m_Removing = 0;
 }
 void StateManager::Clear()
 {
@@ -69,13 +82,13 @@ void StateManager::Clear()
 	while (!m_States.empty())
 	{
 		m_States.top()->End();
-		delete m_States.top();
+		DELPTR(m_States.top());
 		m_States.pop();
 	}
 }
 void StateManager::ProcessStateChanges()
 {
-	if (m_Removing && !m_States.empty())
+	if (m_Removing > 0 && !m_States.empty())
 		Remove();
 
 	if (m_Clearing && !m_States.empty())

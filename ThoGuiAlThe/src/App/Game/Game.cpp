@@ -7,11 +7,11 @@ Game::Game()
 
 Game::~Game()
 {
-	delete m_Board;
+	DELPTR(m_Board);
 
-	for (const auto& player : m_Players)
+	for (auto& player : m_Players)
 	{
-		delete player;
+		DELPTR(player);
 	}
 }
 
