@@ -5,7 +5,7 @@ GameState::GameState()
 }
 GameState::~GameState()
 {
-	delete m_Game;
+	DELPTR(m_Game);
 }
 
 void GameState::InitBackground()

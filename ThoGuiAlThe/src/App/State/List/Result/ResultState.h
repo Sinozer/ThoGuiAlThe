@@ -1,20 +1,18 @@
 #pragma once
-class ProfileState final : public State
+class ResultState final : public State
 {
 public:
-	ProfileState();
-	~ProfileState() = default;
+	ResultState();
+	~ResultState() = default;
 
 	void Init() override;
 	void HandleEvents(sf::Event& event) override;
 	void Update(const float& dt) override;
-	void Render(sf::RenderTarget* target = nullptr) override;
+	void Render(sf::RenderTarget* target) override;
 	void End() override;
 
 private:
-	void InitBackground();
-	void RenderBackground(sf::RenderTarget* target);
-
+	void InitBackground() override;
 	void InitUi() override;
 	void HandleUiEvents(sf::Event& event) override;
 	void UpdateUi(const float& dt) override;

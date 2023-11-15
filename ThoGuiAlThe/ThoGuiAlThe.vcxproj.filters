@@ -22,7 +22,9 @@
     <ClCompile Include="src\App\UI\Nodes\TextInput\UITextInput.cpp" />
     <ClCompile Include="src\App\User\User.cpp" />
     <ClCompile Include="src\App\State\List\Profile\ProfileState.cpp" />
-    <ClCompile Include="src\App\UI\Nodes\Button\TextureButton\UITextureButton.cpp" />
+    <ClCompile Include="src\App\UI\Nodes\Button\ImageButton\UIImageButton.cpp" />
+    <ClCompile Include="src\App\State\List\Result\ResultState.cpp" />
+    <ClCompile Include="src\App\UI\Nodes\Image\UIImage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App\App.h" />
@@ -46,6 +48,8 @@
     <ClInclude Include="src\App\UI\Nodes\TextInput\UITextInput.h" />
     <ClInclude Include="src\App\User\User.h" />
     <ClInclude Include="src\App\State\List\Profile\ProfileState.h" />
-    <ClInclude Include="src\App\UI\Nodes\Button\TextureButton\UITextureButton.h" />
+    <ClInclude Include="src\App\UI\Nodes\Button\ImageButton\UIImageButton.h" />
+    <ClInclude Include="src\App\State\List\Result\ResultState.h" />
+    <ClInclude Include="src\App\UI\Nodes\Image\UIImage.h" />
   </ItemGroup>
 </Project>

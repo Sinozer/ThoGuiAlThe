@@ -2,6 +2,8 @@
 #include "App/State/List/Profile/ProfileState.h"
 #include "App/State/List/Select/SelectState.h"
 
+#include "App/State/List/Game/GameState.h"
+
 HomeState::HomeState()
 = default;
 
@@ -17,16 +19,16 @@ void HomeState::InitUi()
 	title->setOutlineThickness(4.f);
 	title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
 
-	auto* profile = m_UiManager.AddTextureButton("PROFILE", "DEFAULT", [this]() { StateManager::GetInstance()->AddState(new ProfileState()); });
+	auto* profile = m_UiManager.AddImageButton("PROFILE", "DEFAULT_THUMB", [this]() { StateManager::GetInstance()->AddState(new ProfileState()); });
 	profile->setPosition(WINDOW_SCREEN_WIDTH * 0.99f - profile->getGlobalBounds().width, WINDOW_SCREEN_HEIGHT / 100.f);
 	profile->SetOutlineThickness(3.f);
 	profile->SetOutlineColor(sf::Color::White);
 
-	auto* username = m_UiManager.AddText("USERNAME", "USERNAME");
+	auto* username = m_UiManager.AddTextInput("USERNAME", "{USERNAME}");
 	username->setCharacterSize(15);
 	username->setOutlineColor(sf::Color::Black);
 	username->setOutlineThickness(1.f);
-	username->setPosition(profile->getPosition().x + profile->getGlobalBounds().width / 2 - username->getGlobalBounds().width / 2, profile->getPosition().y + profile->getGlobalBounds().height * 1.05f);
+	username->setPosition(profile->getPosition().x - username->getGlobalBounds().width * 1.05f, profile->getPosition().y);
 
 	auto* start = m_UiManager.AddTextButton("START", "PLAY", [this]() { StateManager::GetInstance()->AddState(new SelectState()); });
 	start->setCharacterSize(50);

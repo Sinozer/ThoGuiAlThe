@@ -26,7 +26,18 @@ void App::Init()
 	AssetManager* assetManager = AssetManager::GetInstance();
 
 	assetManager->LoadFont("DEFAULT", "assets/fonts/super_squad/super_squad.ttf");
-	assetManager->LoadTexture("DEFAULT", "assets/textures/angry_winnie_thumb.png");
+	assetManager->LoadTexture("DEFAULT", "assets/textures/angry_winnie.png");
+	assetManager->LoadTexture("DEFAULT_THUMB", "assets/textures/angry_winnie_thumb.png");
+	assetManager->LoadTexture("HAZMAT", "assets/textures/hazmat.png");
+	assetManager->LoadTexture("HAZMAT_THUMB", "assets/textures/hazmat_thumb.png");
+	assetManager->LoadTexture("HAZMAT2", "assets/textures/hazmat2.png");
+	assetManager->LoadTexture("HAZMAT2_THUMB", "assets/textures/hazmat2_thumb.png");
+	assetManager->LoadTexture("SHREK", "assets/textures/shrek.png");
+	assetManager->LoadTexture("SHREK_THUMB", "assets/textures/shrek_thumb.png");
+	assetManager->LoadTexture("MARGE", "assets/textures/marge.png");
+	assetManager->LoadTexture("MARGE_THUMB", "assets/textures/marge_thumb.png");
+	assetManager->LoadTexture("HOMER", "assets/textures/homer.png");
+	assetManager->LoadTexture("HOMER_THUMB", "assets/textures/homer_thumb.png");
 }
 
 void App::HandleEvents()
@@ -63,7 +74,7 @@ void App::Run()
 void App::End() const
 {
 	m_StateManager->RemoveAllStates();
-	
+
 	SingletonManager::DestroyAllInstances();
 }
 

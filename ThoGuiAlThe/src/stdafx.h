@@ -30,3 +30,6 @@
 #include "App/State/State.h"
 //#include "App/UI/Nodes/UIElements.h"
 /* ##################  SELF  ################## */
+
+#define DELPTR(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
+#define NULLPTR(ptr) if (ptr) { (ptr) = nullptr; }

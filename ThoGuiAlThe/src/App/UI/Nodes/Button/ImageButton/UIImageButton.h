@@ -1,13 +1,13 @@
 #pragma once
-#include "App/UI/Nodes/Text/UIText.h"
+#include "App/UI/Nodes/Image/UIImage.h"
 
-class UITextureButton : public sf::Sprite
+class UIImageButton : public UIImage
 {
 public:
-	UITextureButton();
-	UITextureButton(std::string textureName);
-	UITextureButton(std::string textureName, std::function<void()> callback);
-	~UITextureButton() = default;
+	UIImageButton();
+	UIImageButton(std::string textureName);
+	UIImageButton(std::string textureName, std::function<void()> callback);
+	~UIImageButton() = default;
 
 	void HandleEvents(sf::Event& event);
 	void Update(const float& dt);
