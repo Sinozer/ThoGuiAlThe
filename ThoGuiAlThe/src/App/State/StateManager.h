@@ -17,8 +17,9 @@ public:
 	~StateManager() = default;
 
 	void AddState(State* state);
-	void RemoveState();
+	void RemoveState(unsigned char amount = 1);
 	void RemoveAllStates();
+	void GoToFirstState();
 
 	bool IsEmpty();
 
@@ -32,7 +33,7 @@ private:
 	State* m_NewState;
 
 	bool m_Adding;
-	bool m_Removing;
+	unsigned char m_Removing;
 	bool m_Clearing;
 
 	void Add();

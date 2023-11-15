@@ -1,24 +1,24 @@
-#include "UITextureButton.h"
+#include "UIImageButton.h"
 
-UITextureButton::UITextureButton()
+UIImageButton::UIImageButton()
 {
-	setTexture(AssetManager::GetInstance()->GetTexture("DEFAULT"));
+	setTexture(AssetManager::GetInstance()->GetTexture("DEFAULT"), true);
 	m_Callback = []() {};
 }
 
-UITextureButton::UITextureButton(std::string textureName)
+UIImageButton::UIImageButton(std::string textureName)
 {
-	setTexture(AssetManager::GetInstance()->GetTexture(textureName));
+	setTexture(AssetManager::GetInstance()->GetTexture(textureName), true);
 	m_Callback = []() {};
 }
 
-UITextureButton::UITextureButton(std::string textureName, std::function<void()> callback)
+UIImageButton::UIImageButton(std::string textureName, std::function<void()> callback)
 {
-	setTexture(AssetManager::GetInstance()->GetTexture(textureName));
+	setTexture(AssetManager::GetInstance()->GetTexture(textureName), true);
 	m_Callback = callback;
 }
 
-void UITextureButton::HandleEvents(sf::Event& event)
+void UIImageButton::HandleEvents(sf::Event& event)
 {
 	auto bounds = getGlobalBounds();
 	sf::Vector2f mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
@@ -47,11 +47,11 @@ void UITextureButton::HandleEvents(sf::Event& event)
 	//}
 }
 
-void UITextureButton::Update(const float& dt)
+void UIImageButton::Update(const float& dt)
 {
 }
 
-void UITextureButton::Render(sf::RenderTarget* target)
+void UIImageButton::Render(sf::RenderTarget* target)
 {
 	target->draw(*this);
 
@@ -68,17 +68,17 @@ void UITextureButton::Render(sf::RenderTarget* target)
 	}
 }
 
-void UITextureButton::SetCallback(std::function<void()> callback)
+void UIImageButton::SetCallback(std::function<void()> callback)
 {
 	m_Callback = callback;
 }
 
-void UITextureButton::SetOutlineThickness(float thickness)
+void UIImageButton::SetOutlineThickness(float thickness)
 {
 	m_OutlineThickness = thickness;
 }
 
-void UITextureButton::SetOutlineColor(sf::Color color)
+void UIImageButton::SetOutlineColor(sf::Color color)
 {
 	m_OutlineColor = color;
 }
