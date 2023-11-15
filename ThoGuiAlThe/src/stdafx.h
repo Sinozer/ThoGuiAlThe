@@ -45,3 +45,7 @@
 #include "App/State/State.h"
 //#include "App/UI/Nodes/UIElements.h"
 /* ##################  SELF  ################## */
+
+/* #################  NETWORK  ################ */
+#include "../lib/JSON/json.hpp"
+/* #################  NETWORK  ################ */

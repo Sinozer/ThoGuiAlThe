@@ -192,6 +192,12 @@ bool Server::ReceiveFromClient(SOCKET clientSocket, char* data, int size)
 	return true;
 }
 
+void Server::HandleJson(const nlohmann::json& json)
+{
+
+	LOG("Received JSON data: " << json.dump());
+}
+
 bool Server::SendToAllClients(const char* data, int size)
 {
 	for (SOCKET clientSocket : m_ClientSockets)
@@ -283,7 +289,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 		case FD_READ:
 		{
-			char buffer[256];
+			char buffer[4096];  // Adjust the buffer size as needed
 			int bytesReceived = recv((SOCKET)wParam, buffer, sizeof(buffer), 0);
 			if (bytesReceived == SOCKET_ERROR)
 			{
@@ -299,9 +305,19 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				LOG("Bytes received: " << bytesReceived);
 				buffer[bytesReceived] = '\0';
-				LOG("Message received: " << buffer);
+
+				// Parse the received JSON data
+				try
+				{
+					nlohmann::json jsonData = nlohmann::json::parse(buffer);
+					Server::GetInstance().HandleJson(jsonData);
+				}
+				catch (const nlohmann::json::exception& e)
+				{
+					LOG("Error parsing JSON: " << e.what());
+					Server::GetInstance().CloseClient(wParam);
+				}
 			}
 
 			break;

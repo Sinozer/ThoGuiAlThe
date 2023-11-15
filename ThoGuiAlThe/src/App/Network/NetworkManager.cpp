@@ -101,12 +101,28 @@ void NetworkManager::SendData(std::string data)
 	// Send data
 	if (send(m_Socket, data.c_str(), (int)data.size(), 0) == SOCKET_ERROR)
 	{
-        LOG("send failed with error: " << WSAGetLastError());
-        closesocket(m_Socket);
-        WSACleanup();
-    }
-    else
-        LOG("send success");
+		LOG("send failed with error: " << WSAGetLastError());
+		closesocket(m_Socket);
+		WSACleanup();
+	}
+	else
+		LOG("send success");
+}
+
+void NetworkManager::SendData(const nlohmann::json& data)
+{
+	// Serialize the JSON data to a string
+	std::string serializedData = data.dump();
+
+	// Send data
+	if (send(m_Socket, serializedData.c_str(), static_cast<int>(serializedData.size()), 0) == SOCKET_ERROR)
+	{
+		LOG("send failed with error: " << WSAGetLastError());
+		closesocket(m_Socket);
+		WSACleanup();
+	}
+	else
+		LOG("send success");
 }
 
 void NetworkManager::ReceiveData()

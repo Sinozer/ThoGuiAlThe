@@ -21,6 +21,8 @@ public:
 	bool SendToClient(SOCKET clientSocket, const char* message, int messageSize);
 	bool ReceiveFromClient(SOCKET clientSocket, char* buffer, int bufferSize);
 
+	void HandleJson(const nlohmann::json& json);
+
 	bool SendToAllClients(const char* message, int messageSize);
 	bool ReceiveFromAllClients(char* buffer, int bufferSize);
 

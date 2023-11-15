@@ -34,6 +34,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lib\JSON\json.hpp" />
     <ClInclude Include="src\App\App.h" />
     <ClInclude Include="src\App\Asset\AssetManager.h" />
     <ClInclude Include="src\App\Game\Board\Board.h" />

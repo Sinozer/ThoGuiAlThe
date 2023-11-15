@@ -20,6 +20,7 @@ public:
 
 	void SendData();
 	void SendData(std::string data);
+	void SendData(const nlohmann::json& data);
 
 	void ReceiveData();
 
