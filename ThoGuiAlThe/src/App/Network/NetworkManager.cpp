@@ -84,7 +84,7 @@ void NetworkManager::Disconnect()
 void NetworkManager::SendData()
 {
 	// Send data
-	const char* sendbuf = "this is a test";
+	char sendbuf[256] = "this is a test";
 	int iResult = send(m_Socket, sendbuf, (int)strlen(sendbuf), 0);
 	if (iResult == SOCKET_ERROR)
 	{
@@ -94,6 +94,19 @@ void NetworkManager::SendData()
 	}
 	else
 		LOG("send success");
+}
+
+void NetworkManager::SendData(std::string data)
+{
+	// Send data
+	if (send(m_Socket, data.c_str(), (int)data.size(), 0) == SOCKET_ERROR)
+	{
+        LOG("send failed with error: " << WSAGetLastError());
+        closesocket(m_Socket);
+        WSACleanup();
+    }
+    else
+        LOG("send success");
 }
 
 void NetworkManager::ReceiveData()

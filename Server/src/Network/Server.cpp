@@ -282,7 +282,30 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (WSAGETSELECTEVENT(lParam))
 		{
 		case FD_READ:
+		{
+			char buffer[256];
+			int bytesReceived = recv((SOCKET)wParam, buffer, sizeof(buffer), 0);
+			if (bytesReceived == SOCKET_ERROR)
+			{
+				LOG("recv failed with error: " << WSAGetLastError());
+				Server::GetInstance().CloseClient(wParam);
+				break;
+			}
+			else if (bytesReceived == 0)
+			{
+				LOG("Connection closing...");
+				Server::GetInstance().CloseClient(wParam);
+				break;
+			}
+			else
+			{
+				LOG("Bytes received: " << bytesReceived);
+				buffer[bytesReceived] = '\0';
+				LOG("Message received: " << buffer);
+			}
+
 			break;
+		}
 		case FD_WRITE:
 			break;
 		case FD_CLOSE:

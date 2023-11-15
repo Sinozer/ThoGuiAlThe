@@ -19,6 +19,7 @@ public:
 	void Disconnect();
 
 	void SendData();
+	void SendData(std::string data);
 
 	void ReceiveData();
 

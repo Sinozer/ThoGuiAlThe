@@ -1,6 +1,7 @@
 #include "Cell.h"
 
 #include "Constants.h"
+#include "App/Network/NetworkManager.h"
 
 Cell::Cell(const sf::Vector2u position) : m_Player(nullptr) , m_Position(position)
 {
@@ -24,6 +25,7 @@ void Cell::Init()
 void Cell::HandleEvents(sf::Event* event)
 {
     std::cout << "Cell clicked: " << m_Position.x << " " << m_Position.y << std::endl;
+    NetworkManager::GetInstance().SendData("CELL_CLICKED " + std::to_string(m_Position.x) + " " + std::to_string(m_Position.y));
 }
 
 void Cell::Update(const float& dt)
