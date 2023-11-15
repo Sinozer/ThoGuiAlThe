@@ -82,6 +82,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Network\Player.cpp" />
     <ClCompile Include="src\Network\Server.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp">
@@ -90,6 +91,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Network\Player.h" />
     <ClInclude Include="src\Network\Server.h" />
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 #include "Server.h"
+#include "Player.h"
 
 #define MSG_SERVER (WM_USER + 1)
 #define MSG_CLIENT (WM_USER + 2)
@@ -113,37 +114,37 @@ void Server::CloseServer()
 	}
 	// Fermez toutes les connexions avec les clients, si nécessaire
 
-	for (SOCKET clientSocket : m_ClientSockets)
+	for (Player player : m_Players)
 	{
-		closesocket(clientSocket);
+		closesocket(player.GetSocket());
 	}
 }
 
-void Server::AcceptNewClient(SOCKET& clientSocket)
+void Server::AcceptNewPlayer(Player newPlayer)
 {
-	if (clientSocket == INVALID_SOCKET)
+	if (newPlayer.GetSocket() == INVALID_SOCKET)
 	{
 		throw std::exception("accept failed");
 	}
 	else
 		LOG("accept success");
 
-	if (WSAAsyncSelect(clientSocket, m_hWnd, MSG_CLIENT, FD_READ | FD_WRITE | FD_CLOSE) == SOCKET_ERROR)
+	if (WSAAsyncSelect(newPlayer.GetSocket(), m_hWnd, MSG_CLIENT, FD_READ | FD_CLOSE) == SOCKET_ERROR)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
-		closesocket(clientSocket);
+		closesocket(newPlayer.GetSocket());
 		return;
 	}
 	else
 		LOG("WSAAsyncSelect success");
 
-	m_ClientSockets.push_back(clientSocket);
-	LOG("Number of clients: " << m_ClientSockets.size());
+	m_Players.emplace(std::move(newPlayer));
+	LOG("Number of clients: " << m_Players.size());
 }
 
-void Server::CloseClient(SOCKET clientSocket)
+void Server::RemovePlayer(Player& player)
 {
-	if (int r = closesocket(clientSocket) != 0)
+	if (int r = closesocket(player.GetSocket()) != 0)
 	{
 		LOG("closesocket failed with error: " << r);
 		return;
@@ -152,15 +153,30 @@ void Server::CloseClient(SOCKET clientSocket)
         LOG("closesocket success");
 	// Retirez le client de la liste des clients
 
-	for (int i = 0; i < m_ClientSockets.size(); i++)
-	{
-		if (m_ClientSockets[i] == clientSocket)
+	m_Players.erase(player);
+	LOG("Number of clients: " << m_Players.size());
+}
+
+void Server::RemovePlayer(SOCKET socket)
+{
+	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](const Player& player) 
 		{
-			m_ClientSockets.erase(m_ClientSockets.begin() + i);
-			break;
+			return player.GetSocket() == socket;
+		});
+
+
+	if (it != m_Players.end())
+	{
+		if (int r = closesocket(it->GetSocket()); r != 0)
+		{
+			LOG("closesocket failed with error: " << r);
+			return;
 		}
+		else
+			LOG("closesocket success");
+
+		m_Players.erase(it);
 	}
-	LOG("Number of clients: " << m_ClientSockets.size());
 }
 
 // Implémentez des méthodes pour gérer la communication avec les clients ici
@@ -180,18 +196,6 @@ bool Server::SendToClient(SOCKET clientSocket, const char* data, int size)
 	return true;
 }
 
-bool Server::ReceiveFromClient(SOCKET clientSocket, char* data, int size)
-{
-	int bytesReceived = recv(clientSocket, data, size, 0);
-	if (bytesReceived == SOCKET_ERROR)
-	{
-		// Gestion de l'erreur
-		return false;
-	}
-
-	return true;
-}
-
 void Server::HandleJson(const nlohmann::json& json)
 {
 
@@ -200,27 +204,14 @@ void Server::HandleJson(const nlohmann::json& json)
 
 bool Server::SendToAllClients(const char* data, int size)
 {
-	for (SOCKET clientSocket : m_ClientSockets)
-	{
-		std::cout << m_ClientSockets.size() << std::endl;
-		if (!SendToClient(clientSocket, data, size))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool Server::ReceiveFromAllClients(char* data, int size)
-{
-	for (SOCKET clientSocket : m_ClientSockets)
-	{
-		if (!ReceiveFromClient(clientSocket, data, size))
-		{
-			return false;
-		}
-	}
+	//for (SOCKET clientSocket : m_ClientSockets)
+	//{
+	//	std::cout << m_ClientSockets.size() << std::endl;
+	//	if (!SendToClient(clientSocket, data, size))
+	//	{
+	//		return false;
+	//	}
+	//}
 
 	return true;
 }
@@ -272,7 +263,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 		case FD_ACCEPT:
 			SOCKET clientSocket = accept(wParam, nullptr, nullptr);
-			Server::GetInstance().AcceptNewClient(clientSocket);
+			Server::GetInstance().AcceptNewPlayer(clientSocket);
 			break;
 		}
 
@@ -294,13 +285,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (bytesReceived == SOCKET_ERROR)
 			{
 				LOG("recv failed with error: " << WSAGetLastError());
-				Server::GetInstance().CloseClient(wParam);
-				break;
-			}
-			else if (bytesReceived == 0)
-			{
-				LOG("Connection closing...");
-				Server::GetInstance().CloseClient(wParam);
+				Server::GetInstance().RemovePlayer(wParam);
 				break;
 			}
 			else
@@ -316,7 +301,9 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				catch (const nlohmann::json::exception& e)
 				{
 					LOG("Error parsing JSON: " << e.what());
-					Server::GetInstance().CloseClient(wParam);
+					std::unordered_set<Player>& players = Server::GetInstance().GetPlayers();
+
+					Server::GetInstance().RemovePlayer(wParam);
 				}
 			}
 
@@ -325,7 +312,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case FD_WRITE:
 			break;
 		case FD_CLOSE:
-			Server::GetInstance().CloseClient(wParam);
+			Server::GetInstance().RemovePlayer(wParam);
             break;
 		}
 		return 0;

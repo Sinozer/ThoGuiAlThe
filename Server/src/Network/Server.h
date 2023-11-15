@@ -1,4 +1,6 @@
 #pragma once
+#include "Player.h"
+
 class Server
 {
 public:
@@ -15,22 +17,23 @@ public:
 	void ProcessMessages();
 	void CloseServer();
 
-	void AcceptNewClient(SOCKET& clientSocket);
-	void CloseClient(SOCKET clientSocket);
+	void AcceptNewPlayer(Player newPlayer);
+	void RemovePlayer(Player& player);
+	void RemovePlayer(SOCKET socket);
 
 	bool SendToClient(SOCKET clientSocket, const char* message, int messageSize);
-	bool ReceiveFromClient(SOCKET clientSocket, char* buffer, int bufferSize);
 
 	void HandleJson(const nlohmann::json& json);
 
 	bool SendToAllClients(const char* message, int messageSize);
-	bool ReceiveFromAllClients(char* buffer, int bufferSize);
+
+	std::unordered_set<Player>& GetPlayers() { return m_Players; }
 
 private:
 	HWND m_hWnd; // Handle to the window
 	char m_Port[5];
 	SOCKET m_ServerSocket;
-	std::vector<SOCKET> m_ClientSockets;
+	std::unordered_set<Player> m_Players;
 
 	void InitWindow();
 
