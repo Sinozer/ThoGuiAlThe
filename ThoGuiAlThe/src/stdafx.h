@@ -11,7 +11,7 @@
 #include <SFML/Graphics.hpp>
 /* ##################  SFML  ################## */
 
-/* ################# STANDART ################# */
+/* ################# STANDARD ################# */
 #include <functional>
 #include <iostream>
 
@@ -19,7 +19,23 @@
 #include <vector>
 #include <stack>
 #include <string>
-/* ################# STANDART ################# */
+/* ################# STANDARD ################# */
+
+/* ##################  WINSOCK  ############### */
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <WinSock2.h>
+#include <Winerror.h>
+#include <WS2tcpip.h>
+/* ##################  WINSOCK  ############### */
+
+/* #################  DEBUG  ################## */
+#include <assert.h>
+#if defined(_DEBUG) || defined(DEBUG) && !defined(LOG)
+#define LOG(x) std::cout << x << '\n'
+#else
+#define LOG(x)
+#endif
+/* #################  DEBUG  ################## */
 
 /* ##################  SELF  ################## */
 #include "App/Singleton/SingletonManager.h"
@@ -31,5 +47,8 @@
 //#include "App/UI/Nodes/UIElements.h"
 /* ##################  SELF  ################## */
 
+/* #################  NETWORK  ################ */
+#include "../lib/JSON/json.hpp"
+/* #################  NETWORK  ################ */
 #define DELPTR(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
 #define NULLPTR(ptr) if (ptr) { (ptr) = nullptr; }

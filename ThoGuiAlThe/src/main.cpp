@@ -2,13 +2,13 @@
 
 int main()
 {
-    App app;
+	App app;
 
-    app.Init();
+	app.Init();
 
-    app.Run();
+	app.Run();
 
-    app.End();
+	app.End();
 
-    return 0;
+	return 0;
 }

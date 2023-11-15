@@ -1,4 +1,9 @@
+#include "Network/Server.h"
+
 int main()
 {
-    return 0;
+	Server::GetInstance().StartServer();
+	Server::GetInstance().ProcessMessages();
+
+	return 0;
 }

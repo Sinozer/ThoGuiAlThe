@@ -1,6 +1,7 @@
 #include "HomeState.h"
 #include "App/State/List/Profile/ProfileState.h"
 #include "App/State/List/Select/SelectState.h"
+#include "App/Network/NetworkManager.h"
 
 #include "App/State/List/Game/GameState.h"
 
@@ -30,7 +31,11 @@ void HomeState::InitUi()
 	username->setOutlineThickness(1.f);
 	username->setPosition(profile->getPosition().x - username->getGlobalBounds().width * 1.05f, profile->getPosition().y);
 
-	auto* start = m_UiManager.AddTextButton("START", "PLAY", [this]() { StateManager::GetInstance()->AddState(new SelectState()); });
+	auto* start = m_UiManager.AddTextButton("START", "PLAY", [this]() 
+		{
+			NetworkManager::GetInstance().Connect();
+			StateManager::GetInstance()->AddState(new SelectState()); 
+		});
 	start->setCharacterSize(50);
 	start->setOutlineColor(sf::Color::Black);
 	start->setOutlineThickness(2.f);
