@@ -18,6 +18,7 @@ Server::~Server()
 void Server::StartServer()
 {
 	InitWindow();
+	InitHttpRequestHandlers();
 	
 	// Initialize Winsock
 	WSADATA wsaData;
@@ -102,6 +103,11 @@ void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long even
 	}
 	else
 		LOG("WSAAsyncSelect server success");
+}
+
+void Server::InitHttpRequestHandlers()
+{
+	m_HttpRequestHandlers.insert({ "/", std::make_unique<HomeRequestHandler>() });
 }
 
 void Server::ProcessMessages()
@@ -220,30 +226,35 @@ void Server::HandleHttpRequest(std::string request, SOCKET socket)
 	// Parse the HTTP request
 	std::stringstream ss(request);
 	std::string method;
-	std::string path;
+	std::string url;
 	std::string httpVersion;
 
-	ss >> method >> path >> httpVersion;
+	ss >> method >> url >> httpVersion;
+
+	// Extracting parameters from the URL
+	size_t paramsStart = url.find('?');
+	std::string route = (paramsStart != std::string::npos) ? url.substr(0, paramsStart) : url;
+
+	// Extracting parameters into a map
+	std::unordered_map<std::string, std::string> params;
+	if (paramsStart != std::string::npos)
+	{
+		params = RequestHandler::ParseParams(url.substr(paramsStart + 1));
+	}
 
 	// Process the HTTP request (this is where you would typically handle the request)
-	if (method == "GET")
+	std::string response;
+	if (m_HttpRequestHandlers.contains(route) == true)
+		response = m_HttpRequestHandlers[route]->HandleHttpRequest(params, method);
+	else
+		response = RequestHandler::NotFound();
+	
+	if (int r = send(socket, response.c_str(), response.size(), 0); r == SOCKET_ERROR)
 	{
-		if (path == "/")
-		{
-			// Send the HTML file
-			std::ifstream file("assets/index.html");
-			std::string fileContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-			std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + std::to_string(fileContent.size()) + "\r\n\r\n" + fileContent;
-
-			if (int r = send(socket, response.c_str(), response.size(), 0); r == SOCKET_ERROR)
-			{
-				LOG("send failed with error: " << WSAGetLastError());
-			}
-			else
-				LOG("send success");
-		}
+		LOG("send failed with error: " << WSAGetLastError());
 	}
+	else
+		LOG("send success");
 }
 
 bool Server::SendToAllClients(const char* data, int size)

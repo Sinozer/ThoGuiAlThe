@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_set>
 #include <fstream>
+#include <memory>
 /* ################# STANDARD ################# */
 
 /* ##################  WINSOCK  ################## */

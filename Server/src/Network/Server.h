@@ -1,5 +1,6 @@
 #pragma once
 #include "Player.h"
+#include "Http/HttpInclude.h"
 
 class Server
 {
@@ -39,8 +40,10 @@ private:
 	SOCKET m_ServerSocket;
 	SOCKET m_WebServerSocket;
 	std::unordered_set<Player> m_Players;
+	std::unordered_map<std::string, std::unique_ptr<RequestHandler>> m_HttpRequestHandlers;
 
 	void InitWindow();
+	void InitHttpRequestHandlers();
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
