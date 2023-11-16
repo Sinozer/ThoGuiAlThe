@@ -21,13 +21,6 @@
 #include <string>
 /* ################# STANDARD ################# */
 
-/* ##################  WINSOCK  ############### */
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <WinSock2.h>
-#include <Winerror.h>
-#include <WS2tcpip.h>
-/* ##################  WINSOCK  ############### */
-
 /* #################  DEBUG  ################## */
 #include <assert.h>
 #if defined(_DEBUG) || defined(DEBUG) && !defined(LOG)
@@ -47,8 +40,4 @@
 //#include "App/UI/Nodes/UIElements.h"
 /* ##################  SELF  ################## */
 
-/* #################  NETWORK  ################ */
-#include "JSON/json.hpp"
-/* #################  NETWORK  ################ */
-#define DELPTR(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
-#define NULLPTR(ptr) if (ptr) { (ptr) = nullptr; }
+
