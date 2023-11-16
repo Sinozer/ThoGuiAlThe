@@ -1,7 +1,8 @@
 #include <Windows.h>
 #include <stdio.h>
+#include <vector>
 
-#define THREADCOUNT 2
+constexpr auto THREADCOUNT = 5;
 
 HANDLE ghEvents[2];
 HANDLE hThread;
@@ -10,111 +11,21 @@ HANDLE ghMutex;
 DWORD WINAPI ThreadProc(LPVOID);
 DWORD WINAPI WriteToDatabase(LPVOID);
 
-int main()
-{
-	HANDLE aThread[THREADCOUNT];
-	DWORD i;
-	DWORD dwEvent;
-	DWORD dwThreadID;
+CRITICAL_SECTION CriticalSection;
 
-	
-
-	// Create two event objects
-	for (i = 0; i < 2; i++)
-	{
-		ghEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
-		if (ghEvents[i] == NULL)
-		{
-			printf("CreateEvent failed (%d)\n", GetLastError());
-			ExitProcess(0);
-		}
-	}
-
-	//Create Thread for event objects
-	hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadProc, NULL, 0, &dwThreadID);
-	if (hThread == NULL)
-	{
-		printf("CreateThread failed (%d)\n", GetLastError());
-		return 1;
-	}
-
-	//Wait for the thread to signal one of the event objects
-	dwEvent = WaitForMultipleObjects(2, ghEvents, FALSE, 5000);
-
-
-	//return = indicates which event object was signaled
-	switch (dwEvent)
-	{
-		case WAIT_OBJECT_0 + 0:
-			printf("Event 1 was signaled.\n");
-			break;
-
-		case WAIT_OBJECT_0 + 1:
-			printf("Event 2 was signaled.\n");
-			break;
-		case WAIT_TIMEOUT:
-			printf("Wait timed out.\n");
-			break;
-	default:
-		printf("Wait error: %d\n", GetLastError());
-		break;
-	}
-
-	// Close event handles
-	for (i = 0; i < 2; i++)
-	{
-		CloseHandle(ghEvents[i]);
-	}
-}
-
-void ManageMutex() 
-{
-
-	DWORD ThreadID;
-	DWORD i;
-
-	// Create a mutex with no initial owner
-	ghMutex = CreateMutex(NULL, FALSE, NULL);
-	if (ghMutex == NULL)
-	{
-		printf("CreateMutex error: %d\n", GetLastError());
-	}
-
-	//Create worker threads
-	for (i = 0; i < THREADCOUNT; i++)
-	{
-		aThread[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)WriteToDatabase, NULL, 0, &ThreadID);
-		if (aThread[i] == NULL)
-		{
-			printf("CreateThread error: %d\n", GetLastError());
-		}
-	}
-	//Wait for all threads to terminate
-
-	WaitForMultipleObjects(THREADCOUNT, aThread, TRUE, INFINITE);
-
-	//Close thread and mutex handles
-	for (i = 0; i < THREADCOUNT; i++)
-	{
-		CloseHandle(aThread[i]);
-	}
-
-}
 
 DWORD WINAPI ThreadProc(LPVOID lpParam)
 {
-
-	// lpParam not used in this example
 	UNREFERENCED_PARAMETER(lpParam);
 
-	// Set one event to the signaled state
+	// lpParam not used in this example
+	DWORD dwWaitResult;
 
-	if (!SetEvent(ghEvents[0]))
-	{
-		printf("SetEvent failed (%d)\n", GetLastError());
-		return 1;
-	}
-	return 0;
+	EnterCriticalSection(&CriticalSection);
+
+
+	LeaveCriticalSection(&CriticalSection);
+	return 1;
 }
 
 DWORD WINAPI WriteToDatabase(LPVOID lpParam)
@@ -163,4 +74,116 @@ DWORD WINAPI WriteToDatabase(LPVOID lpParam)
 	return TRUE;
 }
 
+void CreateThreads()
+{
+	DWORD dwThreadIdArray[THREADCOUNT]{};
+	HANDLE hThreadArray[THREADCOUNT]{};
 
+	// Create THREADCOUNT worker threads.
+
+	for (int i = 0; i < THREADCOUNT; i++)
+	{
+		// Create the thread to begin execution on its own.
+		hThreadArray[i] = CreateThread(
+			NULL,                   // default security attributes
+			0,                      // use default stack size  
+			ThreadProc,             // thread function name
+			NULL,                   // argument to thread function 
+			0,                      // use default creation flags 
+			&dwThreadIdArray[i]);   // returns the thread identifier
+	}
+}
+
+int main()
+{
+	if(!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x00000400))
+		return 0;
+	std::vector<HANDLE> threads;
+	for (int i = 0; i < THREADCOUNT; i++)
+	{
+		threads.push_back(CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CreateThreads, NULL, 0, NULL));
+	}
+
+	for (HANDLE thread : threads)
+	{
+		WaitForSingleObject(thread, INFINITE);
+	}
+
+	std::cout << "All threads finished" << std::endl;
+	DeleteCriticalSection(&CriticalSection);
+	return 0;
+
+}
+
+
+
+void ManageEventObjects() {
+	DWORD i;
+	DWORD dwEvent;
+	DWORD dwThreadID;
+
+	// Create two event objects
+	for (i = 0; i < 2; i++)
+	{
+		ghEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+		if (ghEvents[i] == NULL)
+		{
+			printf("CreateEvent failed (%d)\n", GetLastError());
+			ExitProcess(0);
+		}
+	}
+
+	//Create Thread for event objects
+	hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ThreadProc, NULL, 0, &dwThreadID);
+	if (hThread == NULL)
+	{
+		printf("CreateThread failed (%d)\n", GetLastError());
+	}
+
+	//Wait for the thread to signal one of the event objects
+	dwEvent = WaitForMultipleObjects(2, ghEvents, FALSE, 5000);
+
+
+	// Close event handles
+	for (i = 0; i < 2; i++)
+	{
+		CloseHandle(ghEvents[i]);
+	}
+
+}
+
+void ManageMutex()
+{
+	HANDLE aThread[THREADCOUNT]{};
+	DWORD ThreadID;
+	DWORD i;
+
+
+	// Create a mutex with no initial owner
+	ghMutex = CreateMutex(NULL, FALSE, NULL);
+	if (ghMutex == NULL)
+	{
+		printf("CreateMutex error: %d\n", GetLastError());
+	}
+
+	//Create worker threads
+	for (i = 0; i < THREADCOUNT; i++)
+	{
+		aThread[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)WriteToDatabase, NULL, 0, &ThreadID);
+		if (aThread[i] == NULL)
+		{
+			printf("CreateThread error: %d\n", GetLastError());
+		}
+	}
+	//Wait for all threads to terminate
+
+	WaitForMultipleObjects(THREADCOUNT, aThread, TRUE, INFINITE);
+
+	//Close thread and mutex handles
+	for (i = 0; i < THREADCOUNT; i++)
+	{
+		CloseHandle(aThread[i]);
+	}
+	ReleaseMutex(ghMutex);
+	CloseHandle(ghMutex);
+}
