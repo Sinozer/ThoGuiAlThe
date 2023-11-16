@@ -39,4 +39,7 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\index.html" />
+  </ItemGroup>
 </Project>

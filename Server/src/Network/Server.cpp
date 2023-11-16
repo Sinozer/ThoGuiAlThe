@@ -3,8 +3,9 @@
 
 #define MSG_SERVER (WM_USER + 1)
 #define MSG_CLIENT (WM_USER + 2)
+#define MSG_WEB (WM_USER + 3)
 
-Server::Server() : m_hWnd(nullptr), m_Port{"6969"}, m_ServerSocket(INVALID_SOCKET)
+Server::Server() : m_hWnd(nullptr), m_Port{ "6969" }, m_WebPort{ "9669" }, m_ServerSocket(INVALID_SOCKET)
 {}
 
 Server::~Server()
@@ -28,6 +29,13 @@ void Server::StartServer()
 	else
 		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
 
+	// Initialize the server socket
+	InitSocket(m_ServerSocket, m_Port, MSG_SERVER, FD_ACCEPT);
+	InitSocket(m_WebServerSocket, m_WebPort, MSG_WEB, FD_ACCEPT | FD_CLOSE | FD_READ);
+}
+
+void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long events)
+{
 	addrinfo* result = nullptr;
 	addrinfo hints{};
 
@@ -37,7 +45,7 @@ void Server::StartServer()
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE; // For wildcard IP address
 
-	if (int r = getaddrinfo("localhost", m_Port, &hints, &result); r != 0)
+	if (int r = getaddrinfo("localhost", port, &hints, &result); r != 0)
 	{
 		LOG("getaddrinfo failed with error: " << r);
 		WSACleanup();
@@ -47,8 +55,8 @@ void Server::StartServer()
 		LOG("getaddrinfo success");
 
 	// Socket creation
-	m_ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (m_ServerSocket == INVALID_SOCKET)
+	s = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (s == INVALID_SOCKET)
 	{
 		LOG("socket failed with error: " << WSAGetLastError());
 		freeaddrinfo(result);
@@ -60,7 +68,7 @@ void Server::StartServer()
 
 	// Bind socket to listen to TCP requests on the given address and port
 
-	if (int r = bind(m_ServerSocket, result->ai_addr, (int)result->ai_addrlen); r == SOCKET_ERROR)
+	if (int r = bind(s, result->ai_addr, (int)result->ai_addrlen); r == SOCKET_ERROR)
 	{
 		LOG("bind failed with error: " << WSAGetLastError());
 		freeaddrinfo(result);
@@ -72,11 +80,12 @@ void Server::StartServer()
 		LOG("bind success");
 
 	freeaddrinfo(result);
+	result = nullptr;
 
-	if (int r = listen(m_ServerSocket, SOMAXCONN); r == SOCKET_ERROR)
+	if (int r = listen(s, SOMAXCONN); r == SOCKET_ERROR)
 	{
 		LOG("listen failed with error: " << WSAGetLastError());
-		closesocket(m_ServerSocket);
+		closesocket(s);
 		WSACleanup();
 		throw std::exception("listen failed");
 	}
@@ -84,15 +93,15 @@ void Server::StartServer()
 		LOG("listen success");
 
 	// Setup asynchronous socket for listening to new clients in the window message loop
-	if (WSAAsyncSelect(m_ServerSocket, m_hWnd, MSG_SERVER, FD_ACCEPT) == SOCKET_ERROR)
+	if (WSAAsyncSelect(s, m_hWnd, msgType, events) == SOCKET_ERROR)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
-		closesocket(m_ServerSocket);
+		closesocket(s);
 		WSACleanup();
 		throw std::exception("WSAAsyncSelect failed");
 	}
 	else
-		LOG("WSAAsyncSelect success");
+		LOG("WSAAsyncSelect server success");
 }
 
 void Server::ProcessMessages()
@@ -190,20 +199,51 @@ void Server::RemovePlayer(SOCKET socket)
 void Server::SendDataToPlayer(const Player& player, const nlohmann::json& data)
 {
 	std::string dataString = data.dump();
-	int size = dataString.size();
+	size_t size = dataString.size();
 
 if (int r = send(player.GetSocket(), dataString.c_str(), size, 0); r == SOCKET_ERROR)
-    {
-        LOG("send failed with error: " << WSAGetLastError());
-    }
-    else
-        LOG("send success");
+	{
+		LOG("send failed with error: " << WSAGetLastError());
+	}
+	else
+		LOG("send success");
 }
 
 void Server::HandleJson(const nlohmann::json& json)
 {
 
 	LOG("Received JSON data: " << json.dump());
+}
+
+void Server::HandleHttpRequest(std::string request, SOCKET socket)
+{
+	// Parse the HTTP request
+	std::stringstream ss(request);
+	std::string method;
+	std::string path;
+	std::string httpVersion;
+
+	ss >> method >> path >> httpVersion;
+
+	// Process the HTTP request (this is where you would typically handle the request)
+	if (method == "GET")
+	{
+		if (path == "/")
+		{
+			// Send the HTML file
+			std::ifstream file("assets/index.html");
+			std::string fileContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+			std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + std::to_string(fileContent.size()) + "\r\n\r\n" + fileContent;
+
+			if (int r = send(socket, response.c_str(), response.size(), 0); r == SOCKET_ERROR)
+			{
+				LOG("send failed with error: " << WSAGetLastError());
+			}
+			else
+				LOG("send success");
+		}
+	}
 }
 
 bool Server::SendToAllClients(const char* data, int size)
@@ -317,6 +357,65 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case FD_CLOSE:
 			Server::GetInstance().RemovePlayer(wParam);
+			break;
+		}
+		return 0;
+	case MSG_WEB:
+		if (WSAGETSELECTERROR(lParam))
+		{
+			LOG("FD_READ failed with error: " << WSAGetLastError());
+			break;
+		}
+
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_ACCEPT:
+		{
+			SOCKET webClientSocket = accept(wParam, nullptr, nullptr);
+			if (webClientSocket == INVALID_SOCKET)
+			{
+				LOG("accept failed with error: " << WSAGetLastError());
+				break;
+			}
+			break;
+		}
+		case FD_READ:
+		{
+			char buffer[4096];
+			int bytesReceived = recv((SOCKET)wParam, buffer, sizeof(buffer), 0);
+
+			if (bytesReceived == SOCKET_ERROR)
+			{
+				LOG("recv failed with error: " << WSAGetLastError());
+				closesocket((SOCKET)wParam);
+				break;
+			}
+			else if (bytesReceived == 0)
+			{
+				// Connection closed by the client
+				closesocket((SOCKET)wParam);
+				LOG("Web client disconnected.");
+				break;
+			}
+
+			buffer[bytesReceived] = '\0';
+
+			// Parse the received HTTP request
+			std::string httpRequest(buffer);
+			// Process the HTTP request (this is where you would typically handle the request)
+			GetInstance().HandleHttpRequest(httpRequest, (SOCKET)wParam);
+
+			break;
+		}
+		case FD_CLOSE:
+			if (WSAGETSELECTERROR(lParam))
+			{
+				LOG("FD_READ failed with error: " << WSAGetLastError());
+				break;
+			}
+
+			closesocket(wParam);
+
 			break;
 		}
 		return 0;
