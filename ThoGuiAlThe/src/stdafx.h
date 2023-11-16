@@ -48,7 +48,7 @@
 /* ##################  SELF  ################## */
 
 /* #################  NETWORK  ################ */
-#include "../lib/JSON/json.hpp"
+#include "JSON/json.hpp"
 /* #################  NETWORK  ################ */
 #define DELPTR(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
 #define NULLPTR(ptr) if (ptr) { (ptr) = nullptr; }
