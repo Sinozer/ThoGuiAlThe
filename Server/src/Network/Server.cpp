@@ -4,7 +4,7 @@
 #define MSG_SERVER (WM_USER + 1)
 #define MSG_CLIENT (WM_USER + 2)
 
-Server::Server() : m_hWnd(nullptr), m_Port{"6969"}, m_ServerSocket(INVALID_SOCKET)
+Server::Server() : m_hWnd(nullptr), m_Port{ "6969" }, m_ServerSocket(INVALID_SOCKET)
 {}
 
 Server::~Server()
@@ -17,7 +17,7 @@ Server::~Server()
 void Server::StartServer()
 {
 	InitWindow();
-	
+
 	// Initialize Winsock
 	WSADATA wsaData;
 	if (int r = WSAStartup(MAKEWORD(2, 2), &wsaData); r != 0)
@@ -84,7 +84,7 @@ void Server::StartServer()
 		LOG("listen success");
 
 	// Setup asynchronous socket for listening to new clients in the window message loop
-	if (WSAAsyncSelect(m_ServerSocket, m_hWnd, MSG_SERVER, FD_ACCEPT) == SOCKET_ERROR)
+	if (WSAAsyncSelect(m_ServerSocket, m_hWnd, MSG_SERVER, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
 		closesocket(m_ServerSocket);
@@ -141,8 +141,8 @@ void Server::AcceptNewPlayer(Player newPlayer)
 	m_Players.emplace(std::move(newPlayer));
 	LOG("Number of clients: " << m_Players.size());
 
-	nlohmann::json jsonData = 
-	{ 
+	nlohmann::json jsonData =
+	{
 		{"eventType", "INIT_PLAYER"},
 		{"playerId", newPlayer.GetId()}
 	};
@@ -167,7 +167,7 @@ void Server::RemovePlayer(Player& player)
 
 void Server::RemovePlayer(SOCKET socket)
 {
-	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](const Player& player) 
+	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](const Player& player)
 		{
 			return player.GetSocket() == socket;
 		});
@@ -192,12 +192,12 @@ void Server::SendDataToPlayer(const Player& player, const nlohmann::json& data)
 	std::string dataString = data.dump();
 	int size = dataString.size();
 
-if (int r = send(player.GetSocket(), dataString.c_str(), size, 0); r == SOCKET_ERROR)
-    {
-        LOG("send failed with error: " << WSAGetLastError());
-    }
-    else
-        LOG("send success");
+	if (int r = send(player.GetSocket(), dataString.c_str(), size, 0); r == SOCKET_ERROR)
+	{
+		LOG("send failed with error: " << WSAGetLastError());
+	}
+	else
+		LOG("send success");
 }
 
 void Server::HandleJson(const nlohmann::json& json)
@@ -265,10 +265,18 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		switch (WSAGETSELECTEVENT(lParam))
 		{
-		case FD_ACCEPT:
-			SOCKET clientSocket = accept(wParam, nullptr, nullptr);
-			Server::GetInstance().AcceptNewPlayer(clientSocket);
-			break;
+			case FD_ACCEPT:
+			{
+				SOCKET clientSocket = accept(wParam, nullptr, nullptr);
+				Server::GetInstance().AcceptNewPlayer(clientSocket);
+				break;
+			}
+			case FD_CLOSE:
+			{
+				LOG("FD_CLOSE");
+
+				break;
+			}
 		}
 
 		return 0;

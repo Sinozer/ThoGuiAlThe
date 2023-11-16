@@ -6,14 +6,22 @@ static constexpr char PORT[5] = "6969";
 
 NetworkManager* NetworkManager::s_Instance = nullptr;
 
-NetworkManager& NetworkManager::GetInstance()
+NetworkManager* NetworkManager::GetInstance()
 {
 	if (s_Instance == nullptr)
 		s_Instance = new NetworkManager();
-	return *s_Instance;
+	return s_Instance;
 }
 
-void NetworkManager::Destroy()
+const void NetworkManager::DestroyInstance()
+{
+	if (s_Instance == nullptr)
+		return;
+
+	DELPTR(s_Instance);
+}
+
+NetworkManager::~NetworkManager()
 {
 	// Close socket
 	Disconnect();
@@ -22,14 +30,18 @@ void NetworkManager::Destroy()
 	WSACleanup();
 }
 
-void NetworkManager::Connect()
+bool NetworkManager::Connect()
 {
+	if (m_Socket == INVALID_SOCKET)
+		CreateSocket();
+
 	// Connect to server
 	if (connect(m_Socket, m_AddressInfo.ai_addr, (int)m_AddressInfo.ai_addrlen) == SOCKET_ERROR)
 	{
 		LOG("connect failed with error: " << WSAGetLastError());
 		closesocket(m_Socket);
-		WSACleanup();
+		m_Socket = INVALID_SOCKET;
+		return m_Connected;
 	}
 	else
 		LOG("connect success");
@@ -38,29 +50,23 @@ void NetworkManager::Connect()
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
 		closesocket(m_Socket);
-		WSACleanup();
+		m_Socket = INVALID_SOCKET;
+		return m_Connected;
 	}
 	else
 		LOG("WSAAsyncSelect success");
+
+	m_Connected = true;
+
+	return m_Connected;
 }
 
 void NetworkManager::Disconnect()
 {
 	// Disconnect from server
 	closesocket(m_Socket);
-}
 
-void NetworkManager::SendData(std::string data)
-{
-	// Send data
-	if (send(m_Socket, data.c_str(), (int)data.size(), 0) == SOCKET_ERROR)
-	{
-		LOG("send failed with error: " << WSAGetLastError());
-		closesocket(m_Socket);
-		WSACleanup();
-	}
-	else
-		LOG("send success");
+	m_Connected = false;
 }
 
 void NetworkManager::SendData(nlohmann::json& data)
@@ -74,7 +80,8 @@ void NetworkManager::SendData(nlohmann::json& data)
 	{
 		LOG("send failed with error: " << WSAGetLastError());
 		closesocket(m_Socket);
-		WSACleanup();
+		m_Socket = INVALID_SOCKET;
+		CreateSocket();
 	}
 	else
 		LOG("send success");
@@ -93,6 +100,43 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	}
 }
 
+void NetworkManager::CreateSocket()
+{
+	// Resolve address and port
+	addrinfo* result = NULL;
+	addrinfo hints{};
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	int iResult = getaddrinfo("localhost", PORT, &hints, &result);
+
+	if (iResult != 0)
+	{
+		LOG("getaddrinfo failed with error: " << iResult);
+		m_Socket = INVALID_SOCKET;
+		return;
+	}
+	else
+		LOG("getaddrinfo success");
+
+	// Socket creation
+	m_Socket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+
+	if (m_Socket == INVALID_SOCKET)
+	{
+		LOG("socket failed with error: " << WSAGetLastError());
+		freeaddrinfo(result);
+		m_Socket = INVALID_SOCKET;
+		return;
+	}
+	else
+		LOG("socket success");
+
+	m_AddressInfo = *result;
+	freeaddrinfo(result);
+}
+
 void NetworkManager::Init()
 {
 	InitWindow();
@@ -108,41 +152,7 @@ void NetworkManager::Init()
 	else
 		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
 
-	// Resolve address and port
-	addrinfo* result = NULL;
-	addrinfo hints{};
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-
-	iResult = getaddrinfo("localhost", PORT, &hints, &result);
-
-	if (iResult != 0)
-	{
-		LOG("getaddrinfo failed with error: " << iResult);
-		WSACleanup();
-		// TODO: Throw exception
-		throw std::exception("getaddrinfo failed");
-	}
-	else
-		LOG("getaddrinfo success");
-
-	// Socket creation
-	m_Socket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-
-	if (m_Socket == INVALID_SOCKET)
-	{
-		LOG("socket failed with error: " << WSAGetLastError());
-		freeaddrinfo(result);
-		WSACleanup();
-		// TODO: Throw exception
-		throw std::exception("socket creation failed");
-	}
-	else
-		LOG("socket success");
-
-	m_AddressInfo = *result;
-	freeaddrinfo(result);
+	CreateSocket();
 }
 
 void NetworkManager::InitWindow()
@@ -207,7 +217,7 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 				try
 				{
 					nlohmann::json jsonData = nlohmann::json::parse(buffer);
-					GetInstance().HandleData(jsonData);
+					GetInstance()->HandleData(jsonData);
 				}
 				catch (const nlohmann::json::exception& e)
 				{
@@ -215,9 +225,15 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 					break;
 				}
 			}
+		}
 
-			break;
-			}
+		break;
+		case FD_CLOSE:
+		{
+			LOG("FD_CLOSE");
+			GetInstance()->Disconnect();
+		}
+		break;
 		}
 
 		return 0;
