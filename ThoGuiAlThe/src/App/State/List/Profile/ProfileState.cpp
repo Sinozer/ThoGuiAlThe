@@ -14,6 +14,9 @@ void ProfileState::InitUi()
 	title->setOutlineColor(sf::Color::Black);
 	title->setOutlineThickness(4.f);
 	title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
+
+	auto* picture = m_UiManager.AddImage("PICTURE", "HOMER");
+	picture->setPosition(WINDOW_SCREEN_WIDTH / 2.f - picture->getGlobalBounds().width / 2.f, WINDOW_SCREEN_HEIGHT / 2.f - picture->getGlobalBounds().height / 2.f);
 }
 void ProfileState::Init()
 {
@@ -28,6 +31,14 @@ void ProfileState::HandleUiEvents(sf::Event& event)
 void ProfileState::HandleEvents(sf::Event& event)
 {
 	HandleUiEvents(event);
+
+	if (event.type == sf::Event::KeyPressed)
+	{
+		if (event.key.code == sf::Keyboard::Escape)
+		{
+			StateManager::GetInstance()->RemoveState();
+		}
+	}
 }
 
 void ProfileState::UpdateUi(const float& dt)

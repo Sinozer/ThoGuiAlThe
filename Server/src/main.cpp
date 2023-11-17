@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <vector>
+#include "Network/Server.h"
 
 constexpr auto THREADCOUNT = 2;
 
@@ -186,4 +187,12 @@ void ManageMutex()
 	}
 	ReleaseMutex(ghMutex);
 	CloseHandle(ghMutex);
+}
+
+int main()
+{
+	Server::GetInstance().StartServer();
+	Server::GetInstance().ProcessMessages();
+
+	return 0;
 }

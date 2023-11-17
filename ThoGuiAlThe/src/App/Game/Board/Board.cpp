@@ -1,4 +1,5 @@
 #include "Board.h"
+#include "App/State/List/Result/ResultState.h"
 
 Board::Board(const std::vector<Player*>& players) : m_Turn(0), m_Players(players)
 {
@@ -8,17 +9,17 @@ Board::~Board()
 {
     for (auto& row : m_Cells)
     {
-        for (const auto& cell : row)
+        for (auto& cell : row)
         {
-            delete cell;
+            DELPTR(cell);
         }
         row.clear();
     }
     m_Cells.clear();
 
-    for (const auto& player : m_Players)
+    for (auto& player : m_Players)
     {
-        delete player;
+        player = nullptr;
     }
     m_Players.clear();
 }
@@ -108,6 +109,17 @@ void Board::UpdateCells(const float& dt)
 void Board::Update(const float& dt)
 {
     UpdateCells(dt);
+
+    if (IsWin())
+    {
+        StateManager::GetInstance()->RemoveState();
+        StateManager::GetInstance()->AddState(new ResultState());
+    }
+    else if (IsFull())
+    {
+		StateManager::GetInstance()->RemoveState();
+		StateManager::GetInstance()->AddState(new ResultState());
+	}
 }
 
 void Board::RenderCells(sf::RenderTarget* target)

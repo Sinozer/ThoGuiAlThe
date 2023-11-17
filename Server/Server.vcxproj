@@ -50,7 +50,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName)\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName)\src;$(SolutionDir)\lib</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -69,7 +69,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName)\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName)\src;$(SolutionDir)\lib</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -82,6 +82,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Network\Player.cpp" />
+    <ClCompile Include="src\Network\Server.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -90,6 +92,8 @@
     <ClCompile Include="ThreadExemple.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Network\Player.h" />
+    <ClInclude Include="src\Network\Server.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="ThreadExemple.h" />
   </ItemGroup>
