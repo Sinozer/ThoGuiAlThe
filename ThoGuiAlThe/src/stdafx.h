@@ -11,6 +11,10 @@
 #include <SFML/Graphics.hpp>
 /* ##################  SFML  ################## */
 
+/* #################  NETWORK  ################ */
+#include "JSON/json.hpp"
+/* #################  NETWORK  ################ */
+
 /* ################# STANDARD ################# */
 #include <functional>
 #include <iostream>
@@ -40,6 +44,7 @@
 /* ##################  SELF  ################## */
 #include "App/Singleton/SingletonManager.h"
 
+#include "App/Network/NetworkManager.h"
 #include "App/Asset/AssetManager.h"
 #include "App/State/StateManager.h"
 
@@ -47,8 +52,5 @@
 //#include "App/UI/Nodes/UIElements.h"
 /* ##################  SELF  ################## */
 
-/* #################  NETWORK  ################ */
-#include "JSON/json.hpp"
-/* #################  NETWORK  ################ */
 #define DELPTR(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
 #define NULLPTR(ptr) if (ptr) { (ptr) = nullptr; }

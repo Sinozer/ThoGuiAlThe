@@ -2,25 +2,24 @@
 class NetworkManager
 {
 public:
-	static NetworkManager& GetInstance();
+	static NetworkManager* GetInstance();
 
-	static void DestroyInstance()
-	{
-		if (s_Instance != nullptr)
-			s_Instance->Destroy();
-	}
+	static const void DestroyInstance();
 
-	void Destroy();
+	~NetworkManager();
 
-	void Connect();
+	bool Connect();
 	void Disconnect();
 
-	void SendData(std::string data);
 	void SendData(nlohmann::json& data);
 
 	void HandleData(nlohmann::json& data);
 
+	const bool IsConnected() const { return m_Connected; }
+
 private:
+	bool m_Connected = false;
+
 	SOCKET m_Socket;
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
@@ -34,6 +33,7 @@ private:
 	{
 		Init();
 	}
+	void CreateSocket();
 	void Init();
 	void InitWindow();
 

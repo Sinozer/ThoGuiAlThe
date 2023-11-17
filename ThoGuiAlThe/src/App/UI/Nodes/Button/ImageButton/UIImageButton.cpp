@@ -8,18 +8,35 @@ UIImageButton::UIImageButton()
 
 UIImageButton::UIImageButton(std::string textureName)
 {
-	setTexture(AssetManager::GetInstance()->GetTexture(textureName), true);
+	try
+	{
+		setTexture(AssetManager::GetInstance()->GetTexture(textureName), true);
+	}
+	catch (const std::exception&)
+	{
+		setTexture(AssetManager::GetInstance()->GetTexture("DEFAULT"), true);
+	}
 	m_Callback = []() {};
 }
 
 UIImageButton::UIImageButton(std::string textureName, std::function<void()> callback)
 {
-	setTexture(AssetManager::GetInstance()->GetTexture(textureName), true);
+	try
+	{
+		setTexture(AssetManager::GetInstance()->GetTexture(textureName), true);
+	}
+	catch (const std::exception&)
+	{
+		setTexture(AssetManager::GetInstance()->GetTexture("DEFAULT"), true);
+	}
 	m_Callback = callback;
 }
 
 void UIImageButton::HandleEvents(sf::Event& event)
 {
+	if (m_Active == false)
+		return;
+
 	auto bounds = getGlobalBounds();
 	sf::Vector2f mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
 	bool mouseInBounds = bounds.contains(mousePos);
@@ -49,10 +66,15 @@ void UIImageButton::HandleEvents(sf::Event& event)
 
 void UIImageButton::Update(const float& dt)
 {
+	if (m_Active == false)
+		return;
 }
 
 void UIImageButton::Render(sf::RenderTarget* target)
 {
+	if (m_Active == false)
+		return;
+
 	target->draw(*this);
 
 	if (m_OutlineThickness > 0.f)

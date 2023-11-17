@@ -127,7 +127,7 @@ void Server::CloseServer()
 		closesocket(m_ServerSocket);
 		m_ServerSocket = INVALID_SOCKET;
 	}
-	// Fermez toutes les connexions avec les clients, si nécessaire
+	// Fermez toutes les connexions avec les clients, si nï¿½cessaire
 
 	for (Player player : m_Players)
 	{
@@ -156,8 +156,8 @@ void Server::AcceptNewPlayer(Player newPlayer)
 	m_Players.emplace(std::move(newPlayer));
 	LOG("Number of clients: " << m_Players.size());
 
-	nlohmann::json jsonData = 
-	{ 
+	nlohmann::json jsonData =
+	{
 		{"eventType", "INIT_PLAYER"},
 		{"playerId", newPlayer.GetId()}
 	};
@@ -182,7 +182,7 @@ void Server::RemovePlayer(Player& player)
 
 void Server::RemovePlayer(SOCKET socket)
 {
-	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](const Player& player) 
+	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](const Player& player)
 		{
 			return player.GetSocket() == socket;
 		});
@@ -207,7 +207,7 @@ void Server::SendDataToPlayer(const Player& player, const nlohmann::json& data)
 	std::string dataString = data.dump();
 	size_t size = dataString.size();
 
-if (int r = send(player.GetSocket(), dataString.c_str(), size, 0); r == SOCKET_ERROR)
+	if (int r = send(player.GetSocket(), dataString.c_str(), size, 0); r == SOCKET_ERROR)
 	{
 		LOG("send failed with error: " << WSAGetLastError());
 	}
@@ -316,10 +316,18 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		switch (WSAGETSELECTEVENT(lParam))
 		{
-		case FD_ACCEPT:
-			SOCKET clientSocket = accept(wParam, nullptr, nullptr);
-			Server::GetInstance().AcceptNewPlayer(clientSocket);
-			break;
+			case FD_ACCEPT:
+			{
+				SOCKET clientSocket = accept(wParam, nullptr, nullptr);
+				Server::GetInstance().AcceptNewPlayer(clientSocket);
+				break;
+			}
+			case FD_CLOSE:
+			{
+				LOG("FD_CLOSE");
+
+				break;
+			}
 		}
 
 		return 0;

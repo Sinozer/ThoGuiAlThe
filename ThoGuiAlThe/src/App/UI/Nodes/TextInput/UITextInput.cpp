@@ -14,6 +14,9 @@ UITextInput::UITextInput(std::string text)
 
 void UITextInput::HandleEvents(sf::Event& event)
 {
+	if (m_Active == false)
+		return;
+
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
 		m_Focus = getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y);
 
@@ -32,6 +35,9 @@ void UITextInput::HandleEvents(sf::Event& event)
 
 void UITextInput::Update(const float& dt)
 {
+	if (m_Active == false)
+		return;
+
 	if (m_CursorClock.getElapsedTime() >= m_BlinkInterval)
 	{
 		m_CursorVisible = !m_CursorVisible;
@@ -41,6 +47,9 @@ void UITextInput::Update(const float& dt)
 
 void UITextInput::Render(sf::RenderTarget* target)
 {
+	if (m_Active == false)
+		return;
+
 	target->draw(*this);
 
 	if (m_Focus && m_CursorVisible)

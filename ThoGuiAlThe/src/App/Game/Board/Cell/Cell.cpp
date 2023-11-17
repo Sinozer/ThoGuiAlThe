@@ -33,7 +33,7 @@ void Cell::HandleEvents(sf::Event* event)
 	};
 
 	// Send the JSON data using NetworkManager
-	NetworkManager::GetInstance().SendData(eventData);
+	NetworkManager::GetInstance()->SendData(eventData);
 }
 
 void Cell::Update(const float& dt)
