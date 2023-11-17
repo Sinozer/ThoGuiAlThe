@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <vector>
 
-constexpr auto THREADCOUNT = 5;
+constexpr auto THREADCOUNT = 2;
 
 HANDLE ghEvents[2];
 HANDLE hThread;
