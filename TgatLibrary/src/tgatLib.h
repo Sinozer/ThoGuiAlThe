@@ -21,3 +21,13 @@ typedef uint64_t TGATPLAYERID;
 typedef uint64_t TGATBODYSIZE;
 typedef uint64_t TGATDATASIZE;
 /* #################  TYPEDEF  ################ */
+
+/* #################  DEBUG  ################## */
+#include <iostream>
+#include <assert.h>
+#if defined(_DEBUG) || defined(DEBUG) && !defined(LOG)
+#define LOG(x) std::cout << x << '\n'
+#else
+#define LOG(x)
+#endif
+/* #################  DEBUG  ################## */

@@ -1,13 +1,13 @@
 #pragma once
 
-static class TgatNetworkHelper
+class TgatNetworkHelper
 {
 public:
 
 	struct MessageHeader
 	{
 		int Protocol;
-		TGATPLAYERID PlayerId;
+		TGATPLAYERID Id;
 		TGATBODYSIZE BodySize;
 	};
 
@@ -18,31 +18,30 @@ public:
 	};
 
 public:
-	static constexpr int HEADER_ID = 0x54474154; // "TGAT"
-	static constexpr int HEADER_PROTOCOL_SIZE = sizeof(HEADER_ID);
+	const int HEADER_ID = 0x54474154; // "TGAT"
+	const int HEADER_PROTOCOL_SIZE = sizeof(HEADER_ID);
 
-	static constexpr TGATBODYSIZE HEADER_SIZE = HEADER_PROTOCOL_SIZE + sizeof(TGATBODYSIZE) + sizeof(TGATPLAYERID);
+	const TGATBODYSIZE HEADER_SIZE = HEADER_PROTOCOL_SIZE + sizeof(TGATBODYSIZE) + sizeof(TGATPLAYERID);
 
-	void Send(SOCKET socket, Message msg);
+	void Send(SOCKET socket, Message& msg);
 
-	void Receive(SOCKET socket, Message msg);
+	[[nodiscard]] nlohmann::json Receive(SOCKET socket);
 
 	Message CreateMessage(int protocol, TGATPLAYERID playerId, nlohmann::json& body);
+	nlohmann::json ReadMessage(char* msg);
 
-private:
-
-	void static WriteHeader(MessageHeader& msgH, char* sendBuf);
-	TGATBODYSIZE static ReadHeader(char* buffer);
+protected:
+	virtual bool PlayerIdCheck(TGATPLAYERID playerId) = 0;
 };
 
-static enum class TgatNetworkError
+enum class TgatNetworkError
 {
 	SEND_ERROR = 0,
 	RECEIVE_ERROR = 1,
 	HEADER_ERROR = 2
 };
 
-static enum class TgatServerMessage
+enum class TgatServerMessage
 {
 	PLAYER_INIT = 0, // {"eventType": "PLAYER_INIT", "Player" : "playerId": uuid(0)}
 	PLAYER_DISCONNECT = 1, // {"eventType": "PLAYER_DISCONNECT", "Player" : "playerId": uuid(0)}
@@ -50,7 +49,7 @@ static enum class TgatServerMessage
 	PLAYER_WIN = 3, // {"eventType": "PLAYER_WIN", "Player" : "playerId": uuid(0)}
 };
 
-static enum class TgatClientMessage
+enum class TgatClientMessage
 {
 	PLAYER_INPUT = 0, // {"eventType": "PLAYER_INPUT", "Move" : {"x": 0, "y": 0}
 };
