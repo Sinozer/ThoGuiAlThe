@@ -113,10 +113,24 @@ void Server::InitHttpRequestHandlers()
 void Server::ProcessMessages()
 {
 	MSG msg{};
-	while (GetMessage(&msg, m_hWnd, 0, 0))
+	while (true)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		if (_kbhit() && _getch() == VK_ESCAPE)
+		{
+			return;
+		}
+
+		// Peek message
+		while (PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// Your other processing logic can go here
+
+		// Add a sleep to avoid busy-waiting
+		Sleep(1);
 	}
 }
 
@@ -207,7 +221,7 @@ void Server::SendDataToPlayer(const Player& player, const nlohmann::json& data)
 	std::string dataString = data.dump();
 	size_t size = dataString.size();
 
-	if (int r = send(player.GetSocket(), dataString.c_str(), size, 0); r == SOCKET_ERROR)
+	if (int r = send(player.GetSocket(), dataString.c_str(), (int)size, 0); r == SOCKET_ERROR)
 	{
 		LOG("send failed with error: " << WSAGetLastError());
 	}
@@ -249,7 +263,7 @@ void Server::HandleHttpRequest(std::string request, SOCKET socket)
 	else
 		response = RequestHandler::NotFound();
 	
-	if (int r = send(socket, response.c_str(), response.size(), 0); r == SOCKET_ERROR)
+	if (int r = send(socket, response.c_str(), (int)response.size(), 0); r == SOCKET_ERROR)
 	{
 		LOG("send failed with error: " << WSAGetLastError());
 	}
@@ -421,7 +435,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			// Parse the received HTTP request
 			std::string httpRequest(buffer);
-			// Process the HTTP request (this is where you would typically handle the request)
+			// Process the HTTP request
 			GetInstance().HandleHttpRequest(httpRequest, (SOCKET)wParam);
 
 			break;
