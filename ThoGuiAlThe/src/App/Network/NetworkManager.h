@@ -1,4 +1,8 @@
-class NetworkManager
+#pragma once
+
+#include "Network/TgatNetworkHelper.h"
+
+class NetworkManager : public TgatNetworkHelper
 {
 public:
 	static NetworkManager& GetInstance();
@@ -14,10 +18,7 @@ public:
 	void Connect();
 	void Disconnect();
 
-	void SendData(std::string data);
-	void SendData(nlohmann::json& data);
-
-	void HandleData(nlohmann::json& data);
+	void HandleData(nlohmann::json& jsonData);
 
 private:
 	SOCKET m_Socket;
@@ -28,13 +29,14 @@ private:
 	static NetworkManager* s_Instance;
 
 private:
-	NetworkManager()
-		: m_Socket{INVALID_SOCKET}, m_AddressInfo{}
+	NetworkManager() : m_Socket{INVALID_SOCKET}, m_AddressInfo{}
 	{
 		Init();
 	}
 	void Init();
 	void InitWindow();
+
+	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

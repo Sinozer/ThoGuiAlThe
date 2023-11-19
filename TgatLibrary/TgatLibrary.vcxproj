@@ -143,11 +143,13 @@
     <ClInclude Include="src\Exceptions\TgatException.h" />
     <ClInclude Include="src\Network\TgatNetworkHelper.h" />
     <ClInclude Include="src\stdafx.h" />
+    <ClInclude Include="src\tgatLib.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Exceptions\TgatException.cpp" />
     <ClCompile Include="src\Network\TgatNetworkHelper.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\tgatLib.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

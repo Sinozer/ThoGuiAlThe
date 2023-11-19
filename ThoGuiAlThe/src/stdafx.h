@@ -21,14 +21,7 @@
 #include <string>
 /* ################# STANDARD ################# */
 
-/* #################  DEBUG  ################## */
-#include <assert.h>
-#if defined(_DEBUG) || defined(DEBUG) && !defined(LOG)
-#define LOG(x) std::cout << x << '\n'
-#else
-#define LOG(x)
-#endif
-/* #################  DEBUG  ################## */
+
 
 /* ##################  SELF  ################## */
 #include "App/Singleton/SingletonManager.h"

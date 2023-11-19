@@ -1,3 +1,5 @@
+#include "tgatLib.h"
+
 #include "NetworkManager.h"
 
 #define MSG_SERVER (WM_USER + 1)
@@ -48,36 +50,6 @@ void NetworkManager::Disconnect()
 {
 	// Disconnect from server
 	closesocket(m_Socket);
-}
-
-void NetworkManager::SendData(std::string data)
-{
-	// Send data
-	if (send(m_Socket, data.c_str(), (int)data.size(), 0) == SOCKET_ERROR)
-	{
-		LOG("send failed with error: " << WSAGetLastError());
-		closesocket(m_Socket);
-		WSACleanup();
-	}
-	else
-		LOG("send success");
-}
-
-void NetworkManager::SendData(nlohmann::json& data)
-{
-	data.emplace("playerId", m_PlayerId);
-	// Serialize the JSON data to a string
-	std::string serializedData = data.dump();
-
-	// Send data
-	if (send(m_Socket, serializedData.c_str(), static_cast<int>(serializedData.size()), 0) == SOCKET_ERROR)
-	{
-		LOG("send failed with error: " << WSAGetLastError());
-		closesocket(m_Socket);
-		WSACleanup();
-	}
-	else
-		LOG("send success");
 }
 
 void NetworkManager::HandleData(nlohmann::json& data)
@@ -192,36 +164,21 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		{
 		case FD_READ:
 		{
-			char buffer[4096];  // Adjust the buffer size as needed
-			int bytesReceived = recv((SOCKET)wParam, buffer, sizeof(buffer), 0);
-			if (bytesReceived == SOCKET_ERROR)
-			{
-				LOG("recv failed with error: " << WSAGetLastError());
-				break;
-			}
-			else
-			{
-				buffer[bytesReceived] = '\0';
-
-				// Parse the received JSON data
-				try
-				{
-					nlohmann::json jsonData = nlohmann::json::parse(buffer);
-					GetInstance().HandleData(jsonData);
-				}
-				catch (const nlohmann::json::exception& e)
-				{
-					LOG("Error parsing JSON: " << e.what());
-					break;
-				}
-			}
+			nlohmann::json jsonData = GetInstance().Receive((SOCKET)wParam);
+			GetInstance().HandleData(jsonData);
 
 			break;
-			}
+		}
 		}
 
 		return 0;
 	}
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+bool NetworkManager::PlayerIdCheck(TGATPLAYERID playerId)
+{
+	// Will always return true for now on the client side. We know that there won't be any other server sending us data.
+	return true;
 }
