@@ -7,6 +7,7 @@
 #include <fstream>
 #include <memory>
 #include <conio.h>
+#include <regex>
 /* ################# STANDARD ################# */
 
 /* ##################  WINSOCK  ################## */
