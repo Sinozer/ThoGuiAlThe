@@ -6,16 +6,29 @@
 
 #include "Exceptions/TgatException.h"
 
+TgatNetworkHelper::TgatNetworkHelper() : m_Socket(INVALID_SOCKET)
+{
+}
+
+TgatNetworkHelper::~TgatNetworkHelper()
+{
+}
+
+void TgatNetworkHelper::Send(Message& msg)
+{
+	Send(m_Socket, msg);
+}
+
 void TgatNetworkHelper::Send(SOCKET socket, Message& msg)
 {
 	const int bufSize = HEADER_SIZE + msg.Header.BodySize;
 	const int headerSize = (int)sizeof(msg.Header);
 	char* sendBuf = new char[bufSize];
-	if (bufSize != headerSize)
+	if (HEADER_SIZE != headerSize)
 	{
 		throw TgatException(TgatException::ErrorMessageBuilder("Header size error : Header was too long\n"));
 	}
-	memcpy(sendBuf, &msg.Header, bufSize);
+	memcpy(sendBuf, &msg.Header, headerSize);
 
 	const int bodySize = msg.Header.BodySize;
 	if (bodySize != strlen(msg.Body))
@@ -55,8 +68,9 @@ nlohmann::json TgatNetworkHelper::Receive(SOCKET socket)
 		throw TgatException(TgatException::ErrorMessageBuilder("ID Error : "));
 	}
 
-	char* bodyBuf = new char[header.BodySize];
+	char* bodyBuf = new char[header.BodySize + 1];
 	int byteReceived = recv(socket, bodyBuf, header.BodySize, 0);
+	bodyBuf[header.BodySize] = '\0'; 
 
 	if (byteReceived != header.BodySize)
 	{
@@ -69,15 +83,12 @@ nlohmann::json TgatNetworkHelper::Receive(SOCKET socket)
 	return jsonData;
 }
 
-TgatNetworkHelper::Message TgatNetworkHelper::CreateMessage(int protocol, TGATPLAYERID playerId, nlohmann::json& body)
+void TgatNetworkHelper::CreateMessage(int protocol, TGATPLAYERID playerId, std::string& strJson, Message& message)
 {
-	TgatNetworkHelper::Message message =
-	{
-		{ protocol, playerId, body.dump().size() },
-		body.dump().c_str()
-	};
+	// So, we need to convert the json to a string, then to a char* because ?????????????
 
-	return message;
+	message.Header = { protocol, playerId, strlen(strJson.c_str()) };
+	message.Body = strJson.c_str() + '\0'; // ?????	
 }
 
 nlohmann::json TgatNetworkHelper::ReadMessage(char* msg)

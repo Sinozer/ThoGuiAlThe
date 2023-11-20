@@ -17,7 +17,7 @@
 /* #################  JSON	################ */
 
 /* #################  TYPEDEF  ################ */
-typedef uint64_t TGATPLAYERID;
+typedef uint32_t TGATPLAYERID;
 typedef uint64_t TGATBODYSIZE;
 typedef uint64_t TGATDATASIZE;
 /* #################  TYPEDEF  ################ */

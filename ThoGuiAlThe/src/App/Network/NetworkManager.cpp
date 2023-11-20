@@ -1,12 +1,21 @@
-#include "tgatLib.h"
-
 #include "NetworkManager.h"
+
+#include "Exceptions/TgatException.h"
 
 #define MSG_SERVER (WM_USER + 1)
 
 static constexpr char PORT[5] = "6969";
 
 NetworkManager* NetworkManager::s_Instance = nullptr;
+
+NetworkManager::NetworkManager() : m_hWnd(nullptr), m_PlayerId(0)
+{
+	Init();
+}
+
+NetworkManager::~NetworkManager()
+{
+}
 
 NetworkManager& NetworkManager::GetInstance()
 {
@@ -57,12 +66,21 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	// Check if the data has a valid type
 	if (data.contains("eventType"))
 	{
-		if (data["eventType"] == "INIT_PLAYER")
+		switch ((TgatServerMessage)data["eventType"])
 		{
+		case TgatServerMessage::PLAYER_INIT:
 			m_PlayerId = data["playerId"];
 			LOG("Player ID: " << m_PlayerId);
+			break;
+		default:
+			break;
 		}
 	}
+}
+
+TGATPLAYERID NetworkManager::GetPlayerId() const
+{
+	 return (TGATPLAYERID)m_PlayerId;
 }
 
 void NetworkManager::Init()
@@ -164,8 +182,15 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		{
 		case FD_READ:
 		{
-			nlohmann::json jsonData = GetInstance().Receive((SOCKET)wParam);
-			GetInstance().HandleData(jsonData);
+			try
+			{
+				nlohmann::json jsonData = GetInstance().Receive((SOCKET)wParam);
+				GetInstance().HandleData(jsonData);
+			}
+			catch (TgatException& e)
+			{
+				LOG(e.what());
+			}
 
 			break;
 		}

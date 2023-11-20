@@ -1,7 +1,8 @@
 #pragma once
 #include "Player.h"
+#include "Network/TgatNetworkHelper.h"
 
-class Server
+class Server : public TgatNetworkHelper
 {
 public:
 	Server();
@@ -21,7 +22,7 @@ public:
 	void RemovePlayer(Player& player);
 	void RemovePlayer(SOCKET socket);
 
-	void SendDataToPlayer(const Player& player, const nlohmann::json& data);
+	void SendDataToPlayer(const Player& player, nlohmann::json& data);
 
 	void HandleJson(const nlohmann::json& json);
 
@@ -30,12 +31,13 @@ public:
 	std::unordered_set<Player>& GetPlayers() { return m_Players; }
 
 private:
-	HWND m_hWnd; // Handle to the window
+	HWND m_hWnd;
 	char m_Port[5];
-	SOCKET m_ServerSocket;
 	std::unordered_set<Player> m_Players;
 
 	void InitWindow();
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 };

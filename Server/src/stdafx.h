@@ -20,3 +20,5 @@
 #define LOG(x)
 #endif
 /* #################  DEBUG  ################## */
+
+#include "tgatLib.h"

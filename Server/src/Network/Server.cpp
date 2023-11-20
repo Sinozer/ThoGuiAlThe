@@ -1,10 +1,12 @@
 #include "Server.h"
+
+#include "Exceptions/TgatException.h"
 #include "Player.h"
 
 #define MSG_SERVER (WM_USER + 1)
 #define MSG_CLIENT (WM_USER + 2)
 
-Server::Server() : m_hWnd(nullptr), m_Port{"6969"}, m_ServerSocket(INVALID_SOCKET)
+Server::Server() : TgatNetworkHelper(), m_hWnd(nullptr), m_Port{ "6969" }
 {}
 
 Server::~Server()
@@ -17,7 +19,7 @@ Server::~Server()
 void Server::StartServer()
 {
 	InitWindow();
-	
+
 	// Initialize Winsock
 	WSADATA wsaData;
 	if (int r = WSAStartup(MAKEWORD(2, 2), &wsaData); r != 0)
@@ -47,8 +49,8 @@ void Server::StartServer()
 		LOG("getaddrinfo success");
 
 	// Socket creation
-	m_ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (m_ServerSocket == INVALID_SOCKET)
+	m_Socket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (m_Socket == INVALID_SOCKET)
 	{
 		LOG("socket failed with error: " << WSAGetLastError());
 		freeaddrinfo(result);
@@ -60,11 +62,11 @@ void Server::StartServer()
 
 	// Bind socket to listen to TCP requests on the given address and port
 
-	if (int r = bind(m_ServerSocket, result->ai_addr, (int)result->ai_addrlen); r == SOCKET_ERROR)
+	if (int r = bind(m_Socket, result->ai_addr, (int)result->ai_addrlen); r == SOCKET_ERROR)
 	{
 		LOG("bind failed with error: " << WSAGetLastError());
 		freeaddrinfo(result);
-		closesocket(m_ServerSocket);
+		closesocket(m_Socket);
 		WSACleanup();
 		throw std::exception("bind failed");
 	}
@@ -73,10 +75,10 @@ void Server::StartServer()
 
 	freeaddrinfo(result);
 
-	if (int r = listen(m_ServerSocket, SOMAXCONN); r == SOCKET_ERROR)
+	if (int r = listen(m_Socket, SOMAXCONN); r == SOCKET_ERROR)
 	{
 		LOG("listen failed with error: " << WSAGetLastError());
-		closesocket(m_ServerSocket);
+		closesocket(m_Socket);
 		WSACleanup();
 		throw std::exception("listen failed");
 	}
@@ -84,10 +86,10 @@ void Server::StartServer()
 		LOG("listen success");
 
 	// Setup asynchronous socket for listening to new clients in the window message loop
-	if (WSAAsyncSelect(m_ServerSocket, m_hWnd, MSG_SERVER, FD_ACCEPT) == SOCKET_ERROR)
+	if (WSAAsyncSelect(m_Socket, m_hWnd, MSG_SERVER, FD_ACCEPT) == SOCKET_ERROR)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
-		closesocket(m_ServerSocket);
+		closesocket(m_Socket);
 		WSACleanup();
 		throw std::exception("WSAAsyncSelect failed");
 	}
@@ -107,10 +109,10 @@ void Server::ProcessMessages()
 
 void Server::CloseServer()
 {
-	if (m_ServerSocket != INVALID_SOCKET)
+	if (m_Socket != INVALID_SOCKET)
 	{
-		closesocket(m_ServerSocket);
-		m_ServerSocket = INVALID_SOCKET;
+		closesocket(m_Socket);
+		m_Socket = INVALID_SOCKET;
 	}
 	// Fermez toutes les connexions avec les clients, si nécessaire
 
@@ -138,13 +140,14 @@ void Server::AcceptNewPlayer(Player newPlayer)
 	else
 		LOG("WSAAsyncSelect success");
 
+	TGATPLAYERID playerId = newPlayer.GetId();
 	m_Players.emplace(std::move(newPlayer));
 	LOG("Number of clients: " << m_Players.size());
 
-	nlohmann::json jsonData = 
-	{ 
-		{"eventType", "INIT_PLAYER"},
-		{"playerId", newPlayer.GetId()}
+	nlohmann::json jsonData =
+	{
+		{"eventType", TgatServerMessage::PLAYER_INIT},
+		{"playerId", playerId}
 	};
 
 	SendDataToPlayer(newPlayer, jsonData);
@@ -152,6 +155,14 @@ void Server::AcceptNewPlayer(Player newPlayer)
 
 void Server::RemovePlayer(Player& player)
 {
+	nlohmann::json jsonData =
+	{
+		{"eventType", TgatServerMessage::PLAYER_DISCONNECT},
+		{"message", "bye bye"}
+	};
+
+	SendDataToPlayer(player, jsonData);
+
 	if (int r = closesocket(player.GetSocket()) != 0)
 	{
 		LOG("closesocket failed with error: " << r);
@@ -167,7 +178,7 @@ void Server::RemovePlayer(Player& player)
 
 void Server::RemovePlayer(SOCKET socket)
 {
-	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](const Player& player) 
+	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](const Player& player)
 		{
 			return player.GetSocket() == socket;
 		});
@@ -175,6 +186,14 @@ void Server::RemovePlayer(SOCKET socket)
 
 	if (it != m_Players.end())
 	{
+		nlohmann::json jsonData =
+		{
+			{"eventType", TgatServerMessage::PLAYER_DISCONNECT},
+			{"message", "bye bye"}
+		};
+
+		SendDataToPlayer(*it, jsonData);
+
 		if (int r = closesocket(it->GetSocket()); r != 0)
 		{
 			LOG("closesocket failed with error: " << r);
@@ -187,22 +206,23 @@ void Server::RemovePlayer(SOCKET socket)
 	}
 }
 
-void Server::SendDataToPlayer(const Player& player, const nlohmann::json& data)
+void Server::SendDataToPlayer(const Player& player, nlohmann::json& data)
 {
-	std::string dataString = data.dump();
-	int size = dataString.size();
-
-if (int r = send(player.GetSocket(), dataString.c_str(), size, 0); r == SOCKET_ERROR)
-    {
-        LOG("send failed with error: " << WSAGetLastError());
-    }
-    else
-        LOG("send success");
+	try
+	{
+		TgatNetworkHelper::Message msg;
+		std::string strData = data.dump();
+		CreateMessage(HEADER_ID, player.GetId(), strData, msg);
+		Send(player.GetSocket(), msg);
+	}
+	catch (const TgatException& e)
+	{
+		LOG(e.what());
+	}
 }
 
 void Server::HandleJson(const nlohmann::json& json)
 {
-
 	LOG("Received JSON data: " << json.dump());
 }
 
@@ -284,31 +304,16 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 		case FD_READ:
 		{
-			char buffer[4096];  // Adjust the buffer size as needed
-			int bytesReceived = recv((SOCKET)wParam, buffer, sizeof(buffer), 0);
-			if (bytesReceived == SOCKET_ERROR)
+			try
 			{
-				LOG("recv failed with error: " << WSAGetLastError());
+				nlohmann::json jsonData = GetInstance().Receive((SOCKET)wParam);
+				GetInstance().HandleJson(jsonData);
+			}
+			catch (TgatException& e)
+			{
+				LOG(e.what());
 				Server::GetInstance().RemovePlayer(wParam);
 				break;
-			}
-			else
-			{
-				buffer[bytesReceived] = '\0';
-
-				// Parse the received JSON data
-				try
-				{
-					nlohmann::json jsonData = nlohmann::json::parse(buffer);
-					Server::GetInstance().HandleJson(jsonData);
-				}
-				catch (const nlohmann::json::exception& e)
-				{
-					LOG("Error parsing JSON: " << e.what());
-					std::unordered_set<Player>& players = Server::GetInstance().GetPlayers();
-
-					Server::GetInstance().RemovePlayer(wParam);
-				}
 			}
 
 			break;
@@ -322,4 +327,15 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return 0;
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam); // Call default message handler
+}
+
+bool Server::PlayerIdCheck(TGATPLAYERID playerId)
+{
+	// Check if the player id is in the list of connected players
+	auto it = std::find_if(m_Players.begin(), m_Players.end(), [playerId](const Player& player)
+		{
+			return player.GetId() == playerId;
+		});
+
+	return it != m_Players.end();
 }

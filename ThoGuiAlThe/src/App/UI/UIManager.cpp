@@ -1,3 +1,5 @@
+#include "tgatLib.h"
+
 #include "UIManager.h"
 
 UIManager::~UIManager()

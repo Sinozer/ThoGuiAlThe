@@ -106,10 +106,12 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
-      <PrecompiledHeader>Create</PrecompiledHeader>
+      <ForcedIncludeFiles>tgatLib.h</ForcedIncludeFiles>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName)\src\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeaderFile>tgatLib.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -126,10 +128,12 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
-      <PrecompiledHeader>Create</PrecompiledHeader>
+      <ForcedIncludeFiles>tgatLib.h</ForcedIncludeFiles>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(SolutionDir)\$(ProjectName)\src\</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeaderFile>tgatLib.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,14 +146,15 @@
     <ClInclude Include="src\external\JSON\json.hpp" />
     <ClInclude Include="src\Exceptions\TgatException.h" />
     <ClInclude Include="src\Network\TgatNetworkHelper.h" />
-    <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\tgatLib.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Exceptions\TgatException.cpp" />
     <ClCompile Include="src\Network\TgatNetworkHelper.cpp" />
-    <ClCompile Include="src\stdafx.cpp" />
-    <ClCompile Include="src\tgatLib.cpp" />
+    <ClCompile Include="src\tgatLib.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

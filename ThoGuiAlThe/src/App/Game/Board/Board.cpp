@@ -11,7 +11,11 @@ Board::~Board()
     {
         for (auto& cell : row)
         {
-            DELPTR(cell);
+            if (cell != nullptr)
+            {
+                delete cell;
+                cell = nullptr;
+            }
         }
         row.clear();
     }

@@ -20,8 +20,9 @@ public:
 
 	void HandleData(nlohmann::json& jsonData);
 
+	uint32_t GetPlayerId() const;
+
 private:
-	SOCKET m_Socket;
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
 	uint32_t m_PlayerId;
@@ -29,10 +30,9 @@ private:
 	static NetworkManager* s_Instance;
 
 private:
-	NetworkManager() : m_Socket{INVALID_SOCKET}, m_AddressInfo{}
-	{
-		Init();
-	}
+	NetworkManager();
+	~NetworkManager() override;
+
 	void Init();
 	void InitWindow();
 

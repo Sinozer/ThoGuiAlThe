@@ -18,17 +18,25 @@ public:
 	};
 
 public:
+	TgatNetworkHelper();
+	virtual ~TgatNetworkHelper();
+
+public:
 	const int HEADER_ID = 0x54474154; // "TGAT"
 	const int HEADER_PROTOCOL_SIZE = sizeof(HEADER_ID);
 
 	const TGATBODYSIZE HEADER_SIZE = HEADER_PROTOCOL_SIZE + sizeof(TGATBODYSIZE) + sizeof(TGATPLAYERID);
 
+	void Send(Message& msg);
 	void Send(SOCKET socket, Message& msg);
 
 	[[nodiscard]] nlohmann::json Receive(SOCKET socket);
 
-	Message CreateMessage(int protocol, TGATPLAYERID playerId, nlohmann::json& body);
+	void CreateMessage(int protocol, TGATPLAYERID playerId, std::string& strJson, Message& message);
 	nlohmann::json ReadMessage(char* msg);
+
+protected:
+	SOCKET m_Socket;
 
 protected:
 	virtual bool PlayerIdCheck(TGATPLAYERID playerId) = 0;
