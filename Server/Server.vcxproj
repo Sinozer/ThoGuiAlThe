@@ -82,6 +82,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Network\Http\RequestHandler.cpp" />
+    <ClCompile Include="src\Network\Http\RequestHandlers\HomeRequestHandler.cpp" />
     <ClCompile Include="src\Network\Player.cpp" />
     <ClCompile Include="src\Network\Server.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -91,9 +93,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Network\Http\HttpInclude.h" />
+    <ClInclude Include="src\Network\Http\IHandleMethod.h" />
+    <ClInclude Include="src\Network\Http\RequestHandler.h" />
+    <ClInclude Include="src\Network\Http\RequestHandlers\HomeRequestHandler.h" />
     <ClInclude Include="src\Network\Player.h" />
     <ClInclude Include="src\Network\Server.h" />
     <ClInclude Include="src\stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\index.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
