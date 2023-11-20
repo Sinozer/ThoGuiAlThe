@@ -14,12 +14,6 @@ void HomeState::InitBackground()
 }
 void HomeState::InitUi()
 {
-	auto* testinput = m_UiManager.AddTextInput("TESTINPUT", "TESTINPUT");
-testinput->setCharacterSize(15);
-testinput->setOutlineColor(sf::Color::Black);
-testinput->setOutlineThickness(1.f);
-testinput->setPosition(WINDOW_SCREEN_WIDTH / 2 - testinput->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT / 2 - testinput->getGlobalBounds().height / 2);
-
 	auto* title = m_UiManager.AddText("TITLE", "THOGUIALTHE");
 	title->setCharacterSize(100);
 	title->setOutlineColor(sf::Color::Black);
