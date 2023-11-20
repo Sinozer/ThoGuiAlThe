@@ -95,29 +95,6 @@ void CreateThreads()
 	}
 }
 
-int main()
-{
-	if(!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x00000400))
-		return 0;
-	std::vector<HANDLE> threads;
-	for (int i = 0; i < THREADCOUNT; i++)
-	{
-		threads.push_back(CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CreateThreads, NULL, 0, NULL));
-	}
-
-	for (HANDLE thread : threads)
-	{
-		WaitForSingleObject(thread, INFINITE);
-	}
-
-	std::cout << "All threads finished" << std::endl;
-	DeleteCriticalSection(&CriticalSection);
-	return 0;
-
-}
-
-
-
 void ManageEventObjects() {
 	DWORD i;
 	DWORD dwEvent;
@@ -193,6 +170,23 @@ int main()
 {
 	Server::GetInstance().StartServer();
 	Server::GetInstance().ProcessMessages();
+
+	if (!InitializeCriticalSectionAndSpinCount(&CriticalSection, 0x00000400))
+		return 0;
+	std::vector<HANDLE> threads;
+	for (int i = 0; i < THREADCOUNT; i++)
+	{
+		threads.push_back(CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CreateThreads, NULL, 0, NULL));
+	}
+
+	for (HANDLE thread : threads)
+	{
+		WaitForSingleObject(thread, INFINITE);
+	}
+
+	std::cout << "All threads finished" << std::endl;
+	DeleteCriticalSection(&CriticalSection);
+	return 0;
 
 	return 0;
 }
