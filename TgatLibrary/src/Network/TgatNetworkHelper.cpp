@@ -41,6 +41,7 @@ void TgatNetworkHelper::Send(SOCKET socket, Message& msg)
 	{
 		throw TgatException(TgatException::ErrorMessageBuilder("Send Error : "));
 	}
+	delete[] sendBuf;
 }
 
 int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
@@ -50,6 +51,7 @@ int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
 
 	if (headerBytes == SOCKET_ERROR)
 	{
+		delete[] headerBuf;
 		if (int err = WSAGetLastError(); err == WSAEWOULDBLOCK)
 			return err;
 		throw TgatException(TgatException::ErrorMessageBuilder("Message size error : Message was empty or null\n"));
@@ -81,7 +83,6 @@ int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
 
 	data = ReadMessage(bodyBuf);
 	delete[] bodyBuf;
-
 	return true;
 }
 
