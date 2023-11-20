@@ -83,7 +83,7 @@ void App::Run()
 void App::End() const
 {
 	m_StateManager->RemoveAllStates();
-
+	NetworkManager::GetInstance()->Disconnect();
 	SingletonManager::DestroyAllInstances();
 }
 

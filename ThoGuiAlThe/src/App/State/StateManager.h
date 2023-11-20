@@ -14,7 +14,7 @@ private:
 
 public:
 	StateManager();
-	~StateManager() = default;
+	~StateManager();
 
 	void AddState(State* state);
 	void RemoveState(unsigned char amount = 1);
