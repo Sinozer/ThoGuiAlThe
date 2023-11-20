@@ -42,7 +42,7 @@ private:
 	std::map<std::string, UIText*> m_UiTexts;
 	std::map<std::string, UIImage*> m_UiImages;
 	std::map<std::string, UITextButton*> m_UITextButtons;
-	std::map<std::string, UIImageButton*> m_UITextureButtons;
+	std::map<std::string, UIImageButton*> m_UIImageButtons;
 	std::map<std::string, UITextInput*> m_UiTextInputs;
 
 	void UpdateButtons(const float& dt);
