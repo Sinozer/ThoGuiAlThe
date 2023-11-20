@@ -6,7 +6,7 @@
 
 #include "Exceptions/TgatException.h"
 
-TgatNetworkHelper::TgatNetworkHelper() : m_Socket(INVALID_SOCKET)
+TgatNetworkHelper::TgatNetworkHelper() : m_ServerSocket(INVALID_SOCKET)
 {
 }
 
@@ -16,7 +16,7 @@ TgatNetworkHelper::~TgatNetworkHelper()
 
 void TgatNetworkHelper::Send(Message& msg)
 {
-	Send(m_Socket, msg);
+	Send(m_ServerSocket, msg);
 }
 
 void TgatNetworkHelper::Send(SOCKET socket, Message& msg)

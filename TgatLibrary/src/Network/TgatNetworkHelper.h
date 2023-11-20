@@ -36,7 +36,7 @@ public:
 	nlohmann::json ReadMessage(char* msg);
 
 protected:
-	SOCKET m_Socket;
+	SOCKET m_ServerSocket;
 
 protected:
 	virtual bool PlayerIdCheck(TGATPLAYERID playerId) = 0;

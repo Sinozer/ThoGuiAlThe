@@ -7,22 +7,20 @@ class NetworkManager : public TgatNetworkHelper
 public:
 	static NetworkManager& GetInstance();
 
-	static void DestroyInstance()
-	{
-		if (s_Instance != nullptr)
-			s_Instance->Destroy();
-	}
+	static const void DestroyInstance();
 
-	void Destroy();
-
-	void Connect();
+	bool Connect();
 	void Disconnect();
 
 	void HandleData(nlohmann::json& jsonData);
 
 	uint32_t GetPlayerId() const;
 
+	const bool IsConnected() const { return m_Connected; }
+
 private:
+	bool m_Connected = false;
+
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
 	uint32_t m_PlayerId;
@@ -35,6 +33,8 @@ private:
 
 	void Init();
 	void InitWindow();
+
+	void CreateSocket();
 
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 

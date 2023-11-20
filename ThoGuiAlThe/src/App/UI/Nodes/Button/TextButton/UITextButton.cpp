@@ -20,6 +20,9 @@ UITextButton::UITextButton(std::string text, std::function<void()> callback)
 
 void UITextButton::HandleEvents(sf::Event& event)
 {
+	if (m_Active == false)
+		return;
+
 	auto bounds = getGlobalBounds();
 	sf::Vector2f mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
 	bool mouseInBounds = bounds.contains(mousePos);
@@ -49,9 +52,14 @@ void UITextButton::HandleEvents(sf::Event& event)
 
 void UITextButton::Update(const float& dt)
 {
+	if (m_Active == false)
+		return;
 }
 
 void UITextButton::Render(sf::RenderTarget* target)
 {
+	if (m_Active == false)
+		return;
+
 	target->draw(*this);
 }

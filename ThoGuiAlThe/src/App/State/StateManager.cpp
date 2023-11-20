@@ -24,6 +24,17 @@ StateManager::StateManager() : m_NewState(nullptr), m_Adding(false), m_Removing(
 {
 }
 
+StateManager::~StateManager()
+{
+	for (int i = 0; i < m_States.size(); i++)
+	{
+		DELPTR(m_States.top());
+		m_States.pop();
+	}
+
+	DELPTR(m_NewState);
+}
+
 void StateManager::AddState(State* state)
 {
 	m_Adding = true;

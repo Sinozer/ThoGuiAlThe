@@ -13,10 +13,6 @@ NetworkManager::NetworkManager() : m_hWnd(nullptr), m_PlayerId(0)
 	Init();
 }
 
-NetworkManager::~NetworkManager()
-{
-}
-
 NetworkManager& NetworkManager::GetInstance()
 {
 	if (s_Instance == nullptr)
@@ -24,7 +20,15 @@ NetworkManager& NetworkManager::GetInstance()
 	return *s_Instance;
 }
 
-void NetworkManager::Destroy()
+const void NetworkManager::DestroyInstance()
+{
+	if (s_Instance == nullptr)
+		return;
+
+	DELPTR(s_Instance);
+}
+
+NetworkManager::~NetworkManager()
 {
 	// Close socket
 	Disconnect();
@@ -33,32 +37,42 @@ void NetworkManager::Destroy()
 	WSACleanup();
 }
 
-void NetworkManager::Connect()
+bool NetworkManager::Connect()
 {
+	if (m_ServerSocket == INVALID_SOCKET)
+		CreateSocket();
+
 	// Connect to server
-	if (connect(m_Socket, m_AddressInfo.ai_addr, (int)m_AddressInfo.ai_addrlen) == SOCKET_ERROR)
+	if (connect(m_ServerSocket, m_AddressInfo.ai_addr, (int)m_AddressInfo.ai_addrlen) == SOCKET_ERROR)
 	{
 		LOG("connect failed with error: " << WSAGetLastError());
-		closesocket(m_Socket);
-		WSACleanup();
+		closesocket(m_ServerSocket);
+		m_ServerSocket = INVALID_SOCKET;
+		return m_Connected;
 	}
 	else
 		LOG("connect success");
 
-	if (WSAAsyncSelect(m_Socket, m_hWnd, MSG_SERVER, FD_READ | FD_CLOSE))
+	if (WSAAsyncSelect(m_ServerSocket, m_hWnd, MSG_SERVER, FD_READ | FD_CLOSE))
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
-		closesocket(m_Socket);
-		WSACleanup();
+		closesocket(m_ServerSocket);
+		m_ServerSocket = INVALID_SOCKET;
+		return m_Connected;
 	}
 	else
 		LOG("WSAAsyncSelect success");
+
+	m_Connected = true;
+
+	return m_Connected;
 }
 
 void NetworkManager::Disconnect()
 {
 	// Disconnect from server
-	closesocket(m_Socket);
+	closesocket(m_ServerSocket);
+	m_Connected = false;
 }
 
 void NetworkManager::HandleData(nlohmann::json& data)
@@ -83,6 +97,43 @@ TGATPLAYERID NetworkManager::GetPlayerId() const
 	 return (TGATPLAYERID)m_PlayerId;
 }
 
+void NetworkManager::CreateSocket()
+{
+	// Resolve address and port
+	addrinfo* result = NULL;
+	addrinfo hints{};
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	int iResult = getaddrinfo("localhost", PORT, &hints, &result);
+
+	if (iResult != 0)
+	{
+		LOG("getaddrinfo failed with error: " << iResult);
+		m_ServerSocket = INVALID_SOCKET;
+		return;
+	}
+	else
+		LOG("getaddrinfo success");
+
+	// Socket creation
+	m_ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+
+	if (m_ServerSocket == INVALID_SOCKET)
+	{
+		LOG("socket failed with error: " << WSAGetLastError());
+		freeaddrinfo(result);
+		m_ServerSocket = INVALID_SOCKET;
+		return;
+	}
+	else
+		LOG("socket success");
+
+	m_AddressInfo = *result;
+	freeaddrinfo(result);
+}
+
 void NetworkManager::Init()
 {
 	InitWindow();
@@ -98,41 +149,7 @@ void NetworkManager::Init()
 	else
 		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
 
-	// Resolve address and port
-	addrinfo* result = NULL;
-	addrinfo hints{};
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-
-	iResult = getaddrinfo("localhost", PORT, &hints, &result);
-
-	if (iResult != 0)
-	{
-		LOG("getaddrinfo failed with error: " << iResult);
-		WSACleanup();
-		// TODO: Throw exception
-		throw std::exception("getaddrinfo failed");
-	}
-	else
-		LOG("getaddrinfo success");
-
-	// Socket creation
-	m_Socket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-
-	if (m_Socket == INVALID_SOCKET)
-	{
-		LOG("socket failed with error: " << WSAGetLastError());
-		freeaddrinfo(result);
-		WSACleanup();
-		// TODO: Throw exception
-		throw std::exception("socket creation failed");
-	}
-	else
-		LOG("socket success");
-
-	m_AddressInfo = *result;
-	freeaddrinfo(result);
+	CreateSocket();
 }
 
 void NetworkManager::InitWindow()
@@ -191,7 +208,12 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			{
 				LOG(e.what());
 			}
-
+			break;
+		}
+		case FD_CLOSE:
+		{
+			LOG("FD_CLOSE");
+			GetInstance().Disconnect();
 			break;
 		}
 		}

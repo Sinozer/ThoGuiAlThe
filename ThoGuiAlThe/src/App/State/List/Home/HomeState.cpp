@@ -31,11 +31,7 @@ void HomeState::InitUi()
 	username->setOutlineThickness(1.f);
 	username->setPosition(profile->getPosition().x - username->getGlobalBounds().width * 1.05f, profile->getPosition().y);
 
-	auto* start = m_UiManager.AddTextButton("START", "PLAY", [this]() 
-		{
-			NetworkManager::GetInstance().Connect();
-			StateManager::GetInstance()->AddState(new SelectState()); 
-		});
+	auto* start = m_UiManager.AddTextButton("START", "PLAY", [this]() { StateManager::GetInstance()->AddState(new SelectState()); });
 	start->setCharacterSize(50);
 	start->setOutlineColor(sf::Color::Black);
 	start->setOutlineThickness(2.f);
@@ -45,6 +41,28 @@ void HomeState::InitUi()
 	exit->setOutlineColor(sf::Color::Black);
 	exit->setOutlineThickness(2.f);
 	exit->setPosition(WINDOW_SCREEN_WIDTH / 2 - exit->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - exit->getGlobalBounds().height - 50.f);
+
+	if (NetworkManager::GetInstance().IsConnected())
+		return;
+
+	auto* networkConnectionFailedButton = m_UiManager.AddImageButton("NETWORK_CONNECTION_FAILED", "RETRY_THUMB");
+	networkConnectionFailedButton->setPosition(WINDOW_SCREEN_WIDTH * 0.01f, WINDOW_SCREEN_HEIGHT / 100.f);
+
+	auto* networkConnectionFailedText = m_UiManager.AddText("NETWORK_CONNECTION_FAILED", "NETWORK CONNECTION FAILED");
+	networkConnectionFailedText->setCharacterSize(15);
+	networkConnectionFailedText->setOutlineColor(sf::Color::Black);
+	networkConnectionFailedText->setOutlineThickness(1.f);
+	networkConnectionFailedText->setPosition(networkConnectionFailedButton->getPosition().x + networkConnectionFailedButton->getGlobalBounds().width * 1.05f, networkConnectionFailedButton->getPosition().y);
+
+	networkConnectionFailedButton->SetCallback([this, networkConnectionFailedButton, networkConnectionFailedText]()
+		{
+			if (NetworkManager::GetInstance().Connect())
+			{
+				networkConnectionFailedButton->SetActive(false);
+				networkConnectionFailedText->SetActive(false);
+			}
+		}
+	);
 }
 void HomeState::Init()
 {

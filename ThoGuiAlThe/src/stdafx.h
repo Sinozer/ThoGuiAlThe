@@ -36,3 +36,9 @@
 #include "tgatLib.h"
 
 
+#if defined(DEBUG) | defined(_DEBUG)
+#include <crtdbg.h>
+// Replace new to check for memory leaks
+#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+#endif

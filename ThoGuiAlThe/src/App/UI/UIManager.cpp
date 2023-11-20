@@ -27,11 +27,11 @@ UIManager::~UIManager()
 	}
 	m_UiTextInputs.clear();
 
-	for (auto& i : m_UITextureButtons)
+	for (auto& i : m_UIImageButtons)
 	{
 		DELPTR(i.second);
 	}
-	m_UITextureButtons.clear();
+	m_UIImageButtons.clear();
 }
 
 void UIManager::HandleEvents(sf::Event& event)
@@ -41,7 +41,7 @@ void UIManager::HandleEvents(sf::Event& event)
 		i.second->HandleEvents(event);
 	}
 
-	for (auto& i : m_UITextureButtons)
+	for (auto& i : m_UIImageButtons)
 	{
 		i.second->HandleEvents(event);
 	}
@@ -59,7 +59,7 @@ void UIManager::UpdateButtons(const float& dt)
 		i.second->Update(dt);
 	}
 
-	for (auto& i : m_UITextureButtons)
+	for (auto& i : m_UIImageButtons)
 	{
 		i.second->Update(dt);
 	}
@@ -98,7 +98,7 @@ void UIManager::RenderButtons(sf::RenderTarget* target)
 		second->Render(target);
 	}
 
-	for (const auto& [_, second] : m_UITextureButtons)
+	for (const auto& [_, second] : m_UIImageButtons)
 	{
 		second->Render(target);
 	}
@@ -127,9 +127,8 @@ UIText* UIManager::AddText(const std::string& name)
 		return m_UiTexts[name];
 	}
 
-	UIText* newText = new UIText();
-	m_UiTexts[name] = newText;
-	return newText;
+	m_UiTexts[name] = new UIText();
+	return m_UiTexts[name];
 }
 UIText* UIManager::AddText(const std::string& name, const std::string& text)
 {
@@ -139,9 +138,8 @@ UIText* UIManager::AddText(const std::string& name, const std::string& text)
 		return m_UiTexts[name];
 	}
 
-	UIText* newText = new UIText(text);
-	m_UiTexts[name] = newText;
-	return newText;
+	m_UiTexts[name] = new UIText(text);
+	return m_UiTexts[name];
 }
 
 UIImage* UIManager::AddImage(const std::string& name)
@@ -152,9 +150,8 @@ UIImage* UIManager::AddImage(const std::string& name)
 		return m_UiImages[name];
 	}
 
-	UIImage* newImage = new UIImage();
-	m_UiImages[name] = newImage;
-	return newImage;
+	m_UiImages[name] = new UIImage();
+	return m_UiImages[name];
 }
 UIImage* UIManager::AddImage(const std::string& name, const std::string& textureName)
 {
@@ -163,10 +160,9 @@ UIImage* UIManager::AddImage(const std::string& name, const std::string& texture
 		std::cout << "UIImage with name: " << name << " already exists!" << std::endl;
 		return m_UiImages[name];
 	}
-
-	UIImage* newImage = new UIImage(textureName);
-	m_UiImages[name] = newImage;
-	return newImage;
+	
+	m_UiImages[name] = new UIImage(textureName);
+	return m_UiImages[name];
 }
 
 UITextButton* UIManager::AddTextButton(const std::string& name)
@@ -177,9 +173,8 @@ UITextButton* UIManager::AddTextButton(const std::string& name)
 		return m_UITextButtons[name];
 	}
 
-	UITextButton* newTextButton = new UITextButton();
-	m_UITextButtons[name] = newTextButton;
-	return newTextButton;
+	m_UITextButtons[name] = new UITextButton();
+	return m_UITextButtons[name];
 }
 UITextButton* UIManager::AddTextButton(const std::string& name, const std::string& text)
 {
@@ -189,9 +184,8 @@ UITextButton* UIManager::AddTextButton(const std::string& name, const std::strin
 		return m_UITextButtons[name];
 	}
 
-	UITextButton* newTextButton = new UITextButton(text);
-	m_UITextButtons[name] = newTextButton;
-	return newTextButton;
+	m_UITextButtons[name] = new UITextButton(text);
+	return m_UITextButtons[name];
 }
 UITextButton* UIManager::AddTextButton(const std::string& name, const std::string& text, const std::function<void()>& callback)
 {
@@ -201,46 +195,42 @@ UITextButton* UIManager::AddTextButton(const std::string& name, const std::strin
 		return m_UITextButtons[name];
 	}
 
-	UITextButton* newTextButton = new UITextButton(text, callback);
-	m_UITextButtons[name] = newTextButton;
-	return newTextButton;
+	m_UITextButtons[name] = new UITextButton(text, callback);
+	return m_UITextButtons[name];
 }
 
 UIImageButton* UIManager::AddImageButton(const std::string& name)
 {
-	if (m_UITextureButtons.contains(name))
+	if (m_UIImageButtons.contains(name))
 	{
 		std::cout << "UITextureButton with name: " << name << " already exists!" << std::endl;
-		return m_UITextureButtons[name];
+		return m_UIImageButtons[name];
 	}
 
-	UIImageButton* newTextureButton = new UIImageButton();
-	m_UITextureButtons[name] = newTextureButton;
-	return newTextureButton;
+	m_UIImageButtons[name] = new UIImageButton();
+	return m_UIImageButtons[name];
 }
 UIImageButton* UIManager::AddImageButton(const std::string& name, const std::string& textureName)
 {
-	if (m_UITextureButtons.contains(name))
+	if (m_UIImageButtons.contains(name))
 	{
 		std::cout << "UITextureButton with name: " << name << " already exists!" << std::endl;
-		return m_UITextureButtons[name];
+		return m_UIImageButtons[name];
 	}
 
-	UIImageButton* newTextureButton = new UIImageButton(textureName);
-	m_UITextureButtons[name] = newTextureButton;
-	return newTextureButton;
+	m_UIImageButtons[name] = new UIImageButton(textureName);
+	return m_UIImageButtons[name];
 }
 UIImageButton* UIManager::AddImageButton(const std::string& name, const std::string& textureName, const std::function<void()>& callback)
 {
-	if (m_UITextureButtons.contains(name))
+	if (m_UIImageButtons.contains(name))
 	{
 		std::cout << "UITextureButton with name: " << name << " already exists!" << std::endl;
-		return m_UITextureButtons[name];
+		return m_UIImageButtons[name];
 	}
 
-	UIImageButton* newTextureButton = new UIImageButton(textureName, callback);
-	m_UITextureButtons[name] = newTextureButton;
-	return newTextureButton;
+	m_UIImageButtons[name] = new UIImageButton(textureName, callback);
+	return m_UIImageButtons[name];
 }
 
 UITextInput* UIManager::AddTextInput(const std::string& name)
@@ -251,9 +241,8 @@ UITextInput* UIManager::AddTextInput(const std::string& name)
 		return m_UiTextInputs[name];
 	}
 
-	UITextInput* newTextInput = new UITextInput();
-	m_UiTextInputs[name] = newTextInput;
-	return newTextInput;
+	m_UiTextInputs[name] = new UITextInput();
+	return m_UiTextInputs[name];
 }
 UITextInput* UIManager::AddTextInput(const std::string& name, const std::string& text)
 {
@@ -263,9 +252,8 @@ UITextInput* UIManager::AddTextInput(const std::string& name, const std::string&
 		return m_UiTextInputs[name];
 	}
 
-	UITextInput* newTextInput = new UITextInput(text);
-	m_UiTextInputs[name] = newTextInput;
-	return newTextInput;
+	m_UiTextInputs[name] = new UITextInput(text);
+	return m_UiTextInputs[name];
 }
 
 UIText* UIManager::GetText(const std::string& name)
@@ -293,9 +281,9 @@ UITextButton* UIManager::GetTextButton(const std::string& name)
 
 UIImageButton* UIManager::GetImageButton(const std::string& name)
 {
-	if (m_UITextureButtons.contains(name))
+	if (m_UIImageButtons.contains(name))
 	{
-		return m_UITextureButtons[name];
+		return m_UIImageButtons[name];
 	}
 
 	std::cout << "UITextureButton with name: " << name << " does not exist!" << std::endl;
