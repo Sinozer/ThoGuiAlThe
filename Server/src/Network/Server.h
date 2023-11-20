@@ -3,6 +3,8 @@
 #include "Http/HttpInclude.h"
 #include "Network/TgatNetworkHelper.h"
 
+class GameNetworkManager;
+
 class Server : public TgatNetworkHelper
 {
 public:
@@ -27,7 +29,6 @@ public:
 	void SendDataToPlayer(const Player& player, nlohmann::json& data);
 
 	void HandleJson(const nlohmann::json& json);
-
 	void HandleHttpRequest(std::string request, SOCKET socket);
 
 	bool SendToAllClients(const char* message, int messageSize);
@@ -35,17 +36,13 @@ public:
 	std::unordered_set<Player>& GetPlayers() { return m_Players; }
 
 private:
-	HWND m_hWnd;
-	char m_Port[5];
+
+	
+	std::unordered_set<Player> m_Players;
+	bool PlayerIdCheck(TGATPLAYERID playerId) override;
+
 	char m_WebPort[5];
 	SOCKET m_WebServerSocket;
-	std::unordered_set<Player> m_Players;
 	std::unordered_map<std::string, std::unique_ptr<RequestHandler>> m_HttpRequestHandlers;
-
-	void InitWindow();
 	void InitHttpRequestHandlers();
-
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 };

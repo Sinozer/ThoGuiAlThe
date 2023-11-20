@@ -10,6 +10,7 @@
 /* #################  UTILITY  ################ */
 #define DELPTR(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
 #define NULLPTR(ptr) if (ptr) { (ptr) = nullptr; }
+#define I(x) x::GetInstance()
 /* #################  UTILITY  ################ */
 
 /* #################  JSON	################ */

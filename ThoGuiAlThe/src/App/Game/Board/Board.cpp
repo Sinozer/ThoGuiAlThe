@@ -80,7 +80,7 @@ bool Board::HandleMouseLeftClick(sf::Event* event)
         if (m_Cells[cellPosition.x][cellPosition.y]->GetPlayer() != nullptr)
             return true;
 
-        m_Cells[cellPosition.x][cellPosition.y]->SetPlayer(m_Players[m_Turn % 2]);
+        //m_Cells[cellPosition.x][cellPosition.y]->SetPlayer(m_Players[m_Turn % 2]);
         m_Turn++;
     }
     return false;

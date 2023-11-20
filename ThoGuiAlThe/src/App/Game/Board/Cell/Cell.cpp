@@ -34,12 +34,9 @@ void Cell::HandleEvents(sf::Event* event)
 
 	TgatNetworkHelper::Message msg;
 	std::string strData = eventData.dump();
-	NetworkManager::GetInstance().CreateMessage(
-		NetworkManager::GetInstance().HEADER_ID,
-		NetworkManager::GetInstance().GetPlayerId(),
-		strData,
-		msg
-	);
+	const int headerId = NetworkManager::GetInstance().HEADER_ID;
+	const int playerId = NetworkManager::GetInstance().GetPlayerId();
+	NetworkManager::GetInstance().CreateMessage(headerId, playerId, strData, msg);
 	NetworkManager::GetInstance().Send(msg);
 }
 

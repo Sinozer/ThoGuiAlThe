@@ -41,6 +41,7 @@ void TgatNetworkHelper::Send(SOCKET socket, Message& msg)
 	{
 		throw TgatException(TgatException::ErrorMessageBuilder("Send Error : "));
 	}
+	delete[] sendBuf;
 }
 
 int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
