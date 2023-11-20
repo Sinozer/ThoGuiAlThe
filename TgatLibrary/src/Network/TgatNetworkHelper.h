@@ -42,23 +42,5 @@ protected:
 	virtual bool PlayerIdCheck(TGATPLAYERID playerId) = 0;
 };
 
-enum class TgatNetworkError
-{
-	SEND_ERROR = 0,
-	RECEIVE_ERROR = 1,
-	HEADER_ERROR = 2
-};
 
-enum class TgatServerMessage
-{
-	PLAYER_INIT = 0, // {"eventType": "PLAYER_INIT", "Player" : "playerId": uuid(0)}
-	PLAYER_DISCONNECT = 1, // {"eventType": "PLAYER_DISCONNECT", "Player" : "playerId": uuid(0)}
-	PLAYER_INPUT = 2, // {"eventType": "PLAYER_INPUT", "Move" : {"x": 0, "y": 0, "p": 0}
-	PLAYER_WIN = 3, // {"eventType": "PLAYER_WIN", "Player" : "playerId": uuid(0)}
-};
-
-enum class TgatClientMessage
-{
-	PLAYER_INPUT = 0, // {"eventType": "PLAYER_INPUT", "Move" : {"x": 0, "y": 0}
-};
 

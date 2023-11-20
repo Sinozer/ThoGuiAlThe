@@ -1,11 +1,13 @@
 #pragma once
-#include "Player.h"
+#include "Player/Player.h"
 #include "Http/HttpInclude.h"
 #include "Network/TgatNetworkHelper.h"
 
+class HttpManager;
 class GameNetworkManager;
+class PlayerManager;
 
-class Server : public TgatNetworkHelper
+class Server
 {
 public:
 	Server();
@@ -17,32 +19,32 @@ public:
 		return instance;
 	}
 
+	HttpManager* GetHttpManager() const { return m_HttpManager; }
+	GameNetworkManager* GetGameNetworkManager() const { return m_GameNetworkManager; }
+	PlayerManager* GetPlayerManager() const { return m_PlayerManager; }
+
 	void StartServer();
-	void InitSocket(SOCKET& socket, const char* port, uint32_t msgType, long events);
-	void ProcessMessages();
+	void RunServer();
 	void CloseServer();
 
 	void AcceptNewPlayer(Player newPlayer);
-	void RemovePlayer(Player& player);
-	void RemovePlayer(SOCKET socket);
-
-	void SendDataToPlayer(const Player& player, nlohmann::json& data);
+	//void SendDataToPlayer(const Player& player, nlohmann::json& data);
 
 	void HandleJson(const nlohmann::json& json);
-	void HandleHttpRequest(std::string request, SOCKET socket);
 
 	bool SendToAllClients(const char* message, int messageSize);
 
-	std::unordered_set<Player>& GetPlayers() { return m_Players; }
-
 private:
+	HttpManager* m_HttpManager;
+	GameNetworkManager* m_GameNetworkManager;
+	PlayerManager* m_PlayerManager;
 
-	
-	std::unordered_set<Player> m_Players;
-	bool PlayerIdCheck(TGATPLAYERID playerId) override;
+	HWND m_hWnd;
 
-	char m_WebPort[5];
-	SOCKET m_WebServerSocket;
-	std::unordered_map<std::string, std::unique_ptr<RequestHandler>> m_HttpRequestHandlers;
-	void InitHttpRequestHandlers();
+	void InitSocket(SOCKET& socket, const char* port, uint32_t msgType, long events);
+
+	void InitWindow();
+	void ProcessMessages();
+
+	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

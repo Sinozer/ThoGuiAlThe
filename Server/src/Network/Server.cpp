@@ -1,17 +1,27 @@
+#include "Network/Http/HttpManager.h"
+#include "Player/PlayerManager.h"
+#include "Network/GameNetwork/GameNetworkManager.h"
+#include "Game/GameManager.h"
+
 #include "Server.h"
 
 #include "Exceptions/TgatException.h"
-#include "Player.h"
 
-#define MSG_SERVER (WM_USER + 1)
-#define MSG_CLIENT (WM_USER + 2)
-#define MSG_WEB (WM_USER + 3)
+Server::Server()
+{
+	m_HttpManager = new HttpManager();
+	m_GameNetworkManager = new GameNetworkManager();
+	m_PlayerManager = new PlayerManager();
 
-Server::Server() : TgatNetworkHelper(), m_hWnd(nullptr), m_Port{ "6969" }, m_WebPort{ "9669" }
-{}
+	InitWindow();
+}
 
 Server::~Server()
 {
+	DELPTR(m_HttpManager);
+	DELPTR(m_GameNetworkManager);
+	DELPTR(m_PlayerManager);
+
 	CloseServer();
 
 	WSACleanup();
@@ -19,9 +29,9 @@ Server::~Server()
 
 void Server::StartServer()
 {
-	InitWindow();
-	InitHttpRequestHandlers();
-	
+	m_GameNetworkManager->Init();
+	//m_HttpManager->Init(); //InitHttpRequestHandlers();
+
 	// Initialize Winsock
 	WSADATA wsaData;
 	if (int r = WSAStartup(MAKEWORD(2, 2), &wsaData); r != 0)
@@ -32,10 +42,36 @@ void Server::StartServer()
 	else
 		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
 
-	// Initialize the server socket
-	InitSocket(m_ServerSocket, m_Port, MSG_SERVER, FD_ACCEPT);
-	InitSocket(m_WebServerSocket, m_WebPort, MSG_WEB, FD_ACCEPT | FD_CLOSE | FD_READ);
+	SOCKET serverSocket = m_GameNetworkManager->GetSocket();
+	char* port = m_GameNetworkManager->GetPort();
+	InitSocket(serverSocket, port, MSG_SERVER, FD_ACCEPT);
+	port = nullptr;
+
+	SOCKET webServerSocket = m_HttpManager->GetWebServerSocket();
+	char* webPort = m_HttpManager->GetWebPort();
+	InitSocket(webServerSocket, webPort, MSG_WEB, FD_ACCEPT | FD_CLOSE | FD_READ);
+	webPort = nullptr;
 }
+
+void Server::RunServer()
+{
+	ProcessMessages();
+}
+
+void Server::CloseServer()
+{
+	SOCKET& servSocket = m_GameNetworkManager->GetSocket();
+	if (servSocket != INVALID_SOCKET)
+	{
+		closesocket(servSocket);
+	}
+
+	for (Player player : m_PlayerManager->GetPlayers()) 
+	{
+		closesocket(player.GetSocket());
+	}
+}
+
 
 void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long events)
 {
@@ -75,7 +111,7 @@ void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long even
 	{
 		LOG("bind failed with error: " << WSAGetLastError());
 		freeaddrinfo(result);
-		closesocket(m_ServerSocket);
+		closesocket(s);
 		WSACleanup();
 		throw std::exception("bind failed");
 	}
@@ -85,7 +121,7 @@ void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long even
 	freeaddrinfo(result);
 	result = nullptr;
 
-	if (int r = listen(m_ServerSocket, SOMAXCONN); r == SOCKET_ERROR)
+	if (int r = listen(s, SOMAXCONN); r == SOCKET_ERROR)
 	{
 		LOG("listen failed with error: " << WSAGetLastError());
 		closesocket(s);
@@ -107,50 +143,6 @@ void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long even
 		LOG("WSAAsyncSelect server success");
 }
 
-void Server::InitHttpRequestHandlers()
-{
-	m_HttpRequestHandlers.insert({ "/", std::make_unique<HomeRequestHandler>() });
-}
-
-void Server::ProcessMessages()
-{
-	MSG msg{};
-	while (true)
-	{
-		if (_kbhit() && _getch() == VK_ESCAPE)
-		{
-			return;
-		}
-
-		// Peek message
-		while (PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		// Your other processing logic can go here
-
-		// Add a sleep to avoid busy-waiting
-		Sleep(1);
-	}
-}
-
-void Server::CloseServer()
-{
-	if (m_ServerSocket != INVALID_SOCKET)
-	{
-		closesocket(m_ServerSocket);
-		m_ServerSocket = INVALID_SOCKET;
-	}
-	// Fermez toutes les connexions avec les clients, si n�cessaire
-
-	for (Player player : m_Players)
-	{
-		closesocket(player.GetSocket());
-	}
-}
-
 void Server::AcceptNewPlayer(Player newPlayer)
 {
 	if (newPlayer.GetSocket() == INVALID_SOCKET)
@@ -169,127 +161,21 @@ void Server::AcceptNewPlayer(Player newPlayer)
 	else
 		LOG("WSAAsyncSelect success");
 
-	TGATPLAYERID playerId = newPlayer.GetId();
-	m_Players.emplace(std::move(newPlayer));
-	LOG("Number of clients: " << m_Players.size());
-
 	nlohmann::json jsonData =
 	{
 		{"eventType", TgatServerMessage::PLAYER_INIT},
-		{"playerId", playerId}
+		{"playerId", (TGATPLAYERID)newPlayer.GetId()}
 	};
 
-	SendDataToPlayer(newPlayer, jsonData);
+	m_GameNetworkManager->SendDataToPlayer(newPlayer, jsonData);
 }
 
-void Server::RemovePlayer(Player& player)
-{
-	nlohmann::json jsonData =
-	{
-		{"eventType", TgatServerMessage::PLAYER_DISCONNECT},
-		{"message", "bye bye"}
-	};
-
-	SendDataToPlayer(player, jsonData);
-
-	if (int r = closesocket(player.GetSocket()) != 0)
-	{
-		LOG("closesocket failed with error: " << r);
-		return;
-	}
-	else
-		LOG("closesocket success");
-	// Retirez le client de la liste des clients
-
-	m_Players.erase(player);
-	LOG("Number of clients: " << m_Players.size());
-}
-
-void Server::RemovePlayer(SOCKET socket)
-{
-	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](const Player& player)
-		{
-			return player.GetSocket() == socket;
-		});
-
-
-	if (it != m_Players.end())
-	{
-		nlohmann::json jsonData =
-		{
-			{"eventType", TgatServerMessage::PLAYER_DISCONNECT},
-			{"message", "bye bye"}
-		};
-
-		SendDataToPlayer(*it, jsonData);
-
-		if (int r = closesocket(it->GetSocket()); r != 0)
-		{
-			LOG("closesocket failed with error: " << r);
-			return;
-		}
-		else
-			LOG("closesocket success");
-
-		m_Players.erase(it);
-	}
-}
-
-void Server::SendDataToPlayer(const Player& player, nlohmann::json& data)
-{
-	try
-	{
-		TgatNetworkHelper::Message msg;
-		std::string strData = data.dump();
-		CreateMessage(HEADER_ID, player.GetId(), strData, msg);
-		Send(player.GetSocket(), msg);
-	}
-	catch (const TgatException& e)
-	{
-		LOG(e.what());
-	}
-}
 
 void Server::HandleJson(const nlohmann::json& json)
 {
 	LOG("Received JSON data: " << json.dump());
 }
 
-void Server::HandleHttpRequest(std::string request, SOCKET socket)
-{
-	// Parse the HTTP request
-	std::stringstream ss(request);
-	std::string method;
-	std::string url;
-	std::string httpVersion;
-
-	ss >> method >> url >> httpVersion;
-
-	// Extracting parameters from the URL
-	size_t paramsStart = url.find('?');
-	std::string route = (paramsStart != std::string::npos) ? url.substr(0, paramsStart) : url;
-
-	// Extracting parameters into a map
-	std::unordered_map<std::string, std::string> params;
-	if (paramsStart != std::string::npos)
-	{
-		params = RequestHandler::ParseParams(url.substr(paramsStart + 1));
-	}
-
-	// Process the HTTP request (this is where you would typically handle the request)
-	std::string response;
-	if (m_HttpRequestHandlers.contains(route) == true)
-		response = m_HttpRequestHandlers[route]->HandleHttpRequest(params, method);
-	else
-		response = RequestHandler::NotFound();
-	
-	if (int r = send(socket, response.c_str(), (int)response.size(), 0); r == SOCKET_ERROR)
-	{
-		LOG("send failed with error: " << WSAGetLastError());
-	}
-	else
-		LOG("send success");
-}
 
 bool Server::SendToAllClients(const char* data, int size)
 {
@@ -304,6 +190,7 @@ bool Server::SendToAllClients(const char* data, int size)
 
 	return true;
 }
+
 
 void Server::InitWindow()
 {
@@ -336,6 +223,30 @@ void Server::InitWindow()
 		LOG("CreateWindowEx success");
 }
 
+void Server::ProcessMessages()
+{
+	MSG msg{};
+	while (true)
+	{
+		if (_kbhit() && _getch() == VK_ESCAPE)
+		{
+			return;
+		}
+
+		// Peek message
+		while (PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// Your other processing logic can go here
+
+		// Add a sleep to avoid busy-waiting
+		Sleep(1);
+	}
+}
+
 LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -353,7 +264,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			case FD_ACCEPT:
 			{
 				SOCKET clientSocket = accept(wParam, nullptr, nullptr);
-				Server::GetInstance().AcceptNewPlayer(clientSocket);
+				I(Server).AcceptNewPlayer(clientSocket);
 				break;
 			}
 			case FD_CLOSE:
@@ -380,27 +291,27 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			try
 			{
 				nlohmann::json jsonData;
-				if (GetInstance().Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
+				if (I(Server).GetGameNetworkManager()->Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
 					LOG("WSAEWOULDBLOCK");
 				else
-					GetInstance().HandleJson(jsonData);
+					I(Server).HandleJson(jsonData);
 			}
 			catch (TgatException& e)
 			{
 				LOG(e.what());
-				Server::GetInstance().RemovePlayer(wParam);
+				I(Server).GetPlayerManager()->RemovePlayer(wParam);
 				break;
 			}
 			catch (nlohmann::json::exception& e)
 			{
 				LOG(e.what());
-				Server::GetInstance().RemovePlayer(wParam);
+				I(Server).GetPlayerManager()->RemovePlayer(wParam);
 				break;
 			}
 			catch (...)
 			{
 				LOG("Unknown exception");
-				Server::GetInstance().RemovePlayer(wParam);
+				I(Server).GetPlayerManager()->RemovePlayer(wParam);
 				break;
 			}
 
@@ -409,7 +320,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case FD_WRITE:
 			break;
 		case FD_CLOSE:
-			Server::GetInstance().RemovePlayer(wParam);
+			I(Server).GetPlayerManager()->RemovePlayer(wParam);
 			break;
 		}
 		return 0;
@@ -456,7 +367,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			// Parse the received HTTP request
 			std::string httpRequest(buffer);
 			// Process the HTTP request
-			GetInstance().HandleHttpRequest(httpRequest, (SOCKET)wParam);
+			I(Server).GetHttpManager()->HandleHttpRequest(httpRequest, (SOCKET)wParam);
 
 			break;
 		}
@@ -474,15 +385,4 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return 0;
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam); // Call default message handler
-}
-
-bool Server::PlayerIdCheck(TGATPLAYERID playerId)
-{
-	// Check if the player id is in the list of connected players
-	auto it = std::find_if(m_Players.begin(), m_Players.end(), [playerId](const Player& player)
-		{
-			return player.GetId() == playerId;
-		});
-
-	return it != m_Players.end();
 }
