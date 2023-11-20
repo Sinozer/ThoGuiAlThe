@@ -43,13 +43,15 @@ void TgatNetworkHelper::Send(SOCKET socket, Message& msg)
 	}
 }
 
-nlohmann::json TgatNetworkHelper::Receive(SOCKET socket)
+int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
 {
 	char* headerBuf = new char[HEADER_SIZE];
 	int headerBytes = recv(socket, headerBuf, HEADER_SIZE, 0);
 
 	if (headerBytes == SOCKET_ERROR)
 	{
+		if (int err = WSAGetLastError(); err == WSAEWOULDBLOCK)
+			return err;
 		throw TgatException(TgatException::ErrorMessageBuilder("Message size error : Message was empty or null\n"));
 	}
 
@@ -77,10 +79,10 @@ nlohmann::json TgatNetworkHelper::Receive(SOCKET socket)
 		throw TgatException(TgatException::ErrorMessageBuilder("Receive Error, message was too long.\n"));
 	}
 
-	nlohmann::json jsonData = ReadMessage(bodyBuf);
+	data = ReadMessage(bodyBuf);
 	delete[] bodyBuf;
 
-	return jsonData;
+	return true;
 }
 
 void TgatNetworkHelper::CreateMessage(int protocol, TGATPLAYERID playerId, std::string& strJson, Message& message)

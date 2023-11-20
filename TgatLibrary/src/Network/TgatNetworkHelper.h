@@ -30,7 +30,7 @@ public:
 	void Send(Message& msg);
 	void Send(SOCKET socket, Message& msg);
 
-	[[nodiscard]] nlohmann::json Receive(SOCKET socket);
+	[[nodiscard]] int Receive(SOCKET socket, nlohmann::json& data);
 
 	void CreateMessage(int protocol, TGATPLAYERID playerId, std::string& strJson, Message& message);
 	nlohmann::json ReadMessage(char* msg);

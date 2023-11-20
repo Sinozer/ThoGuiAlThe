@@ -201,8 +201,11 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		{
 			try
 			{
-				nlohmann::json jsonData = GetInstance().Receive((SOCKET)wParam);
-				GetInstance().HandleData(jsonData);
+				nlohmann::json jsonData;
+				if (GetInstance().Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
+                    LOG("WSAEWOULDBLOCK");
+				else
+					GetInstance().HandleData(jsonData);
 			}
 			catch (TgatException& e)
 			{

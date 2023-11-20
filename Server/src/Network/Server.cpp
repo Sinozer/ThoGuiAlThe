@@ -379,12 +379,27 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			try
 			{
-				nlohmann::json jsonData = GetInstance().Receive((SOCKET)wParam);
-				GetInstance().HandleJson(jsonData);
+				nlohmann::json jsonData;
+				if (GetInstance().Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
+					LOG("WSAEWOULDBLOCK");
+				else
+					GetInstance().HandleJson(jsonData);
 			}
 			catch (TgatException& e)
 			{
 				LOG(e.what());
+				Server::GetInstance().RemovePlayer(wParam);
+				break;
+			}
+			catch (nlohmann::json::exception& e)
+			{
+				LOG(e.what());
+				Server::GetInstance().RemovePlayer(wParam);
+				break;
+			}
+			catch (...)
+			{
+				LOG("Unknown exception");
 				Server::GetInstance().RemovePlayer(wParam);
 				break;
 			}
