@@ -12,6 +12,10 @@ PlayerManager::PlayerManager()
 
 PlayerManager::~PlayerManager()
 {
+	for (Player player : m_Players)
+	{
+		closesocket(player.GetSocket());
+	}
 }
 
 int PlayerManager::AddPlayer(Player& player)

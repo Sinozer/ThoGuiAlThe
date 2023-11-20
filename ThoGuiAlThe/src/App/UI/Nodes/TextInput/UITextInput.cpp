@@ -18,7 +18,7 @@ void UITextInput::HandleEvents(sf::Event& event)
 		return;
 
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-		m_Focus = getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y);
+		m_Focus = getGlobalBounds().contains((float)event.mouseButton.x, (float)event.mouseButton.y);
 
 	if (!m_Focus)
 		return;

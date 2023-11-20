@@ -14,6 +14,7 @@ GameNetworkManager::GameNetworkManager() : TgatNetworkHelper(), m_ServerSocket(I
 
 GameNetworkManager::~GameNetworkManager()
 {
+    closesocket(m_ServerSocket);
 }
 
 void GameNetworkManager::Init()

@@ -80,7 +80,7 @@ bool Board::HandleMouseLeftClick(sf::Event* event)
         if (m_Cells[cellPosition.x][cellPosition.y]->GetPlayer() != nullptr)
             return true;
 
-        //m_Cells[cellPosition.x][cellPosition.y]->SetPlayer(m_Players[m_Turn % 2]);
+        m_Cells[cellPosition.x][cellPosition.y]->SetPlayer(m_Players[m_Turn % 2]);
         m_Turn++;
     }
     return false;
@@ -146,6 +146,7 @@ void Board::Render(sf::RenderTarget* target)
 
 bool Board::IsFull() const
 {
+	for (int i = 0; i < 3; i++)
 	for (int i = 0; i < 3; i++)
 		for (int j = 0; j < 3; j++)
 			if (m_Cells[i][j]->GetPlayer() == nullptr)

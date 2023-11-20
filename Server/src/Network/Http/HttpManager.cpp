@@ -11,6 +11,7 @@ HttpManager::HttpManager() : m_WebServerSocket(INVALID_SOCKET), m_WebPort("9669"
 
 HttpManager::~HttpManager()
 {
+	closesocket(m_WebServerSocket);
 }
 
 void HttpManager::HandleHttpRequest(std::string request, SOCKET socket)

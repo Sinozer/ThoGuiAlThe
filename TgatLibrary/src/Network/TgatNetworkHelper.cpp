@@ -21,7 +21,7 @@ void TgatNetworkHelper::Send(Message& msg)
 
 void TgatNetworkHelper::Send(SOCKET socket, Message& msg)
 {
-	const int bufSize = HEADER_SIZE + msg.Header.BodySize;
+	const int bufSize = (int)(HEADER_SIZE + msg.Header.BodySize);
 	const int headerSize = (int)sizeof(msg.Header);
 	char* sendBuf = new char[bufSize];
 	if (HEADER_SIZE != headerSize)
@@ -30,7 +30,7 @@ void TgatNetworkHelper::Send(SOCKET socket, Message& msg)
 	}
 	memcpy(sendBuf, &msg.Header, headerSize);
 
-	const int bodySize = msg.Header.BodySize;
+	const int bodySize = (int)msg.Header.BodySize;
 	if (bodySize != strlen(msg.Body))
 	{
 		throw TgatException(TgatException::ErrorMessageBuilder("Body size error : Body was too long\n"));
@@ -47,7 +47,7 @@ void TgatNetworkHelper::Send(SOCKET socket, Message& msg)
 int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
 {
 	char* headerBuf = new char[HEADER_SIZE];
-	int headerBytes = recv(socket, headerBuf, HEADER_SIZE, 0);
+	int headerBytes = recv(socket, headerBuf, (int)HEADER_SIZE, 0);
 
 	if (headerBytes == SOCKET_ERROR)
 	{
@@ -73,7 +73,7 @@ int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
 	}
 
 	char* bodyBuf = new char[header.BodySize + 1];
-	int byteReceived = recv(socket, bodyBuf, header.BodySize, 0);
+	int byteReceived = recv(socket, bodyBuf, (int)header.BodySize, 0);
 	bodyBuf[header.BodySize] = '\0'; 
 
 	if (byteReceived != header.BodySize)
@@ -104,5 +104,6 @@ nlohmann::json TgatNetworkHelper::ReadMessage(char* msg)
 	catch (const nlohmann::json::exception& e)
 	{
 		LOG("Error parsing JSON: " << e.what());
+		return {};
 	}
 }

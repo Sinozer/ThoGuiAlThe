@@ -18,10 +18,6 @@ Server::Server()
 
 Server::~Server()
 {
-	DELPTR(m_HttpManager);
-	DELPTR(m_GameNetworkManager);
-	DELPTR(m_PlayerManager);
-
 	CloseServer();
 
 	WSACleanup();
@@ -60,16 +56,9 @@ void Server::RunServer()
 
 void Server::CloseServer()
 {
-	SOCKET& servSocket = m_GameNetworkManager->GetSocket();
-	if (servSocket != INVALID_SOCKET)
-	{
-		closesocket(servSocket);
-	}
-
-	for (Player player : m_PlayerManager->GetPlayers()) 
-	{
-		closesocket(player.GetSocket());
-	}
+	DELPTR(m_HttpManager);
+	DELPTR(m_GameNetworkManager);
+	DELPTR(m_PlayerManager);
 }
 
 
@@ -156,7 +145,7 @@ void Server::AcceptNewPlayer(Player newPlayer)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
 		closesocket(newPlayer.GetSocket());
-		return;
+		throw std::exception("WSAAsyncSelect failed");
 	}
 	else
 		LOG("WSAAsyncSelect success");
@@ -168,6 +157,8 @@ void Server::AcceptNewPlayer(Player newPlayer)
 	};
 
 	m_GameNetworkManager->SendDataToPlayer(newPlayer, jsonData);
+
+	m_PlayerManager->AddPlayer(newPlayer);
 }
 
 
@@ -264,7 +255,20 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			case FD_ACCEPT:
 			{
 				SOCKET clientSocket = accept(wParam, nullptr, nullptr);
-				I(Server).AcceptNewPlayer(clientSocket);
+				try
+				{
+					I(Server).AcceptNewPlayer(clientSocket);
+				}
+				catch (std::exception& e)
+				{
+					LOG(e.what());
+					break;
+				}
+				catch (...)
+				{
+					LOG("Unknown exception");
+					break;
+				}
 				break;
 			}
 			case FD_CLOSE:
