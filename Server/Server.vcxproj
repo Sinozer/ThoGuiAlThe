@@ -82,16 +82,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Network\Http\RequestHandler.cpp" />
     <ClCompile Include="src\Network\Http\RequestHandlers\HomeRequestHandler.cpp" />
     <ClCompile Include="src\Network\Player.cpp" />
     <ClCompile Include="src\Network\Server.cpp" />
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ThreadExemple.cpp" />
+    <ClCompile Include="ThreadManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Network\Http\HttpInclude.h" />
@@ -101,7 +101,7 @@
     <ClInclude Include="src\Network\Player.h" />
     <ClInclude Include="src\Network\Server.h" />
     <ClInclude Include="src\stdafx.h" />
-    <ClInclude Include="ThreadExemple.h" />
+    <ClInclude Include="ThreadManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\index.html" />
