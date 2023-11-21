@@ -16,7 +16,7 @@ DWORD WINAPI threadFunction(LPVOID lpParam)
 	return 0;
 }
 
-DWORD WINAPI eventFunction(LPVOID lpParam) 
+DWORD WINAPI eventFunction(LPVOID lpParam, int nbEvent) 
 {
 	int eventID = *(reinterpret_cast<int*>(lpParam));
 	std::cout << "Event " << eventID << " is running" << std::endl;
@@ -65,11 +65,11 @@ void ThreadManager::CloseThreads(std::vector<HANDLE> threads)
 	}
 }
 
-std::vector<HANDLE>* ThreadManager::CreateEvents()
+std::vector<HANDLE>* ThreadManager::CreateEvents(int nbEvent)
 {
-	std::vector<int> eventIDs(MAXTHREADS);
+	std::vector<int> eventIDs(nbEvent);
 
-	for (int i = 0; i < MAXTHREADS; i++)
+	for (int i = 0; i < nbEvent; i++)
 	{
 		eventIDs[i] = i;
 		HANDLE event = CreateEvent(
