@@ -15,7 +15,7 @@ void AssetManager::DestroyInstance()
 {
 	if (m_sInstance == nullptr)
 		return;
-	DELPTR(m_sInstance);
+	delete m_sInstance;
 }
 #pragma endregion
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "../RequestHandler.h"
+#include "RequestHandler.h"
 
 class HomeRequestHandler : public RequestHandler
 {

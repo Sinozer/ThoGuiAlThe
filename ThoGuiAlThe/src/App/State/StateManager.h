@@ -33,7 +33,7 @@ private:
 	State* m_NewState;
 
 	bool m_Adding;
-	unsigned char m_Removing;
+	uint32_t m_Removing;
 	bool m_Clearing;
 
 	void Add();

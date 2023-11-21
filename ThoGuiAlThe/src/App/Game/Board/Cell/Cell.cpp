@@ -1,9 +1,10 @@
+#include "tgatLib.h"
 #include "Cell.h"
 
 #include "Constants.h"
 #include "App/Network/NetworkManager.h"
 
-Cell::Cell(const sf::Vector2u position) : m_Player(nullptr) , m_Position(position)
+Cell::Cell(const sf::Vector2u position) : m_Player(nullptr), m_Position(position)
 {
 }
 
@@ -25,15 +26,18 @@ void Cell::Init()
 void Cell::HandleEvents(sf::Event* event)
 {
 	std::cout << "Cell clicked: " << m_Position.x << " " << m_Position.y << std::endl;
-	nlohmann::json eventData = 
+	nlohmann::json eventData =
 	{
-		{"eventType", "CELL_CLICKED"},
-		{"positionX", m_Position.x},
-		{"positionY", m_Position.y}
+		{"eventType", TgatClientMessage::PLAYER_INPUT},
+		{"Move", {{"x", m_Position.x}, {"y", m_Position.y}}},
 	};
 
-	// Send the JSON data using NetworkManager
-	NetworkManager::GetInstance()->SendData(eventData);
+	TgatNetworkHelper::Message msg;
+	std::string strData = eventData.dump();
+	const int headerId = NetworkManager::GetInstance().HEADER_ID;
+	const int playerId = NetworkManager::GetInstance().GetPlayerId();
+	NetworkManager::GetInstance().CreateMessage(headerId, playerId, strData, msg);
+	NetworkManager::GetInstance().Send(msg);
 }
 
 void Cell::Update(const float& dt)

@@ -24,7 +24,7 @@ void UITextButton::HandleEvents(sf::Event& event)
 		return;
 
 	auto bounds = getGlobalBounds();
-	sf::Vector2f mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
+	sf::Vector2f mousePos = sf::Vector2f((float)event.mouseButton.x, (float)event.mouseButton.y);
 	bool mouseInBounds = bounds.contains(mousePos);
 
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
