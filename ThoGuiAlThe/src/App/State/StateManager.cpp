@@ -53,7 +53,7 @@ void StateManager::RemoveAllStates()
 
 void StateManager::GoToFirstState()
 {
-	m_Removing = m_States.size() - 1;
+	m_Removing = (uint32_t)m_States.size() - 1;
 }
 
 bool StateManager::IsEmpty()

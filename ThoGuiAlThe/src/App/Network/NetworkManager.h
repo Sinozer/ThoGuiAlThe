@@ -1,26 +1,26 @@
 #pragma once
-class NetworkManager
+
+#include "Network/TgatNetworkHelper.h"
+
+class NetworkManager : public TgatNetworkHelper
 {
 public:
-	static NetworkManager* GetInstance();
+	static NetworkManager& GetInstance();
 
 	static const void DestroyInstance();
-
-	~NetworkManager();
 
 	bool Connect();
 	void Disconnect();
 
-	void SendData(nlohmann::json& data);
+	void HandleData(nlohmann::json& jsonData);
 
-	void HandleData(nlohmann::json& data);
+	uint32_t GetPlayerId() const;
 
 	const bool IsConnected() const { return m_Connected; }
 
 private:
 	bool m_Connected = false;
 
-	SOCKET m_Socket;
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
 	uint32_t m_PlayerId;
@@ -28,14 +28,15 @@ private:
 	static NetworkManager* s_Instance;
 
 private:
-	NetworkManager()
-		: m_Socket{INVALID_SOCKET}, m_AddressInfo{}
-	{
-		Init();
-	}
-	void CreateSocket();
+	NetworkManager();
+	~NetworkManager() override;
+
 	void Init();
 	void InitWindow();
+
+	void CreateSocket();
+
+	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

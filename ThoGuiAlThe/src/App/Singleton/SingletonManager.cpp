@@ -1,4 +1,5 @@
 #include "SingletonManager.h"
+#include "App/Network/NetworkManager.h"
 
 void SingletonManager::DestroyAllInstances()
 {

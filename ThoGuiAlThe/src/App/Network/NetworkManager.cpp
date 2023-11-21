@@ -1,16 +1,23 @@
 #include "NetworkManager.h"
 
+#include "Exceptions/TgatException.h"
+
 #define MSG_SERVER (WM_USER + 1)
 
 static constexpr char PORT[5] = "6969";
 
 NetworkManager* NetworkManager::s_Instance = nullptr;
 
-NetworkManager* NetworkManager::GetInstance()
+NetworkManager::NetworkManager() : m_hWnd(nullptr), m_PlayerId(0)
+{
+	Init();
+}
+
+NetworkManager& NetworkManager::GetInstance()
 {
 	if (s_Instance == nullptr)
 		s_Instance = new NetworkManager();
-	return s_Instance;
+	return *s_Instance;
 }
 
 const void NetworkManager::DestroyInstance()
@@ -32,25 +39,25 @@ NetworkManager::~NetworkManager()
 
 bool NetworkManager::Connect()
 {
-	if (m_Socket == INVALID_SOCKET)
+	if (m_ServerSocket == INVALID_SOCKET)
 		CreateSocket();
 
 	// Connect to server
-	if (connect(m_Socket, m_AddressInfo.ai_addr, (int)m_AddressInfo.ai_addrlen) == SOCKET_ERROR)
+	if (connect(m_ServerSocket, m_AddressInfo.ai_addr, (int)m_AddressInfo.ai_addrlen) == SOCKET_ERROR)
 	{
 		LOG("connect failed with error: " << WSAGetLastError());
-		closesocket(m_Socket);
-		m_Socket = INVALID_SOCKET;
+		closesocket(m_ServerSocket);
+		m_ServerSocket = INVALID_SOCKET;
 		return m_Connected;
 	}
 	else
 		LOG("connect success");
 
-	if (WSAAsyncSelect(m_Socket, m_hWnd, MSG_SERVER, FD_READ | FD_CLOSE))
+	if (WSAAsyncSelect(m_ServerSocket, m_hWnd, MSG_SERVER, FD_READ | FD_CLOSE))
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
-		closesocket(m_Socket);
-		m_Socket = INVALID_SOCKET;
+		closesocket(m_ServerSocket);
+		m_ServerSocket = INVALID_SOCKET;
 		return m_Connected;
 	}
 	else
@@ -64,27 +71,8 @@ bool NetworkManager::Connect()
 void NetworkManager::Disconnect()
 {
 	// Disconnect from server
-	closesocket(m_Socket);
-
+	closesocket(m_ServerSocket);
 	m_Connected = false;
-}
-
-void NetworkManager::SendData(nlohmann::json& data)
-{
-	data.emplace("playerId", m_PlayerId);
-	// Serialize the JSON data to a string
-	std::string serializedData = data.dump();
-
-	// Send data
-	if (send(m_Socket, serializedData.c_str(), static_cast<int>(serializedData.size()), 0) == SOCKET_ERROR)
-	{
-		LOG("send failed with error: " << WSAGetLastError());
-		closesocket(m_Socket);
-		m_Socket = INVALID_SOCKET;
-		CreateSocket();
-	}
-	else
-		LOG("send success");
 }
 
 void NetworkManager::HandleData(nlohmann::json& data)
@@ -92,12 +80,21 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	// Check if the data has a valid type
 	if (data.contains("eventType"))
 	{
-		if (data["eventType"] == "INIT_PLAYER")
+		switch ((TgatServerMessage)data["eventType"])
 		{
+		case TgatServerMessage::PLAYER_INIT:
 			m_PlayerId = data["playerId"];
 			LOG("Player ID: " << m_PlayerId);
+			break;
+		default:
+			break;
 		}
 	}
+}
+
+TGATPLAYERID NetworkManager::GetPlayerId() const
+{
+	 return (TGATPLAYERID)m_PlayerId;
 }
 
 void NetworkManager::CreateSocket()
@@ -114,20 +111,20 @@ void NetworkManager::CreateSocket()
 	if (iResult != 0)
 	{
 		LOG("getaddrinfo failed with error: " << iResult);
-		m_Socket = INVALID_SOCKET;
+		m_ServerSocket = INVALID_SOCKET;
 		return;
 	}
 	else
 		LOG("getaddrinfo success");
 
 	// Socket creation
-	m_Socket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	m_ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-	if (m_Socket == INVALID_SOCKET)
+	if (m_ServerSocket == INVALID_SOCKET)
 	{
 		LOG("socket failed with error: " << WSAGetLastError());
 		freeaddrinfo(result);
-		m_Socket = INVALID_SOCKET;
+		m_ServerSocket = INVALID_SOCKET;
 		return;
 	}
 	else
@@ -202,42 +199,36 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		{
 		case FD_READ:
 		{
-			char buffer[4096];  // Adjust the buffer size as needed
-			int bytesReceived = recv((SOCKET)wParam, buffer, sizeof(buffer), 0);
-			if (bytesReceived == SOCKET_ERROR)
+			try
 			{
-				LOG("recv failed with error: " << WSAGetLastError());
-				break;
+				nlohmann::json jsonData;
+				if (GetInstance().Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
+                    LOG("WSAEWOULDBLOCK");
+				else
+					GetInstance().HandleData(jsonData);
 			}
-			else
+			catch (TgatException& e)
 			{
-				buffer[bytesReceived] = '\0';
-
-				// Parse the received JSON data
-				try
-				{
-					nlohmann::json jsonData = nlohmann::json::parse(buffer);
-					GetInstance()->HandleData(jsonData);
-				}
-				catch (const nlohmann::json::exception& e)
-				{
-					LOG("Error parsing JSON: " << e.what());
-					break;
-				}
+				LOG(e.what());
 			}
+			break;
 		}
-
-		break;
 		case FD_CLOSE:
 		{
 			LOG("FD_CLOSE");
-			GetInstance()->Disconnect();
+			GetInstance().Disconnect();
+			break;
 		}
-		break;
 		}
 
 		return 0;
 	}
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+bool NetworkManager::PlayerIdCheck(TGATPLAYERID playerId)
+{
+	// Will always return true for now on the client side. We know that there won't be any other server sending us data.
+	return true;
 }

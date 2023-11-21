@@ -1,5 +1,6 @@
 #include "App.h"
 
+#include "Network/NetworkManager.h"
 #include "App/State/List/Home/HomeState.h"
 
 App::App() : m_Event(), m_DeltaTime(0.f), m_StateManager(StateManager::GetInstance())
@@ -20,7 +21,7 @@ void App::InitStates() const
 }
 void App::Init()
 {
-	NetworkManager::GetInstance()->Connect();
+	NetworkManager::GetInstance().Connect();
 	InitWindow();
 	InitStates();
 
@@ -83,7 +84,7 @@ void App::Run()
 void App::End() const
 {
 	m_StateManager->RemoveAllStates();
-	NetworkManager::GetInstance()->Disconnect();
+	NetworkManager::GetInstance().Disconnect();
 	SingletonManager::DestroyAllInstances();
 }
 

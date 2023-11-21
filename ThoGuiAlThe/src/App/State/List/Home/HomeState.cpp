@@ -42,7 +42,7 @@ void HomeState::InitUi()
 	exit->setOutlineThickness(2.f);
 	exit->setPosition(WINDOW_SCREEN_WIDTH / 2 - exit->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - exit->getGlobalBounds().height - 50.f);
 
-	if (NetworkManager::GetInstance()->IsConnected())
+	if (NetworkManager::GetInstance().IsConnected())
 		return;
 
 	auto* networkConnectionFailedButton = m_UiManager.AddImageButton("NETWORK_CONNECTION_FAILED", "RETRY_THUMB");
@@ -56,7 +56,7 @@ void HomeState::InitUi()
 
 	networkConnectionFailedButton->SetCallback([this, networkConnectionFailedButton, networkConnectionFailedText]()
 		{
-			if (NetworkManager::GetInstance()->Connect())
+			if (NetworkManager::GetInstance().Connect())
 			{
 				networkConnectionFailedButton->SetActive(false);
 				networkConnectionFailedText->SetActive(false);
