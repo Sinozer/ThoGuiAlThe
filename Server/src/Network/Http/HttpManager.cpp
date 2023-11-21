@@ -69,7 +69,7 @@ void HttpManager::StartWebServer()
 
 void HttpManager::CloseWebServer()
 {
-	m_Running = false;
+	SendMessage(m_WebWindow, WM_DESTROY, NULL, NULL);
 	WaitForSingleObject(m_ThreadHandle, INFINITE);
 
 	CloseHandle(m_ThreadHandle);
@@ -114,6 +114,12 @@ LRESULT HttpManager::WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 {
 	switch (uMsg) 
 	{
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+			I(Server).GetHttpManager()->Shutdown();
+			return 0;
+		}
 		case MSG_WEB:
 		{
 			if (WSAGETSELECTERROR(lParam))
@@ -160,9 +166,12 @@ LRESULT HttpManager::WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 					// Process the HTTP request
 					I(Server).GetHttpManager()->HandleHttpRequest(httpRequest, (SOCKET)wParam);
 
+					closesocket(wParam);
+
 					break;
 				}
 				case FD_CLOSE:
+				{
 					if (WSAGETSELECTERROR(lParam))
 					{
 						LOG("FD_READ failed with error: " << WSAGetLastError());
@@ -172,6 +181,7 @@ LRESULT HttpManager::WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 					closesocket(wParam);
 
 					break;
+				}
 			}
 			return 0;
 		}
@@ -215,6 +225,7 @@ void HttpManager::WebMain()
 
 	// Close the web server socket
 	closesocket(m_WebServerSocket);
+	m_WebServerSocket = INVALID_SOCKET;
 
 	// Unregister the web server window class
 	UnregisterClass(L"WebServerWindow", GetModuleHandle(nullptr));

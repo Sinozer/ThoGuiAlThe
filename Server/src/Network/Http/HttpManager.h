@@ -33,4 +33,5 @@ private:
 
 	static DWORD WINAPI WebServerThread(LPVOID lpParam);
 	void WebMain();
+	void Shutdown() { m_Running = false; }
 };
