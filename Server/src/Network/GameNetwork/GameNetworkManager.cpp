@@ -8,6 +8,8 @@
 #include "Network/Server.h"
 #include "Exceptions/TgatException.h"
 
+#include "Game/Session/GameSession.h"
+
 GameNetworkManager::GameNetworkManager() : TgatNetworkHelper(), m_ServerSocket(INVALID_SOCKET), m_Port("6969")
 {
 }
@@ -36,12 +38,17 @@ void GameNetworkManager::SendDataToPlayer(const Player& player, nlohmann::json& 
 	}
 }
 
-void GameNetworkManager::SendDataToAllPlayers(std::unordered_set<Player>& players, nlohmann::json& data)
+void GameNetworkManager::SendDataToAllPlayers(Player** first, const int numPlayers, nlohmann::json& data)
 {
-	for (const auto& player : players)
+	for (int i = 0; i < numPlayers; ++i, ++first)
 	{
-		SendDataToPlayer(player, data);
+		SendDataToPlayer(**first, data); 
 	}
+}
+
+void GameNetworkManager::SendDataToAllPlayersInSession(GameSession* session, nlohmann::json& data)
+{
+	SendDataToAllPlayers(session->GetPlayers().data(), session->GetPlayers().size(), data);
 }
 
 bool GameNetworkManager::PlayerIdCheck(TGATPLAYERID playerId)
@@ -53,5 +60,15 @@ bool GameNetworkManager::PlayerIdCheck(TGATPLAYERID playerId)
 			return player.GetId() == playerId;
 		});
 
+	return it != players.end();
+}
+
+bool GameNetworkManager::PlayerIdCheck(TGATPLAYERID playerId, GameSession* session)
+{
+	const auto& players = session->GetPlayers();
+	auto it = std::find_if(players.begin(), players.end(), [playerId](const Player& player)
+		{
+			return player.GetId() == playerId;
+		});
 	return it != players.end();
 }

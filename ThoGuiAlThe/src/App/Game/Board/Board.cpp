@@ -147,7 +147,6 @@ void Board::Render(sf::RenderTarget* target)
 bool Board::IsFull() const
 {
 	for (int i = 0; i < 3; i++)
-	for (int i = 0; i < 3; i++)
 		for (int j = 0; j < 3; j++)
 			if (m_Cells[i][j]->GetPlayer() == nullptr)
 				return false;

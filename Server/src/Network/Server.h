@@ -6,6 +6,8 @@
 class HttpManager;
 class GameNetworkManager;
 class PlayerManager;
+class GameManager;
+class GameSession;
 
 class Server
 {
@@ -22,13 +24,13 @@ public:
 	HttpManager* GetHttpManager() const { return m_HttpManager; }
 	GameNetworkManager* GetGameNetworkManager() const { return m_GameNetworkManager; }
 	PlayerManager* GetPlayerManager() const { return m_PlayerManager; }
+	GameManager* GetGameManager() const { return m_GameManager; }
 
 	void StartServer();
 	void RunServer();
 	void CloseServer();
 
 	void AcceptNewPlayer(Player newPlayer);
-	//void SendDataToPlayer(const Player& player, nlohmann::json& data);
 
 	void HandleJson(const nlohmann::json& json);
 
@@ -38,6 +40,9 @@ private:
 	HttpManager* m_HttpManager;
 	GameNetworkManager* m_GameNetworkManager;
 	PlayerManager* m_PlayerManager;
+
+	GameManager* m_GameManager;
+	std::unordered_map<uint32_t, GameSession*> m_GameSessions;
 
 	HWND m_hWnd;
 

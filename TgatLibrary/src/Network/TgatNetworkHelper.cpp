@@ -82,16 +82,16 @@ int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
 	}
 
 	data = ReadMessage(bodyBuf);
+	data.push_back({JSON_PLAYER_ID, header.Id});
+
 	delete[] bodyBuf;
 	return true;
 }
 
 void TgatNetworkHelper::CreateMessage(int protocol, TGATPLAYERID playerId, std::string& strJson, Message& message)
 {
-	// So, we need to convert the json to a string, then to a char* because ?????????????
-
 	message.Header = { protocol, playerId, strlen(strJson.c_str()) };
-	message.Body = strJson.c_str() + '\0'; // ?????	
+	message.Body = strJson.c_str() + '\0';
 }
 
 nlohmann::json TgatNetworkHelper::ReadMessage(char* msg)

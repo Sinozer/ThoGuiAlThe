@@ -3,8 +3,11 @@
 #include "Network/TgatNetworkHelper.h"
 #include "Player/Player.h"
 
+class GameSession;
+
 class GameNetworkManager : public TgatNetworkHelper
 {
+	friend class Server;
 public:
 	GameNetworkManager();
 	~GameNetworkManager() override;
@@ -15,7 +18,8 @@ public:
 
 	void Init();
 	void SendDataToPlayer(const Player& player, nlohmann::json& data);
-	void SendDataToAllPlayers(std::unordered_set<Player>& players, nlohmann::json& data);
+	void SendDataToAllPlayers(Player** first, const int numPlayers, nlohmann::json& data);
+	void SendDataToAllPlayersInSession(GameSession* session, nlohmann::json& data);
 
 private:
 	char m_Port[5];
@@ -23,5 +27,6 @@ private:
 	SOCKET m_ServerSocket;
 
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
+	bool PlayerIdCheck(TGATPLAYERID playerId, GameSession* session);
 };
 

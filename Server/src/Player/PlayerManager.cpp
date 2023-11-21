@@ -12,7 +12,7 @@ PlayerManager::PlayerManager()
 
 PlayerManager::~PlayerManager()
 {
-	for (Player player : m_Players)
+	for (Player player : m_Players | std::views::values)
 	{
 		closesocket(player.GetSocket());
 	}
@@ -43,7 +43,7 @@ void PlayerManager::RemovePlayer(Player& player)
 	else
 		LOG("closesocket success");
 
-	m_Players.erase(player);
+	m_Players.erase(player.GetId());
 	LOG("Number of clients: " << m_Players.size());
 }
 
@@ -56,8 +56,7 @@ void PlayerManager::RemovePlayer(SOCKET socket)
 
 	if (it != m_Players.end())
 	{
-		Player player = *it;
-		RemovePlayer(player);
+		RemovePlayer(it->second);
 	}
 	else
 	{

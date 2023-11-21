@@ -19,10 +19,20 @@
 
 /* #################  JSON	################ */
 #include "External/JSON/json.hpp"
+
+static const std::string JSON_EVENT_TYPE = "eventType";
+
+static const std::string JSON_PLAYER_MOVE = "move";
+static const std::string JSON_PLAYER_ID = "player";
+static const std::string JSON_SESSION_ID = "session";
+
+#define PLAYER_MOVE(x, y) {{"x", x}, {"y", y}}
+#define PLAYER_MOVE_ARGS(json) json["x"].get<int>(), json["y"].get<int>()
 /* #################  JSON	################ */
 
 /* #################  TYPEDEF  ################ */
 typedef uint32_t TGATPLAYERID;
+typedef uint32_t TGATSESSIONID;
 typedef uint64_t TGATBODYSIZE;
 typedef uint64_t TGATDATASIZE;
 
@@ -38,7 +48,7 @@ enum class TgatServerMessage
 	PLAYER_INIT = 0, // {"eventType": "PLAYER_INIT", "Player" : "playerId": uuid(0)}
 	PLAYER_DISCONNECT = 1, // {"eventType": "PLAYER_DISCONNECT", "Player" : "playerId": uuid(0)}
 	PLAYER_INPUT = 2, // {"eventType": "PLAYER_INPUT", "Move" : {"x": 0, "y": 0, "p": 0}
-	PLAYER_WIN = 3, // {"eventType": "PLAYER_WIN", "Player" : "playerId": uuid(0)}
+	GAME_END = 3, // {"eventType": "GAME_END", "Player" : "playerId": uuid(0)}
 };
 
 enum class TgatClientMessage
