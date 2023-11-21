@@ -27,6 +27,7 @@ public:
 	void RunServer();
 	void CloseServer();
 
+	void InitSocket(SOCKET& socket, HWND window, const char* port, uint32_t msgType, long events);
 	void AcceptNewPlayer(Player newPlayer);
 	//void SendDataToPlayer(const Player& player, nlohmann::json& data);
 
@@ -40,8 +41,6 @@ private:
 	PlayerManager* m_PlayerManager;
 
 	HWND m_hWnd;
-
-	void InitSocket(SOCKET& socket, const char* port, uint32_t msgType, long events);
 
 	void InitWindow();
 	void ProcessMessages();
