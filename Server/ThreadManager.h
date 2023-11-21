@@ -11,7 +11,7 @@ public:
 
 	/* Threads */
 	std::vector<HANDLE>* threads;
-	std::vector<HANDLE>* CreateThreads(DWORD __stdcall appfunc);
+	std::vector<HANDLE>* CreateThreads();
 	void CloseThreads(std::vector<HANDLE> threads);
 
 

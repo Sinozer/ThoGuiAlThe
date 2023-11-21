@@ -13,6 +13,7 @@ NetworkManager::NetworkManager() : m_hWnd(nullptr), m_PlayerId(0)
 	Init();
 }
 
+
 NetworkManager& NetworkManager::GetInstance()
 {
 	if (s_Instance == nullptr)
@@ -35,6 +36,19 @@ NetworkManager::~NetworkManager()
 
 	// Cleanup Winsock
 	WSACleanup();
+}
+
+void NetworkManager::StartNetworkServer()
+{
+	// Create a thread for the network
+	m_NetworkHandle = CreateThread(nullptr, 0, NetworkThread, this, 0, nullptr);
+	if (m_NetworkHandle == nullptr)
+	{
+		LOG("CreateNetworkThread with error :" << GetLastError());
+		throw std::exception("CreateThreadFailed");
+	}
+	else
+		LOG("CreateNetworkThread success");
 }
 
 bool NetworkManager::Connect()
@@ -231,4 +245,32 @@ bool NetworkManager::PlayerIdCheck(TGATPLAYERID playerId)
 {
 	// Will always return true for now on the client side. We know that there won't be any other server sending us data.
 	return true;
+}
+
+
+DWORD WINAPI NetworkManager::NetworkThread(LPVOID lpParam)
+{
+	NetworkManager* networkManager = static_cast<NetworkManager*>(lpParam);
+	networkManager->NetworkMain();
+	return 0;
+}
+
+void NetworkManager::NetworkMain() 
+{
+	//Initialize the network server window
+	InitWindow();
+
+	//Initialize the network server socket
+	CreateSocket();
+
+	while (m_Connected)
+	{
+
+
+	}
+	//Close the network server socket
+	closesocket(m_ServerSocket);
+
+	//Unregister the network server window
+	UnregisterClass(L"NetworkServerWindow", GetModuleHandle(nullptr));
 }
