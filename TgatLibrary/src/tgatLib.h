@@ -9,6 +9,7 @@
 #define MSG_SERVER (WM_USER + 1)
 #define MSG_CLIENT (WM_USER + 2)
 #define MSG_WEB (WM_USER + 3)
+#define MSG_DESTROY (WM_USER + 4)
 /* ##################  WINSOCK  ############### */
 
 /* #################  UTILITY  ################ */

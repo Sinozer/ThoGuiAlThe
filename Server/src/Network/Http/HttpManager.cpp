@@ -8,7 +8,7 @@
 HttpManager::HttpManager()
 	: m_WebPort("9669"), m_WebServerSocket(INVALID_SOCKET),
 	m_WebWindow(nullptr),
-	m_ThreadID(0), m_ThreadHandle(nullptr), m_Running(true),
+	m_ThreadID(0), m_ThreadHandle(nullptr),
 	m_HttpRequestHandlers()
 {
 	InitHttpRequestHandlers();
@@ -69,7 +69,7 @@ void HttpManager::StartWebServer()
 
 void HttpManager::CloseWebServer()
 {
-	SendMessage(m_WebWindow, WM_DESTROY, NULL, NULL);
+	SendMessage(m_WebWindow, MSG_DESTROY, NULL, NULL);
 	WaitForSingleObject(m_ThreadHandle, INFINITE);
 
 	CloseHandle(m_ThreadHandle);
@@ -114,10 +114,14 @@ LRESULT HttpManager::WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 {
 	switch (uMsg) 
 	{
+		case MSG_DESTROY:
+		{
+			DestroyWindow(I(Server).GetHttpManager()->m_WebWindow);
+			return 0;
+		}
 		case WM_DESTROY:
 		{
 			PostQuitMessage(0);
-			I(Server).GetHttpManager()->Shutdown();
 			return 0;
 		}
 		case MSG_WEB:
@@ -192,13 +196,11 @@ LRESULT HttpManager::WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 void HttpManager::ProcessMessages()
 {
 	MSG msg{};
-	while (PeekMessage(&msg, m_WebWindow, 0, 0, PM_REMOVE))
+	while (GetMessage(&msg, m_WebWindow, 0, 0))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	// Add a sleep to avoid busy-waiting
-	Sleep(1);
 }
 
 DWORD WINAPI HttpManager::WebServerThread(LPVOID lpParam)
@@ -217,11 +219,7 @@ void HttpManager::WebMain()
 	I(Server).InitSocket(m_WebServerSocket, m_WebWindow, m_WebPort, MSG_WEB, FD_ACCEPT | FD_READ | FD_CLOSE);
 
 	// Main loop
-	while (m_Running)
-	{
-		// Process messages
-		ProcessMessages();
-	}
+	ProcessMessages();
 
 	// Close the web server socket
 	closesocket(m_WebServerSocket);
