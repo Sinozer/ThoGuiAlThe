@@ -115,7 +115,7 @@ void Board::UpdateCells(const float& dt)
 void Board::Update(const float& dt)
 {
     UpdateCells(dt);
-    auto& q = I(NetworkManager).GetReceiveQueue();
+    auto& q = I(NetworkManager).GetReceiveQueue(TgatServerMessage::PLAYER_INPUT);
     if (q.empty()) return;
 
 

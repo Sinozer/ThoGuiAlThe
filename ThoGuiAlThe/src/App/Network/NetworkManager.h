@@ -19,7 +19,7 @@ public:
 
 	const bool IsConnected() const { return m_Connected; }
 
-	std::queue<nlohmann::json>& GetReceiveQueue() { return m_ReceiveQueue; }
+	std::queue<nlohmann::json>& GetReceiveQueue(TgatServerMessage type) { return m_ReceiveQueues[type]; }
 
 private:
 	bool m_Connected = false;
@@ -28,7 +28,7 @@ private:
 	HWND m_hWnd;
 	TGATPLAYERID m_PlayerId;
 	TGATSESSIONID m_SessionId;
-	std::queue<nlohmann::json> m_ReceiveQueue;
+	std::unordered_map<TgatServerMessage, std::queue<nlohmann::json>> m_ReceiveQueues;
 
 	static NetworkManager* s_Instance;
 

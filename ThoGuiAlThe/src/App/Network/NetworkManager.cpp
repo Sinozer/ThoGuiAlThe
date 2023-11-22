@@ -2,6 +2,7 @@
 
 #include "App/State/List/Create/CreateState.h"
 #include "App/State/List/Game/GameState.h"
+#include "App/State/List/Result/ResultState.h"
 
 #include "Exceptions/TgatException.h"
 
@@ -104,7 +105,12 @@ void NetworkManager::HandleData(nlohmann::json& data)
 		StateManager::GetInstance()->AddState(new GameState());
 		break;
 	case TgatServerMessage::PLAYER_INPUT:
-		m_ReceiveQueue.push(data);
+		m_ReceiveQueues[TgatServerMessage::PLAYER_INPUT].push(data);
+		break;
+	case TgatServerMessage::GAME_END:
+		m_ReceiveQueues[TgatServerMessage::GAME_END].push(data);
+		I(StateManager)->GoToFirstState();
+		I(StateManager)->AddState(new ResultState());
 		break;
 	default:
 		break;
