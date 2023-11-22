@@ -65,7 +65,7 @@ void Server::CloseServer()
 	DELPTR(m_GameManager);
 }
 
-void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long events)
+void Server::InitSocket(SOCKET& s, HWND window, const char* port, uint32_t msgType, long events)
 {
 	addrinfo* result = nullptr;
 	addrinfo hints{};
@@ -344,15 +344,15 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
-	#pragma region ServerMessage
-		case MSG_SERVER:
+#pragma region ServerMessage
+	case MSG_SERVER:
+	{
+		if (WSAGETSELECTERROR(lParam))
 		{
-			if (WSAGETSELECTERROR(lParam))
-			{
-				LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
-				break;
-			}
-      
+			LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
+			break;
+		}
+
 		switch (WSAGETSELECTEVENT(lParam))
 		{
 		case FD_ACCEPT:
@@ -384,7 +384,10 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		return 0;
 	}
+#pragma endregion
+#pragma region ClientMessage
 	case MSG_CLIENT:
+	{
 		if (WSAGETSELECTERROR(lParam))
 		{
 			LOG("FD_READ failed with error: " << WSAGetLastError());
@@ -422,60 +425,17 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
-			return 0;
+			break;
 		}
-	#pragma endregion
-	#pragma region ClientMessage
-		case MSG_CLIENT:
-		{
-			if (WSAGETSELECTERROR(lParam))
-			{
-				LOG("FD_READ failed with error: " << WSAGetLastError());
-				break;
-			}
-
-			switch (WSAGETSELECTEVENT(lParam))
-			{
-				case FD_READ:
-				{
-					try
-					{
-						nlohmann::json jsonData;
-						if (I(Server).GetGameNetworkManager()->Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
-							LOG("WSAEWOULDBLOCK");
-						else
-							I(Server).HandleJson(jsonData);
-					}
-					catch (TgatException& e)
-					{
-						LOG(e.what());
-						I(Server).GetPlayerManager()->RemovePlayer(wParam);
-						break;
-					}
-					catch (nlohmann::json::exception& e)
-					{
-						LOG(e.what());
-						I(Server).GetPlayerManager()->RemovePlayer(wParam);
-						break;
-					}
-					catch (...)
-					{
-						LOG("Unknown exception");
-						I(Server).GetPlayerManager()->RemovePlayer(wParam);
-						break;
-					}
-
-					break;
-				}
-				case FD_WRITE:
-					break;
-				case FD_CLOSE:
-					I(Server).GetPlayerManager()->RemovePlayer(wParam);
-					break;
-			}
-			return 0;
+		case FD_WRITE:
+			break;
+		case FD_CLOSE:
+			I(Server).GetPlayerManager()->RemovePlayer(wParam);
+			break;
 		}
-		#pragma endregion
+		return 0;
+	}
+#pragma endregion
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam); // Call default message handler
 }
