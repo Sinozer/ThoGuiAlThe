@@ -74,7 +74,7 @@ void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long even
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE; // For wildcard IP address
 
-	if (int r = getaddrinfo("localhost", port, &hints, &result); r != 0)
+	if (int r = getaddrinfo(nullptr, port, &hints, &result); r != 0)
 	{
 		LOG("getaddrinfo failed with error: " << r);
 		WSACleanup();
