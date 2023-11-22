@@ -23,6 +23,7 @@ public:
 	virtual ~State() = default;
 
 	virtual void Init() = 0;
+	virtual void Resume() = 0;
 	virtual void End() = 0;
 
 	virtual void HandleEvents(sf::Event& event) = 0;

@@ -78,6 +78,25 @@ void HomeState::Init()
 	InitUi();
 }
 
+void HomeState::Resume()
+{
+	const PlayerDisplayData& playerDisplayData = I(NetworkManager).GetPlayerDisplayData();
+
+	auto* profile = m_UiManager.GetImageButton("PROFILE");
+	if (profile != nullptr)
+	{
+		profile->setTexture(I(AssetManager)->GetTexture(playerDisplayData.profilePictureThumbPath));
+		profile->SetOutlineColor(sf::Color(playerDisplayData.color[0], playerDisplayData.color[1], playerDisplayData.color[2], playerDisplayData.color[3]));
+	}
+
+	auto* username = m_UiManager.GetTextInput("USERNAME");
+	if (username != nullptr)
+	{
+		username->setString(playerDisplayData.name);
+		username->setPosition(profile->getPosition().x - username->getGlobalBounds().width * 1.05f, profile->getPosition().y);
+	}
+}
+
 void HomeState::End()
 {
 }

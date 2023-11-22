@@ -10,6 +10,7 @@ public:
 	void HandleEvents(sf::Event& event);
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target = nullptr);
+	void Resume() override;
 	void End();
 
 private:

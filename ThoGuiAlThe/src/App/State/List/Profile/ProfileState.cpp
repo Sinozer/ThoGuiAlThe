@@ -103,6 +103,7 @@ void ProfileState::InitUi()
 		networkManager.CreateMessage(headerId, playerId, strData, msg);
 		networkManager.Send(msg);
 		});
+
 	save->setPosition(
 		WINDOW_SCREEN_WIDTH / 2 - save->getGlobalBounds().getSize().x / 2,
 		WINDOW_SCREEN_HEIGHT - save->getGlobalBounds().getSize().y * 1.5f
@@ -147,10 +148,42 @@ void ProfileState::HandleEvents(sf::Event& event)
 void ProfileState::UpdateUi(const float& dt)
 {
 	m_UiManager.Update(dt);
+
+	auto* name = m_UiManager.GetTextInput("PLAYER_NAME");
+	auto* title = m_UiManager.GetText("TITLE");
+
+	name->setPosition(
+		WINDOW_SCREEN_WIDTH / 2 - name->getGlobalBounds().getSize().x / 2,
+		title->getPosition().y + title->getGlobalBounds().getSize().y + name->getGlobalBounds().getSize().y * 1.5f
+	);
 }
 void ProfileState::Update(const float& dt)
 {
 	UpdateUi(dt);
+
+	auto& q = I(NetworkManager).GetReceiveQueue(TgatServerMessage::PLAYER_INFO_CHANGED);
+
+	NetworkManager& networkManager = I(NetworkManager);
+	User* user = networkManager.GetUser();
+	if (q.empty() == false)
+	{
+		nlohmann::json& data = q.front();
+
+		if (data.contains(JSON_PLAYER_NAME))
+			user->SetName(PLAYER_DD_ARG_NAME(data));
+
+		if (data.contains(JSON_PLAYER_PPP))
+			user->SetProfilePicturePath(PLAYER_DD_ARG_PPP(data));
+
+		if (data.contains(JSON_PLAYER_PPTP))
+			user->SetProfilePictureThumbPath(PLAYER_DD_ARG_PPTP(data));
+
+		if (data.contains(JSON_PLAYER_COLOR))
+			user->SetBorderColor(PLAYER_DD_ARG_COLOR(data));
+
+		networkManager.GetReceiveQueue(TgatServerMessage::PLAYER_INFO_CHANGED).pop();
+		I(StateManager)->RemoveState();
+	}
 }
 
 void ProfileState::RenderBackground(sf::RenderTarget* target)
@@ -164,6 +197,10 @@ void ProfileState::Render(sf::RenderTarget* target)
 {
 	RenderBackground(target);
 	RenderUi(target);
+}
+
+void ProfileState::Resume()
+{
 }
 
 void ProfileState::End()

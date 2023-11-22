@@ -7,6 +7,7 @@ public:
 	~HomeState() override = default;
 
 	void Init() override;
+	void Resume() override;
 	void End() override;
 
 	void HandleEvents(sf::Event& event) override;

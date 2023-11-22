@@ -27,6 +27,10 @@ void ConnectState::Init()
 	Sleep(1000);
 }
 
+void ConnectState::Resume()
+{
+}
+
 void ConnectState::End()
 {
 }

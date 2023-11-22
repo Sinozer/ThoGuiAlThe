@@ -10,6 +10,7 @@ public:
 	void Update(const float& dt) override;
 	void Render(sf::RenderTarget* target) override;
 
+	void Resume() override;
 	void End() override;
 
 private:

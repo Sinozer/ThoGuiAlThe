@@ -95,6 +95,10 @@ void JoinState::Render(sf::RenderTarget* target)
 	RenderUi(target);
 }
 
+void JoinState::Resume()
+{
+}
+
 void JoinState::End()
 {
 }

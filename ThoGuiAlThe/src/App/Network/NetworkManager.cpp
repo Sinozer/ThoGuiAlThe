@@ -128,19 +128,7 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	}
 	case TgatServerMessage::PLAYER_INFO_CHANGED:
 	{
-		//m_ReceiveQueues[TgatServerMessage::PLAYER_INFO_CHANGED].push(data);
-
-		if (data.contains(JSON_PLAYER_NAME))
-			m_User->SetName(PLAYER_DD_ARG_NAME(data));
-
-		if (data.contains(JSON_PLAYER_PPP))
-			m_User->SetProfilePicturePath(PLAYER_DD_ARG_PPP(data));
-
-		if (data.contains(JSON_PLAYER_PPTP))
-			m_User->SetProfilePictureThumbPath(PLAYER_DD_ARG_PPTP(data));
-
-		if (data.contains(JSON_PLAYER_COLOR))
-			m_User->SetBorderColor(PLAYER_DD_ARG_COLOR(data));
+		m_ReceiveQueues[TgatServerMessage::PLAYER_INFO_CHANGED].push(data);
 
 		break;
 	}
