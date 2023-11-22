@@ -30,6 +30,8 @@ public:
 	void RunServer();
 	void CloseServer();
 
+	void InitSocket(SOCKET& s, HWND window, const char* port, uint32_t msgType, long events);
+
 	void AcceptNewPlayer(SOCKET socket);
 
 	void HandleJson(const nlohmann::json& json);
