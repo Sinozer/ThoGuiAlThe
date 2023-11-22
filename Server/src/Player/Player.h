@@ -1,5 +1,8 @@
 #pragma once
-class Player
+
+#include "Player/DisplayablePlayer.h"
+
+class Player : public DisplayablePlayer
 {
 public:
     Player(SOCKET socket);

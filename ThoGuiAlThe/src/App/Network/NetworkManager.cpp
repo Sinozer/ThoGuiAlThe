@@ -1,3 +1,5 @@
+#include "App/User/User.h"
+
 #include "NetworkManager.h"
 
 #include "App/State/List/Create/CreateState.h"
@@ -12,8 +14,10 @@ static constexpr char PORT[5] = "6969";
 
 NetworkManager* NetworkManager::s_Instance = nullptr;
 
-NetworkManager::NetworkManager() : m_hWnd(nullptr), m_PlayerId(0)
+NetworkManager::NetworkManager() : TgatNetworkHelper(), m_SessionId(0), m_Connected(false)
 {
+	m_hWnd = nullptr;
+	m_User = nullptr;
 	Init();
 }
 
@@ -77,6 +81,7 @@ void NetworkManager::Disconnect()
 	// Disconnect from server
 	closesocket(m_ServerSocket);
 	m_Connected = false;
+	DELPTR(m_User);
 }
 
 void NetworkManager::HandleData(nlohmann::json& data)
@@ -91,9 +96,10 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	switch (type)
 	{
 	case TgatServerMessage::PLAYER_INIT:
-		m_PlayerId = data[JSON_PLAYER_ID];
-		LOG(JSON_PLAYER_ID << ": " << m_PlayerId);
+	{
+		InitPlayerWithData(data);
 		break;
+	}
 	case TgatServerMessage::SESSION_CREATED:
 		m_SessionId = data[JSON_SESSION_ID];
 		LOG(JSON_SESSION_ID << ": " << m_SessionId);
@@ -119,7 +125,12 @@ void NetworkManager::HandleData(nlohmann::json& data)
 
 TGATPLAYERID NetworkManager::GetPlayerId() const
 {
-	return (TGATPLAYERID)m_PlayerId;
+	return m_User->GetId();
+}
+
+const PlayerDisplayData& NetworkManager::GetPlayerDisplayData() const
+{
+	return m_User->GetDisplayData();
 }
 
 TGATSESSIONID NetworkManager::GetSessionId() const
@@ -255,6 +266,24 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	}
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+void NetworkManager::InitPlayerWithData(nlohmann::json& jsonData)
+{
+	m_User = new User(jsonData[JSON_PLAYER_ID]);
+	LOG("Self was created with id : " << m_User->GetId());
+
+	if ((jsonData.contains(JSON_PLAYER_NAME) || jsonData.contains(JSON_PLAYER_PPP) || jsonData.contains(JSON_PLAYER_COLOR)) == false)
+	{
+		LOG("JSON_PLAYER_NAME or JSON_PLAYER_PPP or JSON_PLAYER_COLOR not found");
+		return;
+	}
+
+	PlayerDisplayData data;
+	data.name = PLAYER_DD_ARG_NAME(jsonData);
+	data.profilePicturePath = PLAYER_DD_ARG_PPP(jsonData);
+	data.color = PLAYER_DD_ARG_COLOR(jsonData);
+	m_User->SetDisplayData(data);
 }
 
 bool NetworkManager::PlayerIdCheck(TGATPLAYERID playerId)

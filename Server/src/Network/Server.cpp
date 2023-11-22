@@ -157,7 +157,9 @@ void Server::AcceptNewPlayer(SOCKET socket)
 	nlohmann::json jsonData =
 	{
 		{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INIT},
-		//{JSON_PLAYER_ID, (TGATPLAYERID)newPlayer->GetId()}
+		{JSON_PLAYER_NAME, newPlayer->GetName()},
+		{JSON_PLAYER_PPP, newPlayer->GetProfilePicturePath()},
+		{JSON_PLAYER_COLOR, newPlayer->GetBorderColor()}
 	};
 
 	m_GameNetworkManager->SendDataToPlayer(newPlayer, jsonData);

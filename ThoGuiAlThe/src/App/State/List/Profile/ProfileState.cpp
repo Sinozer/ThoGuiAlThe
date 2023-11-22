@@ -1,5 +1,7 @@
 #include "ProfileState.h"
 
+#include "App/Network/NetworkManager.h"
+
 ProfileState::ProfileState()
 {
 }
@@ -15,7 +17,9 @@ void ProfileState::InitUi()
 	title->setOutlineThickness(4.f);
 	title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
 
-	auto* picture = m_UiManager.AddImage("PICTURE", "HOMER");
+	const PlayerDisplayData& playerDisplayData = I(NetworkManager).GetPlayerDisplayData();
+
+	auto* picture = m_UiManager.AddImage("PICTURE", playerDisplayData.profilePicturePath);
 	picture->setPosition(WINDOW_SCREEN_WIDTH / 2.f - picture->getGlobalBounds().width / 2.f, WINDOW_SCREEN_HEIGHT / 2.f - picture->getGlobalBounds().height / 2.f);
 }
 void ProfileState::Init()

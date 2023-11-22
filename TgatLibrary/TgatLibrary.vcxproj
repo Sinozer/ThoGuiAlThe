@@ -143,12 +143,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Player\DisplayablePlayer.h" />
     <ClInclude Include="src\external\JSON\json.hpp" />
     <ClInclude Include="src\Exceptions\TgatException.h" />
     <ClInclude Include="src\Network\TgatNetworkHelper.h" />
     <ClInclude Include="src\tgatLib.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Player\DisplayablePlayer.cpp" />
     <ClCompile Include="src\Exceptions\TgatException.cpp" />
     <ClCompile Include="src\Network\TgatNetworkHelper.cpp" />
     <ClCompile Include="src\tgatLib.cpp">

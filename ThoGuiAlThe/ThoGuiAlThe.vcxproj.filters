@@ -28,6 +28,7 @@
     <ClCompile Include="src\App\UI\Nodes\Image\UIImage.cpp" />
     <ClCompile Include="src\App\State\List\Create\CreateState.cpp" />
     <ClCompile Include="src\App\State\List\Join\JoinState.cpp" />
+    <ClCompile Include="src\App\State\List\Connect\ConnectState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App\App.h" />
@@ -58,5 +59,6 @@
     <ClInclude Include="lib\JSON\json.hpp" />
     <ClInclude Include="src\App\State\List\Create\CreateState.h" />
     <ClInclude Include="src\App\State\List\Join\JoinState.h" />
+    <ClInclude Include="src\App\State\List\Connect\ConnectState.h" />
   </ItemGroup>
 </Project>
