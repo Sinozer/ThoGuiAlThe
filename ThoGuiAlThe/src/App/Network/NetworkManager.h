@@ -19,6 +19,8 @@ public:
 
 	const bool IsConnected() const { return m_Connected; }
 
+	std::queue<nlohmann::json>& GetReceiveQueue() { return m_ReceiveQueue; }
+
 private:
 	bool m_Connected = false;
 
@@ -26,6 +28,7 @@ private:
 	HWND m_hWnd;
 	TGATPLAYERID m_PlayerId;
 	TGATSESSIONID m_SessionId;
+	std::queue<nlohmann::json> m_ReceiveQueue;
 
 	static NetworkManager* s_Instance;
 

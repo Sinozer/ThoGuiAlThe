@@ -1,6 +1,8 @@
 #include "Board.h"
 #include "App/State/List/Result/ResultState.h"
 
+#include "App/Network/NetworkManager.h"
+
 Board::Board(const std::vector<Player*>& players) : m_Turn(0), m_Players(players)
 {
 }
@@ -80,8 +82,8 @@ bool Board::HandleMouseLeftClick(sf::Event* event)
         if (m_Cells[cellPosition.x][cellPosition.y]->GetPlayer() != nullptr)
             return true;
 
-        m_Cells[cellPosition.x][cellPosition.y]->SetPlayer(m_Players[m_Turn % 2]);
-        m_Turn++;
+        /*m_Cells[cellPosition.x][cellPosition.y]->SetPlayer(m_Players[m_Turn % 2]);
+        m_Turn++;*/
     }
     return false;
 }
@@ -113,8 +115,29 @@ void Board::UpdateCells(const float& dt)
 void Board::Update(const float& dt)
 {
     UpdateCells(dt);
+    auto& q = I(NetworkManager).GetReceiveQueue();
+    if (q.empty()) return;
 
-    if (IsWin())
+
+    nlohmann::json& data = q.front();
+
+    Player* p;
+
+    int playerId = data[JSON_PLAYER_ID];
+
+    if (playerId == I(NetworkManager).GetPlayerId())
+		p = m_Players[0];
+	else
+		p = m_Players[1];
+
+    int x = PLAYER_MOVE_ARG_X(data[JSON_PLAYER_MOVE]);
+    int y = PLAYER_MOVE_ARG_Y(data[JSON_PLAYER_MOVE]);
+
+    m_Cells[x][y]->SetPlayer(p);
+
+    q.pop();
+
+    /*if (IsWin())
     {
         StateManager::GetInstance()->RemoveState();
         StateManager::GetInstance()->AddState(new ResultState());
@@ -123,7 +146,7 @@ void Board::Update(const float& dt)
     {
 		StateManager::GetInstance()->RemoveState();
 		StateManager::GetInstance()->AddState(new ResultState());
-	}
+	}*/
 }
 
 void Board::RenderCells(sf::RenderTarget* target)

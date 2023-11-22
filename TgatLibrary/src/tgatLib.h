@@ -25,9 +25,12 @@ static const std::string JSON_EVENT_TYPE = "eventType";
 static const std::string JSON_PLAYER_MOVE = "move";
 static const std::string JSON_PLAYER_ID = "player";
 static const std::string JSON_SESSION_ID = "session";
+static const std::string JSON_ERROR = "error";
 
 #define PLAYER_MOVE(x, y) {{"x", x}, {"y", y}}
-#define PLAYER_MOVE_ARGS(json) json["x"].get<int>(), json["y"].get<int>()
+#define PLAYER_MOVE_ARG_X(json) json["x"].get<int>()
+#define PLAYER_MOVE_ARG_Y(json) json["y"].get<int>()
+#define PLAYER_MOVE_ARGS(json) PLAYER_MOVE_ARG_X(json), PLAYER_MOVE_ARG_Y(json)
 /* #################  JSON	################ */
 
 /* #################  TYPEDEF  ################ */
@@ -53,6 +56,7 @@ enum class TgatServerMessage
 	SESSION_JOINED = 5, // {"eventType": "SESSION_JOINED", "Session" : "sessionId": uuid(0)}
 
 	BAD_SESSION_ID = 101, // {"eventType": "BAD_SESSION_ID"}
+	BAD = 500, // {"eventType": "BAD", error...}
 };
 
 enum class TgatClientMessage

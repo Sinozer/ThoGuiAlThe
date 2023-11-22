@@ -39,7 +39,7 @@ void JoinState::InitUi()
 	joinButton->setOutlineThickness(2.f);
 	joinButton->setOutlineColor(sf::Color::Black);
 	joinButton->SetCallback([idInput]() {
-		std::string id = idInput->getString();
+		int id = std::atoi(idInput->getString().toAnsiString().c_str());
 
 		NetworkManager& networkManager = I(NetworkManager);
 		nlohmann::json eventData =

@@ -197,6 +197,13 @@ void Server::HandleJson(const nlohmann::json& json)
 
 		session->Update(playerId, PLAYER_MOVE_ARGS(move), packageToSend);
 
+		TgatServerMessage type = packageToSend[JSON_EVENT_TYPE].get<TgatServerMessage>();
+		if (type == TgatServerMessage::BAD)
+		{
+			m_GameNetworkManager->SendDataToPlayer(m_PlayerManager->GetPlayerById(playerId), packageToSend);
+			break;
+		}
+
 		if (session != nullptr)
 			m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
 		else
@@ -253,11 +260,11 @@ void Server::HandleJson(const nlohmann::json& json)
 
 		packageToSend =
 		{
-			{JSON_EVENT_TYPE, TgatServerMessage::SESSION_CREATED},
+			{JSON_EVENT_TYPE, TgatServerMessage::SESSION_JOINED},
 			{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
 		};
 
-		m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
+		m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
 
 		break;
 	}

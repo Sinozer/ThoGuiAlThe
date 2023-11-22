@@ -80,7 +80,14 @@ void NetworkManager::Disconnect()
 
 void NetworkManager::HandleData(nlohmann::json& data)
 {
-	switch ((TgatServerMessage)data[JSON_EVENT_TYPE])
+	if (data.contains(JSON_EVENT_TYPE) == false)
+	{
+		LOG("JSON_EVENT_TYPE not found");
+		return;
+	}
+
+	TgatServerMessage type = data[JSON_EVENT_TYPE].get<TgatServerMessage>();
+	switch (type)
 	{
 	case TgatServerMessage::PLAYER_INIT:
 		m_PlayerId = data[JSON_PLAYER_ID];
@@ -95,6 +102,9 @@ void NetworkManager::HandleData(nlohmann::json& data)
 		m_SessionId = data[JSON_SESSION_ID];
 		LOG(JSON_SESSION_ID << ": " << m_SessionId);
 		StateManager::GetInstance()->AddState(new GameState());
+		break;
+	case TgatServerMessage::PLAYER_INPUT:
+		m_ReceiveQueue.push(data);
 		break;
 	default:
 		break;

@@ -31,19 +31,31 @@ void GameSession::Update(uint32_t playerId, int x, int y, nlohmann::json& return
 	uint32_t id = m_Players[m_Turn % 2]->GetId();
 	if (id != playerId)
 	{
-		returnJson["error"] = "Not your turn";
+		returnJson =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::BAD},
+			{JSON_ERROR, "Not your turn"}
+		};
 		return;
 	}
 
 	if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE)
 	{
-		returnJson["error"] = "Invalid position";
+		returnJson = 
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::BAD},
+			{JSON_ERROR, "Invalid position"}
+		};
 		return;
 	}
 
 	if (m_Board[x][y] != 0)
 	{
-		returnJson["error"] = "Position already occupied";
+		returnJson =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::BAD},
+			{JSON_ERROR, "Position already taken"}
+		};
 		return;
 	}
 
@@ -72,6 +84,13 @@ void GameSession::Update(uint32_t playerId, int x, int y, nlohmann::json& return
 		m_IsEnded = true;
 		return;
 	}
+
+	returnJson =
+	{
+		{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INPUT},
+		{JSON_PLAYER_ID, id},
+		{JSON_PLAYER_MOVE, PLAYER_MOVE(x, y)}
+	};
 }
 
 bool GameSession::IsFull() const
