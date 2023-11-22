@@ -16,6 +16,9 @@ public:
 public:
 	[[nodiscard]] SOCKET& GetSocket() { return m_ServerSocket; }
 	[[nodiscard]] char* GetPort() { return m_Port; }
+	
+	void StartNetworkServer();
+
 
 	void Init();
 	void SendDataToPlayer(Player* player, nlohmann::json& data);
@@ -26,8 +29,13 @@ private:
 	char m_Port[5];
 
 	SOCKET m_ServerSocket;
+	HANDLE m_ThreadHandle;
 
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 	bool PlayerIdCheck(TGATPLAYERID playerId, GameSession* session);
+
+	void ProcessMessages();
+	static DWORD WINAPI GameNetworkThread(LPVOID lpParam);
+	void GameNetworkMain();
 };
 

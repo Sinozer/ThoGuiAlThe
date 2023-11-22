@@ -87,7 +87,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Network\Http\RequestHandler.cpp" />
     <ClCompile Include="src\Game\Session\GameSession.cpp" />
     <ClCompile Include="src\Network\Http\HttpManager.cpp" />
     <ClCompile Include="src\Player\PlayerManager.cpp" />

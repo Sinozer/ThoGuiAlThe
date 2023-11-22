@@ -10,7 +10,9 @@
 
 #include "Game/Session/GameSession.h"
 
-GameNetworkManager::GameNetworkManager() : TgatNetworkHelper(), m_ServerSocket(INVALID_SOCKET), m_Port("6969")
+GameNetworkManager::GameNetworkManager() 
+	: TgatNetworkHelper(), m_ServerSocket(INVALID_SOCKET), 
+	m_Port("6969"), m_ThreadHandle(nullptr)
 {
 }
 
@@ -72,3 +74,55 @@ bool GameNetworkManager::PlayerIdCheck(TGATPLAYERID playerId, GameSession* sessi
 		});
 	return it != players.end();
 }
+
+void GameNetworkManager::StartNetworkServer() 
+{
+	m_ThreadHandle = CreateThread(nullptr, 0, GameNetworkThread, this, 0, nullptr);
+	if (m_ThreadHandle == nullptr)
+	{
+		LOG("CreateWebThread failed with error: " << GetLastError());
+		throw std::exception("CreateThread failed");
+	}
+	else
+		LOG("CreateWebThread success");
+}
+
+void GameNetworkManager::ProcessMessages()
+{
+	MSG msg{};
+	while (GetMessage(&msg, I(Server).GetWindow(), 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+DWORD WINAPI GameNetworkManager::GameNetworkThread(LPVOID lpParam)
+{
+	GameNetworkManager* gameNetwork = static_cast<GameNetworkManager*>(lpParam);
+	gameNetwork->GameNetworkMain();
+	return 0;
+}
+
+void GameNetworkManager::GameNetworkMain()
+{
+	//Initialize the network server window
+	Init();
+
+	//Initialize the network server socket
+	I(Server).InitSocket(m_ServerSocket, I(Server).GetWindow(), m_Port, MSG_WEB, FD_ACCEPT | FD_READ | FD_CLOSE);
+
+	//Main loop
+	ProcessMessages();
+
+	//Close the network server socket
+	closesocket(m_ServerSocket);
+	m_ServerSocket = INVALID_SOCKET;
+
+	//Unregister the network server window class
+	UnregisterClass(L"WebNetworkServer", nullptr);
+}
+
+
+
+

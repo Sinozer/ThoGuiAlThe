@@ -38,6 +38,8 @@ public:
 
 	bool SendToAllClients(const char* message, int messageSize);
 
+	const HWND& GetWindow() const { return m_hWnd; }
+
 private:
 	HttpManager* m_HttpManager;
 	GameNetworkManager* m_GameNetworkManager;

@@ -38,6 +38,8 @@ private:
 	NetworkManager();
 	~NetworkManager() override;
 
+	void StartNetworkServer();
+
 	void Init();
 	void InitWindow();
 
