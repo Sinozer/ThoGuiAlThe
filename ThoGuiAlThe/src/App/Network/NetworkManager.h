@@ -18,6 +18,7 @@ public:
 
 	TGATPLAYERID GetPlayerId() const;
 	const PlayerDisplayData& GetPlayerDisplayData() const;
+	User* GetUser() const { return m_User; }
 	TGATSESSIONID GetSessionId() const;
 
 	const bool IsConnected() const { return m_Connected; }
