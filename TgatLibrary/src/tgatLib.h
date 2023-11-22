@@ -50,12 +50,16 @@ enum class TgatServerMessage
 	PLAYER_INPUT = 2, // {"eventType": "PLAYER_INPUT", "Move" : {"x": 0, "y": 0, "p": 0}
 	GAME_END = 3, // {"eventType": "GAME_END", "Player" : "playerId": uuid(0)}
 	SESSION_CREATED = 4, // {"eventType": "SESSION_CREATED", "Session" : "sessionId": uuid(0)}
+	SESSION_JOINED = 5, // {"eventType": "SESSION_JOINED", "Session" : "sessionId": uuid(0)}
+
+	BAD_SESSION_ID = 101, // {"eventType": "BAD_SESSION_ID"}
 };
 
 enum class TgatClientMessage
 {
 	PLAYER_INPUT = 0, // {"eventType": "PLAYER_INPUT", "Move" : {"x": 0, "y": 0}
 	CREATE_SESSION = 1, // {"eventType": "CREATE_SESSION"}
+	JOIN_SESSION = 2, // {"eventType": "JOIN_SESSION", "Session" : "sessionId": uuid(0)}
 };
 /* #################  TYPEDEF  ################ */
 

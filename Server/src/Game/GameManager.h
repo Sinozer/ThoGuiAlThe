@@ -10,7 +10,8 @@ public:
 	void AddPlayerToGameSession(Player* p2, uint32_t id = -1);
 	void UpdateGameSession(uint32_t id, uint32_t playerId, int x, int y, nlohmann::json& returnJson);
 
-	GameSession* GetSessionById(uint32_t id) const;
+	GameSession* GetWaitingSessionById(uint32_t id) const;
+	GameSession* GetActiveSessionById(uint32_t id) const;
 
 private:
 	const int MAGIC_NUMBER = 7817;

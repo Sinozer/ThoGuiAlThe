@@ -1,4 +1,5 @@
 #include "CreateState.h"
+#include "App/Network/NetworkManager.h"
 
 CreateState::CreateState()
 {
@@ -9,7 +10,7 @@ void CreateState::InitBackground()
 }
 void CreateState::InitUi()
 {
-	auto* id = m_UiManager.AddText("ID", "Session id: ");
+	auto* id = m_UiManager.AddText("ID", "Session id: " + std::to_string((int)I(NetworkManager).GetSessionId()));
 	id->setPosition(
 		WINDOW_SCREEN_WIDTH / 4 - id->getGlobalBounds().width / 2,
 		WINDOW_SCREEN_HEIGHT / 4 - id->getGlobalBounds().height / 2

@@ -79,12 +79,24 @@ void GameManager::UpdateGameSession(uint32_t id, uint32_t playerId, int x, int y
 	if (it->second->IsEnded()) EndGameSession(id);
 }
 
-GameSession* GameManager::GetSessionById(uint32_t id) const
+GameSession* GameManager::GetWaitingSessionById(uint32_t id) const
+{
+	auto it = m_WaitingSessions.find(id);
+	if (it == m_WaitingSessions.end())
+	{
+		LOG("Invalid session id : GameManager::GetWaitingSessionById()");
+		return nullptr;
+	}
+
+	return it->second;
+}
+
+GameSession* GameManager::GetActiveSessionById(uint32_t id) const
 {
 	auto it = m_ActiveSessions.find(id);
 	if (it == m_ActiveSessions.end())
 	{
-		LOG("Invalid session id : GameManager::GetSessionById()");
+		LOG("Invalid session id : GameManager::GetActiveSessionById()");
 		return nullptr;
 	}
 

@@ -1,6 +1,8 @@
 #include "JoinState.h"
 #include "App/State/List/Game/GameState.h"
 
+#include "App/Network/NetworkManager.h"
+
 JoinState::JoinState()
 {
 }
@@ -38,7 +40,19 @@ void JoinState::InitUi()
 	joinButton->setOutlineColor(sf::Color::Black);
 	joinButton->SetCallback([idInput]() {
 		std::string id = idInput->getString();
-		StateManager::GetInstance()->AddState(new GameState());
+
+		NetworkManager& networkManager = I(NetworkManager);
+		nlohmann::json eventData =
+		{
+			{JSON_EVENT_TYPE, TgatClientMessage::JOIN_SESSION},
+			{JSON_SESSION_ID, id}
+		};
+		TgatNetworkHelper::Message msg;
+		std::string strData = eventData.dump();
+		const int headerId = networkManager.HEADER_ID;
+		const int playerId = networkManager.GetPlayerId();
+		networkManager.CreateMessage(headerId, playerId, strData, msg);
+		networkManager.Send(msg);
 	});
 }
 void JoinState::Init()

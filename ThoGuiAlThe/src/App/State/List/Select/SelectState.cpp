@@ -23,7 +23,21 @@ void SelectState::InitUi()
 		100.f
 	);
 
-	auto* create = m_UiManager.AddTextButton("CREATE", "CREATE", [this]() { StateManager::GetInstance()->AddState(new CreateState()); });
+	auto* create = m_UiManager.AddTextButton("CREATE", "CREATE", [this]()
+		{
+			NetworkManager& networkManager = I(NetworkManager);
+			nlohmann::json eventData =
+			{
+				{JSON_EVENT_TYPE, TgatClientMessage::CREATE_SESSION}
+			};
+			TgatNetworkHelper::Message msg;
+			std::string strData = eventData.dump();
+			const int headerId = networkManager.HEADER_ID;
+			const int playerId = networkManager.GetPlayerId();
+			networkManager.CreateMessage(headerId, playerId, strData, msg);
+			networkManager.Send(msg);
+		}
+	);
 	create->setCharacterSize(50);
 	create->setOutlineColor(sf::Color::Black);
 	create->setOutlineThickness(2.f);

@@ -1,5 +1,8 @@
 #include "NetworkManager.h"
 
+#include "App/State/List/Create/CreateState.h"
+#include "App/State/List/Game/GameState.h"
+
 #include "Exceptions/TgatException.h"
 
 #define MSG_SERVER (WM_USER + 1)
@@ -86,6 +89,12 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	case TgatServerMessage::SESSION_CREATED:
 		m_SessionId = data[JSON_SESSION_ID];
 		LOG(JSON_SESSION_ID << ": " << m_SessionId);
+		StateManager::GetInstance()->AddState(new CreateState());
+		break;
+	case TgatServerMessage::SESSION_JOINED:
+		m_SessionId = data[JSON_SESSION_ID];
+		LOG(JSON_SESSION_ID << ": " << m_SessionId);
+		StateManager::GetInstance()->AddState(new GameState());
 		break;
 	default:
 		break;

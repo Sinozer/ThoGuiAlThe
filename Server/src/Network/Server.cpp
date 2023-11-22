@@ -187,7 +187,7 @@ void Server::HandleJson(const nlohmann::json& json)
 		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
 		const nlohmann::json& move = json[JSON_PLAYER_MOVE];
 
-		session = m_GameManager->GetSessionById(sessionId);
+		session = m_GameManager->GetActiveSessionById(sessionId);
 
 		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
 		if (m_GameNetworkManager->PlayerIdCheck(playerId, session) == false)
@@ -224,6 +224,40 @@ void Server::HandleJson(const nlohmann::json& json)
 		};
 
 		m_GameNetworkManager->SendDataToPlayer(p1, packageToSend);
+
+		break;
+	}
+	case TgatClientMessage::JOIN_SESSION:
+	{
+		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
+		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
+
+		Player* p2 = m_PlayerManager->GetPlayerById(playerId);
+		if (p2 == nullptr)
+		{
+			throw TgatException("Invalid player Id");
+		}
+
+		session = m_GameManager->GetWaitingSessionById(sessionId);
+		if (session == nullptr)
+		{
+			packageToSend =
+			{
+				{JSON_EVENT_TYPE, TgatServerMessage::BAD_SESSION_ID}
+			};
+			m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
+			break;
+		}
+
+		m_GameManager->AddPlayerToGameSession(p2, sessionId);
+
+		packageToSend =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::SESSION_CREATED},
+			{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+		};
+
+		m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
 
 		break;
 	}
