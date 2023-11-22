@@ -74,8 +74,9 @@ enum class TgatServerMessage
 enum class TgatClientMessage
 {
 	PLAYER_INPUT = 0, // {"eventType": "PLAYER_INPUT", "Move" : {"x": 0, "y": 0}
-	CREATE_SESSION = 1, // {"eventType": "CREATE_SESSION"}
-	JOIN_SESSION = 2, // {"eventType": "JOIN_SESSION", "Session" : "sessionId": uuid(0)}
+	PLAYER_CHANGE_INFO = 1, // {"eventType": "PLAYER_CHANGE_INFO", "Player" : {"name": "name", "profilePicturePath": "path", "color": [0, 0, 0, 0]}
+	CREATE_SESSION = 2, // {"eventType": "CREATE_SESSION"}
+	JOIN_SESSION = 3, // {"eventType": "JOIN_SESSION", "Session" : "sessionId": uuid(0)}
 };
 
 struct PlayerDisplayData
