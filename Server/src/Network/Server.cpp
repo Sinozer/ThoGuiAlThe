@@ -27,7 +27,6 @@ Server::~Server()
 void Server::StartServer()
 {
 	m_GameNetworkManager->Init();
-	//m_HttpManager->Init(); //InitHttpRequestHandlers();
 
 	// Initialize Winsock
 	WSADATA wsaData;
@@ -41,18 +40,21 @@ void Server::StartServer()
 
 	SOCKET serverSocket = m_GameNetworkManager->GetSocket();
 	char* port = m_GameNetworkManager->GetPort();
-	InitSocket(serverSocket, port, MSG_SERVER, FD_ACCEPT);
+	InitSocket(serverSocket, m_hWnd, port, MSG_SERVER, FD_ACCEPT);
 	port = nullptr;
 
-	SOCKET webServerSocket = m_HttpManager->GetWebServerSocket();
-	char* webPort = m_HttpManager->GetWebPort();
-	InitSocket(webServerSocket, webPort, MSG_WEB, FD_ACCEPT | FD_CLOSE | FD_READ);
-	webPort = nullptr;
+	m_HttpManager->StartWebServer();
+
+	//SOCKET webServerSocket = m_HttpManager->GetWebServerSocket();
+	//char* webPort = m_HttpManager->GetWebPort();
+	//InitSocket(webServerSocket, webPort, MSG_WEB, FD_ACCEPT | FD_CLOSE | FD_READ);
+	//webPort = nullptr;
 }
 
 void Server::RunServer()
 {
 	ProcessMessages();
+	m_HttpManager->CloseWebServer();
 }
 
 void Server::CloseServer()
@@ -122,7 +124,7 @@ void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long even
 		LOG("listen success");
 
 	// Setup asynchronous socket for listening to new clients in the window message loop
-	if (WSAAsyncSelect(s, m_hWnd, msgType, events) == SOCKET_ERROR)
+	if (WSAAsyncSelect(s, window, msgType, events) == SOCKET_ERROR)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
 		closesocket(s);
@@ -333,8 +335,6 @@ void Server::ProcessMessages()
 			DispatchMessage(&msg);
 		}
 
-		// Your other processing logic can go here
-
 		// Add a sleep to avoid busy-waiting
 		Sleep(1);
 	}
@@ -344,14 +344,15 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
-	case MSG_SERVER:
-	{
-		if (WSAGETSELECTERROR(lParam))
+	#pragma region ServerMessage
+		case MSG_SERVER:
 		{
-			LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
-			break;
-		}
-
+			if (WSAGETSELECTERROR(lParam))
+			{
+				LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
+				break;
+			}
+      
 		switch (WSAGETSELECTEVENT(lParam))
 		{
 		case FD_ACCEPT:
@@ -421,74 +422,60 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
-			break;
+			return 0;
 		}
-		case FD_WRITE:
-			break;
-		case FD_CLOSE:
-			I(Server).GetPlayerManager()->RemovePlayer(wParam);
-			break;
-		}
-		return 0;
-	case MSG_WEB:
-		if (WSAGETSELECTERROR(lParam))
+	#pragma endregion
+	#pragma region ClientMessage
+		case MSG_CLIENT:
 		{
-			LOG("FD_READ failed with error: " << WSAGetLastError());
-			break;
-		}
-
-		switch (WSAGETSELECTEVENT(lParam))
-		{
-		case FD_ACCEPT:
-		{
-			SOCKET webClientSocket = accept(wParam, nullptr, nullptr);
-			if (webClientSocket == INVALID_SOCKET)
-			{
-				LOG("accept failed with error: " << WSAGetLastError());
-				break;
-			}
-			break;
-		}
-		case FD_READ:
-		{
-			char buffer[4096];
-			int bytesReceived = recv((SOCKET)wParam, buffer, sizeof(buffer), 0);
-
-			if (bytesReceived == SOCKET_ERROR)
-			{
-				LOG("recv failed with error: " << WSAGetLastError());
-				closesocket((SOCKET)wParam);
-				break;
-			}
-			else if (bytesReceived == 0)
-			{
-				// Connection closed by the client
-				closesocket((SOCKET)wParam);
-				LOG("Web client disconnected.");
-				break;
-			}
-
-			buffer[bytesReceived] = '\0';
-
-			// Parse the received HTTP request
-			std::string httpRequest(buffer);
-			// Process the HTTP request
-			I(Server).GetHttpManager()->HandleHttpRequest(httpRequest, (SOCKET)wParam);
-
-			break;
-		}
-		case FD_CLOSE:
 			if (WSAGETSELECTERROR(lParam))
 			{
 				LOG("FD_READ failed with error: " << WSAGetLastError());
 				break;
 			}
 
-			closesocket(wParam);
+			switch (WSAGETSELECTEVENT(lParam))
+			{
+				case FD_READ:
+				{
+					try
+					{
+						nlohmann::json jsonData;
+						if (I(Server).GetGameNetworkManager()->Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
+							LOG("WSAEWOULDBLOCK");
+						else
+							I(Server).HandleJson(jsonData);
+					}
+					catch (TgatException& e)
+					{
+						LOG(e.what());
+						I(Server).GetPlayerManager()->RemovePlayer(wParam);
+						break;
+					}
+					catch (nlohmann::json::exception& e)
+					{
+						LOG(e.what());
+						I(Server).GetPlayerManager()->RemovePlayer(wParam);
+						break;
+					}
+					catch (...)
+					{
+						LOG("Unknown exception");
+						I(Server).GetPlayerManager()->RemovePlayer(wParam);
+						break;
+					}
 
-			break;
+					break;
+				}
+				case FD_WRITE:
+					break;
+				case FD_CLOSE:
+					I(Server).GetPlayerManager()->RemovePlayer(wParam);
+					break;
+			}
+			return 0;
 		}
-		return 0;
+		#pragma endregion
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam); // Call default message handler
 }

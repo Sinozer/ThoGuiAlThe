@@ -46,8 +46,6 @@ private:
 
 	HWND m_hWnd;
 
-	void InitSocket(SOCKET& socket, const char* port, uint32_t msgType, long events);
-
 	void InitWindow();
 	void ProcessMessages();
 
