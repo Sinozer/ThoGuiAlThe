@@ -76,12 +76,11 @@ void ProfileState::InitUi()
 		User* user = networkManager.GetUser();
 
 		user->SetName(pName->getString());
-		user->Set
 
-			nlohmann::json eventData =
+		nlohmann::json eventData =
 		{
 			{JSON_EVENT_TYPE, TgatClientMessage::PLAYER_CHANGE_INFO},
-			{JSON_PLAYER_NAME, idInput->getString().toAnsiString()},
+			{JSON_PLAYER_NAME, pName->getString().toAnsiString()},
 		};
 		TgatNetworkHelper::Message msg;
 		std::string strData = eventData.dump();
