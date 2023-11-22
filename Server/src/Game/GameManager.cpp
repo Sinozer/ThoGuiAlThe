@@ -1,6 +1,14 @@
 #include "stdafx.h"
 #include "GameManager.h"
 
+GameManager::GameManager()
+    : MAGIC_NUMBER(7817),
+	m_WaitingSessions(), m_ActiveSessions()
+	, m_ActiveSessionsLock{}
+{
+	InitializeCriticalSection(&m_ActiveSessionsLock);
+}
+
 GameManager::~GameManager()
 {
 	for (auto& session : m_WaitingSessions)
@@ -8,6 +16,8 @@ GameManager::~GameManager()
 
 	for (auto& session : m_ActiveSessions)
 		DELPTR(session.second);
+
+	DeleteCriticalSection(&m_ActiveSessionsLock);
 }
 
 GameSession* GameManager::CreateGameSession(Player* p1)

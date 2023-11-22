@@ -30,4 +30,3 @@ private:
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 	bool PlayerIdCheck(TGATPLAYERID playerId, GameSession* session);
 };
-

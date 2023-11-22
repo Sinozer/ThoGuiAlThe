@@ -184,6 +184,7 @@ void Server::HandleJson(const nlohmann::json& json)
 		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
 		const nlohmann::json& move = json[JSON_PLAYER_MOVE];
 
+		m_GameManager->EnterCS();
 		session = m_GameManager->GetActiveSessionById(sessionId);
 
 		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
@@ -207,6 +208,7 @@ void Server::HandleJson(const nlohmann::json& json)
 		{
 			throw TgatException("No session found");
 		}
+		m_GameManager->ExitCS();
 
 		break;
 	}
@@ -218,13 +220,14 @@ void Server::HandleJson(const nlohmann::json& json)
 		{
 			throw TgatException("Invalid player Id");
 		}
-
-		session = m_GameManager->CreateGameSession(p1);
+		m_GameManager->EnterCS();
+		TGATSESSIONID id = m_GameManager->CreateGameSession(p1)->GetId();
+		m_GameManager->ExitCS();
 
 		packageToSend =
 		{
 			{JSON_EVENT_TYPE, TgatServerMessage::SESSION_CREATED},
-			{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+			{JSON_SESSION_ID, id},
 		};
 
 		m_GameNetworkManager->SendDataToPlayer(p1, packageToSend);
@@ -241,7 +244,7 @@ void Server::HandleJson(const nlohmann::json& json)
 		{
 			throw TgatException("Invalid player Id");
 		}
-
+		m_GameManager->EnterCS();
 		session = m_GameManager->GetWaitingSessionById(sessionId);
 		if (session == nullptr)
 		{
@@ -262,7 +265,7 @@ void Server::HandleJson(const nlohmann::json& json)
 		};
 
 		m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
-
+		m_GameManager->ExitCS();
 		break;
 	}
 	}

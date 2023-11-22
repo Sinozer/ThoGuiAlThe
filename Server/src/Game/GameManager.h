@@ -3,7 +3,7 @@
 class GameManager 
 {
 public:
-	GameManager() = default;
+	GameManager();
 	~GameManager();
 
 	GameSession* CreateGameSession(Player* p1);
@@ -12,12 +12,18 @@ public:
 
 	GameSession* GetWaitingSessionById(uint32_t id) const;
 	GameSession* GetActiveSessionById(uint32_t id) const;
+	std::unordered_map<uint32_t, GameSession*> GetActiveSessions() const { return m_ActiveSessions; }
+
+	void EnterCS() { EnterCriticalSection(&m_ActiveSessionsLock); }
+	void ExitCS() { LeaveCriticalSection(&m_ActiveSessionsLock); }
 
 private:
-	const int MAGIC_NUMBER = 7817;
+	const int MAGIC_NUMBER;
 
 	std::map<uint32_t, GameSession*> m_WaitingSessions;
 	std::unordered_map<uint32_t, GameSession*> m_ActiveSessions;
+
+	CRITICAL_SECTION m_ActiveSessionsLock;
 
 	void EndGameSession(uint32_t id);
 };
