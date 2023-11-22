@@ -69,7 +69,7 @@ void HttpManager::StartWebServer()
 
 void HttpManager::CloseWebServer()
 {
-	SendMessage(m_WebWindow, MSG_DESTROY, NULL, NULL);
+	PostMessage(m_WebWindow, MSG_DESTROY, NULL, NULL);
 	WaitForSingleObject(m_ThreadHandle, INFINITE);
 
 	CloseHandle(m_ThreadHandle);

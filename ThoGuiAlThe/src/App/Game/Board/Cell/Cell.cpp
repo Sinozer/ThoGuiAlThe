@@ -26,18 +26,13 @@ void Cell::Init()
 void Cell::HandleEvents(sf::Event* event)
 {
 	std::cout << "Cell clicked: " << m_Position.x << " " << m_Position.y << std::endl;
-	nlohmann::json eventData =
-	{
-		{"eventType", TgatClientMessage::PLAYER_INPUT},
-		{"Move", {{"x", m_Position.x}, {"y", m_Position.y}}},
-	};
-
-	TgatNetworkHelper::Message msg;
-	std::string strData = eventData.dump();
-	const int headerId = NetworkManager::GetInstance().HEADER_ID;
-	const int playerId = NetworkManager::GetInstance().GetPlayerId();
-	NetworkManager::GetInstance().CreateMessage(headerId, playerId, strData, msg);
-	NetworkManager::GetInstance().Send(msg);
+	
+	NetworkManager::GetInstance().SendData(
+		{
+			{"eventType", TgatClientMessage::PLAYER_INPUT},
+			{"Move", {{"x", m_Position.x}, {"y", m_Position.y}}},
+		}
+	);
 }
 
 void Cell::Update(const float& dt)

@@ -13,6 +13,7 @@ public:
 	void Disconnect();
 
 	void HandleData(nlohmann::json& jsonData);
+	void SendData(nlohmann::json&& jsonData);
 
 	uint32_t GetPlayerId() const;
 
@@ -24,6 +25,8 @@ private:
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
 	uint32_t m_PlayerId;
+	CRITICAL_SECTION m_CriticalSection;
+	std::queue<nlohmann::json> m_EventQueue;
 
 	static NetworkManager* s_Instance;
 
@@ -39,4 +42,8 @@ private:
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	void SendNetworkData();
+	static DWORD WINAPI NetworkThread(LPVOID lpParam) {}
+	void NetworkMain() {}
 };

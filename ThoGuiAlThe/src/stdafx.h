@@ -14,6 +14,7 @@
 /* ################# STANDARD ################# */
 #include <functional>
 #include <iostream>
+#include <queue>
 
 #include <map>
 #include <vector>
