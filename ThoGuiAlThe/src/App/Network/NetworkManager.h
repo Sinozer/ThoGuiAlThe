@@ -15,18 +15,24 @@ public:
 	void HandleData(nlohmann::json& jsonData);
 	void SendData(nlohmann::json&& jsonData);
 
-	uint32_t GetPlayerId() const;
+	TGATPLAYERID GetPlayerId() const;
+	TGATSESSIONID GetSessionId() const;
 
 	const bool IsConnected() const { return m_Connected; }
 
-private:
-	bool m_Connected = false;
+	std::queue<nlohmann::json>& GetReceiveQueue(TgatServerMessage type) { return m_ReceiveQueues[type]; }
 
+private:
+	TGATPLAYERID m_PlayerId;
+	TGATSESSIONID m_SessionId;
+	
+	bool m_Connected = false;
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
-	uint32_t m_PlayerId;
+	
 	CRITICAL_SECTION m_CriticalSection;
 	std::queue<nlohmann::json> m_EventQueue;
+	std::unordered_map<TgatServerMessage, std::queue<nlohmann::json>> m_ReceiveQueues;
 
 	static NetworkManager* s_Instance;
 

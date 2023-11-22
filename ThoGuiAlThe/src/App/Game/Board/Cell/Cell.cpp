@@ -28,10 +28,12 @@ void Cell::HandleEvents(sf::Event* event)
 	std::cout << "Cell clicked: " << m_Position.x << " " << m_Position.y << std::endl;
 	
 	NetworkManager::GetInstance().SendData(
-		{
-			{"eventType", TgatClientMessage::PLAYER_INPUT},
-			{"Move", {{"x", m_Position.x}, {"y", m_Position.y}}},
-		}
+	{
+		{JSON_EVENT_TYPE, TgatClientMessage::PLAYER_INPUT},
+		{JSON_PLAYER_MOVE, {{"x", m_Position.x}, {"y", m_Position.y}}},
+		{JSON_PLAYER_ID, networkManager.GetPlayerId()},
+		{JSON_SESSION_ID, networkManager.GetSessionId()}
+	}
 	);
 }
 
