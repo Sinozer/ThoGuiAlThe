@@ -30,7 +30,7 @@ public:
 	void RunServer();
 	void CloseServer();
 
-	void AcceptNewPlayer(Player newPlayer);
+	void AcceptNewPlayer(SOCKET socket);
 
 	void HandleJson(const nlohmann::json& json);
 

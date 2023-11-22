@@ -77,24 +77,20 @@ void NetworkManager::Disconnect()
 
 void NetworkManager::HandleData(nlohmann::json& data)
 {
-	// Check if the data has a valid type
-	if (data.contains("eventType"))
+	switch ((TgatServerMessage)data[JSON_EVENT_TYPE])
 	{
-		switch ((TgatServerMessage)data["eventType"])
-		{
-		case TgatServerMessage::PLAYER_INIT:
-			m_PlayerId = data["playerId"];
-			LOG("Player ID: " << m_PlayerId);
-			break;
-		default:
-			break;
-		}
+	case TgatServerMessage::PLAYER_INIT:
+		m_PlayerId = data[JSON_PLAYER_ID];
+		LOG(JSON_PLAYER_ID << ": " << m_PlayerId);
+		break;
+	default:
+		break;
 	}
 }
 
 TGATPLAYERID NetworkManager::GetPlayerId() const
 {
-	 return (TGATPLAYERID)m_PlayerId;
+	return (TGATPLAYERID)m_PlayerId;
 }
 
 void NetworkManager::CreateSocket()
@@ -203,7 +199,7 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			{
 				nlohmann::json jsonData;
 				if (GetInstance().Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
-                    LOG("WSAEWOULDBLOCK");
+					LOG("WSAEWOULDBLOCK");
 				else
 					GetInstance().HandleData(jsonData);
 			}

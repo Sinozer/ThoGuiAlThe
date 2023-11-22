@@ -4,6 +4,7 @@
 #include "Player/Player.h"
 
 class GameSession;
+class Player;
 
 class GameNetworkManager : public TgatNetworkHelper
 {
@@ -17,8 +18,8 @@ public:
 	[[nodiscard]] char* GetPort() { return m_Port; }
 
 	void Init();
-	void SendDataToPlayer(const Player& player, nlohmann::json& data);
-	void SendDataToAllPlayers(Player** first, const int numPlayers, nlohmann::json& data);
+	void SendDataToPlayer(Player* player, nlohmann::json& data);
+	void SendDataToAllPlayers(std::unordered_map<uint32_t, Player*>& players, nlohmann::json& data);
 	void SendDataToAllPlayersInSession(GameSession* session, nlohmann::json& data);
 
 private:

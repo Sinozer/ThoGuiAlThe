@@ -21,10 +21,10 @@ public:
 	void Update(uint32_t playerId, int x, int y, nlohmann::json& returnJson);
 
 	bool IsEnded() const { return m_IsEnded; }
-	std::array<Player*, MAX_PLAYERS_PER_GAME>& GetPlayers() { return m_Players; }
+	std::unordered_map<uint32_t, Player*>& GetPlayers() { return m_Players; }
 
 private:
-	std::array<Player*, MAX_PLAYERS_PER_GAME> m_Players;
+	std::unordered_map<uint32_t, Player*> m_Players;
 	std::unordered_set<Player*> m_Spectators;
 
 	uint32_t m_Board[BOARD_SIZE][BOARD_SIZE];

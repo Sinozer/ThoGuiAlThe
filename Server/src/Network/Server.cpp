@@ -133,19 +133,20 @@ void Server::InitSocket(SOCKET& s, const char* port, uint32_t msgType, long even
 		LOG("WSAAsyncSelect server success");
 }
 
-void Server::AcceptNewPlayer(Player newPlayer)
+void Server::AcceptNewPlayer(SOCKET socket)
 {
-	if (newPlayer.GetSocket() == INVALID_SOCKET)
+	Player* newPlayer = new Player(socket);
+	if (newPlayer->GetSocket() == INVALID_SOCKET)
 	{
 		throw std::exception("accept failed");
 	}
 	else
 		LOG("accept success");
 
-	if (WSAAsyncSelect(newPlayer.GetSocket(), m_hWnd, MSG_CLIENT, FD_READ | FD_CLOSE) == SOCKET_ERROR)
+	if (WSAAsyncSelect(newPlayer->GetSocket(), m_hWnd, MSG_CLIENT, FD_READ | FD_CLOSE) == SOCKET_ERROR)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
-		closesocket(newPlayer.GetSocket());
+		closesocket(newPlayer->GetSocket());
 		throw std::exception("WSAAsyncSelect failed");
 	}
 	else
@@ -154,7 +155,7 @@ void Server::AcceptNewPlayer(Player newPlayer)
 	nlohmann::json jsonData =
 	{
 		{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INIT},
-		{JSON_PLAYER_ID, (TGATPLAYERID)newPlayer.GetId()}
+		{JSON_PLAYER_ID, (TGATPLAYERID)newPlayer->GetId()}
 	};
 
 	m_GameNetworkManager->SendDataToPlayer(newPlayer, jsonData);
@@ -291,7 +292,7 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SOCKET clientSocket = accept(wParam, nullptr, nullptr);
 			try
 			{
-				I(Server).AcceptNewPlayer(clientSocket);
+				I(Server).AcceptNewPlayer(clientSocket); // Implicit construction of Player
 			}
 			catch (std::exception& e)
 			{

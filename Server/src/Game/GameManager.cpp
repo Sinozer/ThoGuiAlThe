@@ -17,7 +17,7 @@ void GameManager::CreateGameSession(Player* p1)
 	m_WaitingSessions.insert(std::make_pair(session->GetId(), session));
 }
 
-void GameManager::AddPlayerToGameSession(Player* p2, uint32_t id = -1)
+void GameManager::AddPlayerToGameSession(Player* p2, uint32_t id)
 {
 	GameSession* session = nullptr;
 

@@ -3,7 +3,6 @@
 
 GameSession::GameSession() : m_Board(), m_Players(), m_Turn(0), m_Id(0), m_IsEnded(false)
 {
-	m_Players.fill(nullptr);
 	for (int i = 0; i < BOARD_SIZE; i++)
 		for (int j = 0; j < BOARD_SIZE; j++)
 			m_Board[i][j] = 0;
@@ -11,20 +10,20 @@ GameSession::GameSession() : m_Board(), m_Players(), m_Turn(0), m_Id(0), m_IsEnd
 
 GameSession::~GameSession()
 {
-	m_Players.fill(nullptr);
 	m_Spectators.clear();
+	m_Players.clear();
 }
 
 void GameSession::Init(Player* p1, int magic)
 {
-	m_Players[0] = p1;
+	m_Players.emplace(std::make_pair(0, p1));
 
 	m_Id = p1->GetId() * magic;
 }
 
 void GameSession::AddPlayer(Player* p2)
 {
-	m_Players[1] = p2;
+	m_Players.emplace(std::make_pair(1, p2));
 }
 
 void GameSession::Update(uint32_t playerId, int x, int y, nlohmann::json& returnJson)

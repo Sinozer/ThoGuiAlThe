@@ -1,6 +1,6 @@
 #include "Player.h"
 
-uint32_t Player::s_IdCounter = 0;
+uint32_t Player::s_IdCounter = 1;
 
 Player::Player(SOCKET socket)
 {
