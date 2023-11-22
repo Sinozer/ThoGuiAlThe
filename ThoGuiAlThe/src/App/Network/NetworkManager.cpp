@@ -1,5 +1,9 @@
 #include "NetworkManager.h"
 
+#include "App/State/List/Create/CreateState.h"
+#include "App/State/List/Game/GameState.h"
+#include "App/State/List/Result/ResultState.h"
+
 #include "Exceptions/TgatException.h"
 
 #define MSG_SERVER (WM_USER + 1)
@@ -91,24 +95,50 @@ void NetworkManager::Disconnect()
 
 void NetworkManager::HandleData(nlohmann::json& data)
 {
-	// Check if the data has a valid type
-	if (data.contains("eventType"))
+	if (data.contains(JSON_EVENT_TYPE) == false)
 	{
-		switch ((TgatServerMessage)data["eventType"])
-		{
-		case TgatServerMessage::PLAYER_INIT:
-			m_PlayerId = data["playerId"];
-			LOG("Player ID: " << m_PlayerId);
-			break;
-		default:
-			break;
-		}
+		LOG("JSON_EVENT_TYPE not found");
+		return;
+	}
+
+	TgatServerMessage type = data[JSON_EVENT_TYPE].get<TgatServerMessage>();
+	switch (type)
+	{
+	case TgatServerMessage::PLAYER_INIT:
+		m_PlayerId = data[JSON_PLAYER_ID];
+		LOG(JSON_PLAYER_ID << ": " << m_PlayerId);
+		break;
+	case TgatServerMessage::SESSION_CREATED:
+		m_SessionId = data[JSON_SESSION_ID];
+		LOG(JSON_SESSION_ID << ": " << m_SessionId);
+		StateManager::GetInstance()->AddState(new CreateState());
+		break;
+	case TgatServerMessage::SESSION_JOINED:
+		m_SessionId = data[JSON_SESSION_ID];
+		LOG(JSON_SESSION_ID << ": " << m_SessionId);
+		StateManager::GetInstance()->AddState(new GameState());
+		break;
+	case TgatServerMessage::PLAYER_INPUT:
+		m_ReceiveQueues[TgatServerMessage::PLAYER_INPUT].push(data);
+		break;
+	case TgatServerMessage::GAME_END:
+		m_ReceiveQueues[TgatServerMessage::GAME_END].push(data);
+		I(StateManager)->GoToFirstState();
+		I(StateManager)->AddState(new ResultState());
+		break;
+	default:
+		break;
 	}
 }
 
 TGATPLAYERID NetworkManager::GetPlayerId() const
 {
-	 return (TGATPLAYERID)m_PlayerId;
+	return (TGATPLAYERID)m_PlayerId;
+}
+
+TGATSESSIONID NetworkManager::GetSessionId() const
+{
+	return (TGATSESSIONID)m_SessionId;
 }
 
 void NetworkManager::CreateSocket()
@@ -217,7 +247,7 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			{
 				nlohmann::json jsonData;
 				if (GetInstance().Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
-                    LOG("WSAEWOULDBLOCK");
+					LOG("WSAEWOULDBLOCK");
 				else
 					GetInstance().HandleData(jsonData);
 			}
