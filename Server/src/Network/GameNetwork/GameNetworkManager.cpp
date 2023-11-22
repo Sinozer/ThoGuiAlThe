@@ -8,6 +8,8 @@
 #include "Network/Server.h"
 #include "Exceptions/TgatException.h"
 
+#include "Game/Session/GameSession.h"
+
 GameNetworkManager::GameNetworkManager() : TgatNetworkHelper(), m_ServerSocket(INVALID_SOCKET), m_Port("6969")
 {
 }
@@ -21,14 +23,14 @@ void GameNetworkManager::Init()
 {
 }
 
-void GameNetworkManager::SendDataToPlayer(const Player& player, nlohmann::json& data)
+void GameNetworkManager::SendDataToPlayer(Player* player, nlohmann::json& data)
 {
 	try
 	{
 		TgatNetworkHelper::Message msg;
 		std::string strData = data.dump();
-		CreateMessage(HEADER_ID, player.GetId(), strData, msg);
-		Send(player.GetSocket(), msg);
+		CreateMessage(HEADER_ID, player->GetId(), strData, msg);
+		Send(player->GetSocket(), msg);
 	}
 	catch (const TgatException& e)
 	{
@@ -36,22 +38,37 @@ void GameNetworkManager::SendDataToPlayer(const Player& player, nlohmann::json& 
 	}
 }
 
-void GameNetworkManager::SendDataToAllPlayers(std::unordered_set<Player>& players, nlohmann::json& data)
+void GameNetworkManager::SendDataToAllPlayers(std::unordered_map<uint32_t, Player*>& players, nlohmann::json& data)
 {
-	for (const auto& player : players)
+	for (const auto& p : players | std::views::values)
 	{
-		SendDataToPlayer(player, data);
+		SendDataToPlayer(p, data);
 	}
+}
+
+void GameNetworkManager::SendDataToAllPlayersInSession(GameSession* session, nlohmann::json& data)
+{
+	SendDataToAllPlayers(session->GetPlayers(), data);
 }
 
 bool GameNetworkManager::PlayerIdCheck(TGATPLAYERID playerId)
 {
 	// Check if the player id is in the list of connected players
 	const auto& players = I(Server).GetPlayerManager()->GetPlayers();
-	auto it = std::find_if(players.begin(), players.end(), [playerId](const Player& player)
+	auto it = std::find_if(players.begin(), players.end(), [playerId](std::pair<uint32_t, Player*> player)
 		{
-			return player.GetId() == playerId;
+			return player.second->GetId() == playerId;
 		});
 
+	return it != players.end();
+}
+
+bool GameNetworkManager::PlayerIdCheck(TGATPLAYERID playerId, GameSession* session)
+{
+	const auto& players = session->GetPlayers();
+	auto it = std::find_if(players.begin(), players.end(), [playerId](std::pair<uint32_t, Player*> player)
+		{
+			return player.second->GetId() == playerId;
+		});
 	return it != players.end();
 }

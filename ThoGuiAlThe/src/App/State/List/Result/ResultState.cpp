@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ResultState.h"
 
+#include "App/Network/NetworkManager.h"
+
 ResultState::ResultState()
 {
 }
@@ -10,7 +12,25 @@ void ResultState::InitBackground()
 }
 void ResultState::InitUi()
 {
-	auto* title = m_UiManager.AddText("TITLE", "{RESULT}");
+	auto& q = I(NetworkManager).GetReceiveQueue(TgatServerMessage::GAME_END);
+	if (q.empty()) return;
+
+	nlohmann::json& data = q.front();
+
+	int playerId = data[JSON_PLAYER_ID];
+
+	std::string titleText;
+
+	if (playerId == I(NetworkManager).GetPlayerId())
+		titleText = "YOU WIN";
+	else if (playerId != I(NetworkManager).GetPlayerId())
+		titleText = "YOU LOSE";
+	else
+		titleText = "DRAW";
+
+	q.pop();
+
+	auto* title = m_UiManager.AddText("TITLE", titleText);
 	title->setCharacterSize(100);
 	title->setOutlineColor(sf::Color::Black);
 	title->setOutlineThickness(4.f);

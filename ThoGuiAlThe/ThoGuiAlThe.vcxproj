@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\App\State\List\Create\CreateState.cpp" />
+    <ClCompile Include="src\App\State\List\Join\JoinState.cpp" />
     <ClCompile Include="src\App\State\List\Result\ResultState.cpp" />
     <ClCompile Include="src\App\State\List\Profile\ProfileState.cpp" />
     <ClCompile Include="src\App\App.cpp" />
@@ -41,6 +43,8 @@
     <ClCompile Include="src\App\User\User.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\App\State\List\Create\CreateState.h" />
+    <ClInclude Include="src\App\State\List\Join\JoinState.h" />
     <ClInclude Include="lib\JSON\json.hpp" />
     <ClInclude Include="src\App\State\List\Result\ResultState.h" />
     <ClInclude Include="src\App\State\List\Profile\ProfileState.h" />
