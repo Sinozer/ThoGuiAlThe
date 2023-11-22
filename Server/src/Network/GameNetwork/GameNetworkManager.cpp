@@ -10,10 +10,13 @@
 
 #include "Game/Session/GameSession.h"
 
+CRITICAL_SECTION GameNetworkManager::GameNetCS = {};
+
 GameNetworkManager::GameNetworkManager() 
 	: TgatNetworkHelper(), m_ServerSocket(INVALID_SOCKET), 
 	m_Port("6969"), m_ThreadHandle(nullptr)
 {
+	InitializeCriticalSection(&GameNetCS);
 }
 
 GameNetworkManager::~GameNetworkManager()
@@ -99,9 +102,11 @@ void GameNetworkManager::ProcessMessages()
 
 DWORD WINAPI GameNetworkManager::GameNetworkThread(LPVOID lpParam)
 {
+	EnterCriticalSection(&GameNetCS);
 	GameNetworkManager* gameNetwork = static_cast<GameNetworkManager*>(lpParam);
 	gameNetwork->GameNetworkMain();
-	return 0;
+	LeaveCriticalSection(&GameNetCS);
+	return 1;
 }
 
 void GameNetworkManager::GameNetworkMain()

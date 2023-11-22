@@ -6,6 +6,7 @@
 class GameSession;
 class Player;
 
+
 class GameNetworkManager : public TgatNetworkHelper
 {
 	friend class Server;
@@ -30,6 +31,8 @@ private:
 
 	SOCKET m_ServerSocket;
 	HANDLE m_ThreadHandle;
+
+	static CRITICAL_SECTION GameNetCS;
 
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 	bool PlayerIdCheck(TGATPLAYERID playerId, GameSession* session);
