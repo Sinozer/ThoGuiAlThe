@@ -21,7 +21,6 @@ private:
 	HWND m_WebWindow;
 	DWORD m_ThreadID;
 	HANDLE m_ThreadHandle;
-	bool m_Running;
 	std::unordered_map<std::string, std::unique_ptr<RequestHandler>> m_HttpRequestHandlers;
 
 private:
