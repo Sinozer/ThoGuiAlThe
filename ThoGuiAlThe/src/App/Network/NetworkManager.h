@@ -14,7 +14,8 @@ public:
 
 	void HandleData(nlohmann::json& jsonData);
 
-	uint32_t GetPlayerId() const;
+	TGATPLAYERID GetPlayerId() const;
+	TGATSESSIONID GetSessionId() const;
 
 	const bool IsConnected() const { return m_Connected; }
 
@@ -23,7 +24,8 @@ private:
 
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
-	uint32_t m_PlayerId;
+	TGATPLAYERID m_PlayerId;
+	TGATSESSIONID m_SessionId;
 
 	static NetworkManager* s_Instance;
 

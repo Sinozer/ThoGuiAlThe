@@ -155,7 +155,7 @@ void Server::AcceptNewPlayer(SOCKET socket)
 	nlohmann::json jsonData =
 	{
 		{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INIT},
-		{JSON_PLAYER_ID, (TGATPLAYERID)newPlayer->GetId()}
+		//{JSON_PLAYER_ID, (TGATPLAYERID)newPlayer->GetId()}
 	};
 
 	m_GameNetworkManager->SendDataToPlayer(newPlayer, jsonData);
@@ -167,15 +167,16 @@ void Server::HandleJson(const nlohmann::json& json)
 {
 	LOG("Received JSON data: " << json.dump());
 
+	TgatClientMessage eventType = json[JSON_EVENT_TYPE].get<TgatClientMessage>();
 	if (json.contains(JSON_PLAYER_ID) == false)
 	{
-		throw TgatException("Invalid JSON data, no JSON_PLAYER_ID field was found");
+		throw TgatException("Invalid JSON data, no JSON_PLAYER_ID field was found. Event type : " + (int)eventType);
 	}
 
 	GameSession* session = nullptr;
 	nlohmann::json packageToSend;
 
-	switch (json[JSON_EVENT_TYPE].get<TgatClientMessage>())
+	switch (eventType)
 	{
 	case TgatClientMessage::PLAYER_INPUT:
 	{
@@ -196,12 +197,37 @@ void Server::HandleJson(const nlohmann::json& json)
 
 		session->Update(playerId, PLAYER_MOVE_ARGS(move), packageToSend);
 
+		if (session != nullptr)
+			m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+		else
+		{
+			throw TgatException("No session found");
+		}
+
+		break;
+	}
+	case TgatClientMessage::CREATE_SESSION:
+	{
+		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
+		Player* p1 = m_PlayerManager->GetPlayerById(playerId);
+		if (p1 == nullptr)
+		{
+			throw TgatException("Invalid player Id");
+		}
+
+		session = m_GameManager->CreateGameSession(p1);
+
+		packageToSend =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::SESSION_CREATED},
+			{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+		};
+
+		m_GameNetworkManager->SendDataToPlayer(p1, packageToSend);
+
 		break;
 	}
 	}
-
-	if (session != nullptr)
-		m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
 }
 
 bool Server::SendToAllClients(const char* data, int size)

@@ -83,6 +83,10 @@ void NetworkManager::HandleData(nlohmann::json& data)
 		m_PlayerId = data[JSON_PLAYER_ID];
 		LOG(JSON_PLAYER_ID << ": " << m_PlayerId);
 		break;
+	case TgatServerMessage::SESSION_CREATED:
+		m_SessionId = data[JSON_SESSION_ID];
+		LOG(JSON_SESSION_ID << ": " << m_SessionId);
+		break;
 	default:
 		break;
 	}
@@ -91,6 +95,11 @@ void NetworkManager::HandleData(nlohmann::json& data)
 TGATPLAYERID NetworkManager::GetPlayerId() const
 {
 	return (TGATPLAYERID)m_PlayerId;
+}
+
+TGATSESSIONID NetworkManager::GetSessionId() const
+{
+	return (TGATSESSIONID)m_SessionId;
 }
 
 void NetworkManager::CreateSocket()

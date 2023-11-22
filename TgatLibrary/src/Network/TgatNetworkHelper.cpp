@@ -82,7 +82,9 @@ int TgatNetworkHelper::Receive(SOCKET socket, nlohmann::json& data)
 	}
 
 	data = ReadMessage(bodyBuf);
+	std::string str = data.dump();
 	data.push_back({JSON_PLAYER_ID, header.Id});
+	str = data.dump();
 
 	delete[] bodyBuf;
 	return true;

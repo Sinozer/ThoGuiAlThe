@@ -51,7 +51,7 @@ void PlayerManager::RemovePlayer(SOCKET socket)
 {
 	auto it = std::find_if(m_Players.begin(), m_Players.end(), [socket](std::pair<uint32_t, Player*> player)
 		{
-			return player.second->GetSocket() == socket; 
+			return player.second->GetSocket() == socket;
 		});
 
 	if (it != m_Players.end())
@@ -62,4 +62,15 @@ void PlayerManager::RemovePlayer(SOCKET socket)
 	{
 		LOG("Player not found");
 	}
+}
+
+Player* PlayerManager::GetPlayerById(uint32_t index)
+{
+	auto it = m_Players.find(index);
+	if (it != m_Players.end())
+	{
+		return it->second;
+	}
+	LOG("Player not found");
+	return nullptr;
 }

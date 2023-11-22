@@ -10,11 +10,12 @@ GameManager::~GameManager()
 		DELPTR(session.second);
 }
 
-void GameManager::CreateGameSession(Player* p1)
+GameSession* GameManager::CreateGameSession(Player* p1)
 {
 	GameSession* session = new GameSession();
 	session->Init(p1, MAGIC_NUMBER);
 	m_WaitingSessions.insert(std::make_pair(session->GetId(), session));
+	return session;
 }
 
 void GameManager::AddPlayerToGameSession(Player* p2, uint32_t id)
