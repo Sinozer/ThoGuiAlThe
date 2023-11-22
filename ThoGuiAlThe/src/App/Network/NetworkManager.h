@@ -28,10 +28,11 @@ private:
 	TGATPLAYERID m_PlayerId;
 	TGATSESSIONID m_SessionId;
 	
-	bool m_Connected = false;
+	bool m_Connected;
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
 	
+	HANDLE m_NetworkThread;
 	CRITICAL_SECTION m_SendCS;
 	CRITICAL_SECTION m_ReceiveCS;
 	std::queue<nlohmann::json> m_SendQueue;

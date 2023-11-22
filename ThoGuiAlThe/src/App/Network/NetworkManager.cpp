@@ -13,7 +13,10 @@ static constexpr char PORT[5] = "6969";
 
 NetworkManager* NetworkManager::s_Instance = nullptr;
 
-NetworkManager::NetworkManager() : m_hWnd(nullptr), m_PlayerId(0)
+NetworkManager::NetworkManager() 
+	: TgatNetworkHelper(), m_PlayerId(-1), m_SessionId(-1), m_Connected(false),
+	m_AddressInfo{}, m_hWnd(nullptr), m_NetworkThread(nullptr),
+	m_SendCS{}, m_ReceiveCS{}, m_SendQueue(), m_ReceiveQueues()
 {
 	Init();
 }
@@ -86,6 +89,14 @@ void NetworkManager::Disconnect()
 void NetworkManager::Close()
 {
 	SendMessage(m_hWnd, MSG_NUKE, 0, 0);
+	if (WaitForSingleObject(m_NetworkThread, 10000) == WAIT_TIMEOUT)
+	{
+        LOG("Network thread did not close in time");
+		TerminateThread(m_NetworkThread, 0);
+	}
+
+	CloseHandle(m_NetworkThread);
+	UnregisterClass(L"ServerWindow", GetModuleHandle(nullptr));
 }
 
 void NetworkManager::HandleData(nlohmann::json& data)
@@ -169,8 +180,8 @@ void NetworkManager::Init()
 	InitializeCriticalSection(&m_ReceiveCS);
 
     // Create network thread
-    HANDLE hThread = CreateThread(nullptr, 0, NetworkThread, this, 0, nullptr);
-	if (hThread == nullptr)
+	m_NetworkThread = CreateThread(nullptr, 0, NetworkThread, this, 0, nullptr);
+	if (m_NetworkThread == nullptr)
 	{
         LOG("CreateThread failed with error: " << GetLastError());
         throw std::exception("CreateThread failed");
