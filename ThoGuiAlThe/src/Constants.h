@@ -15,3 +15,5 @@
 #define PLAYER_SIZE_Y 90.f
 #define PLAYER_MARGIN_X 5.f
 #define PLAYER_MARGIN_Y 5.f
+
+const std::vector<std::string> PROFILE_PICTURES = { "DEFAULT", "HAZMAT", "HAZMAT2", "SHREK", "MARGE", "HOMER" };

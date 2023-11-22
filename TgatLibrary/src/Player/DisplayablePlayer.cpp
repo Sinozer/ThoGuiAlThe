@@ -6,7 +6,8 @@ DisplayablePlayer::DisplayablePlayer()
 	PlayerDisplayData data = 
 	{
 		.name = "Player",
-		.profilePicturePath = "DEFAULT_THUMB",
+		.profilePicturePath = "DEFAULT",
+		.profilePictureThumbPath = "DEFAULT_THUMB",
 		.color = { 230, 50, 50, 255 },
 	};
 	m_DisplayData = data;

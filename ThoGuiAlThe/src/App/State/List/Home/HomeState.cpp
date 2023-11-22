@@ -48,7 +48,7 @@ void HomeState::InitUi()
 	{
 		const PlayerDisplayData& playerDisplayData = I(NetworkManager).GetPlayerDisplayData();
 
-		auto* profile = m_UiManager.AddImageButton("PROFILE", playerDisplayData.profilePicturePath, [this]() { StateManager::GetInstance()->AddState(new ProfileState()); });
+		auto* profile = m_UiManager.AddImageButton("PROFILE", playerDisplayData.profilePictureThumbPath, [this]() { StateManager::GetInstance()->AddState(new ProfileState()); });
 		profile->setPosition(WINDOW_SCREEN_WIDTH * 0.99f - profile->getGlobalBounds().width, WINDOW_SCREEN_HEIGHT / 100.f);
 		profile->SetOutlineThickness(3.f);
 		profile->SetOutlineColor(sf::Color(playerDisplayData.color[0], playerDisplayData.color[1], playerDisplayData.color[2], playerDisplayData.color[3]));

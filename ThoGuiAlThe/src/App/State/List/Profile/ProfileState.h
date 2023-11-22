@@ -19,5 +19,8 @@ private:
 	void HandleUiEvents(sf::Event& event) override;
 	void UpdateUi(const float& dt) override;
 	void RenderUi(sf::RenderTarget* target) override;
+
+private:
+	int m_ActualIndex = 0;
 };
 

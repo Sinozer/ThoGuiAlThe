@@ -1,9 +1,5 @@
 #pragma once
 
-/* ################  CONSTANTS  ############### */
-#include "constants.h"
-/* ################  CONSTANTS  ############### */
-
 /* ##################  SFML  ################## */
 #include <SFML/System.hpp>
 #include <SFML/Network.hpp>
@@ -22,7 +18,9 @@
 #include <queue>
 /* ################# STANDARD ################# */
 
-
+/* ################  CONSTANTS  ############### */
+#include "constants.h"
+/* ################  CONSTANTS  ############### */
 
 /* ##################  SELF  ################## */
 #include "App/Singleton/SingletonManager.h"

@@ -101,23 +101,49 @@ void NetworkManager::HandleData(nlohmann::json& data)
 		break;
 	}
 	case TgatServerMessage::SESSION_CREATED:
+	{
 		m_SessionId = data[JSON_SESSION_ID];
 		LOG(JSON_SESSION_ID << ": " << m_SessionId);
 		StateManager::GetInstance()->AddState(new CreateState());
 		break;
+	}
 	case TgatServerMessage::SESSION_JOINED:
+	{
 		m_SessionId = data[JSON_SESSION_ID];
 		LOG(JSON_SESSION_ID << ": " << m_SessionId);
 		StateManager::GetInstance()->AddState(new GameState());
 		break;
+	}
 	case TgatServerMessage::PLAYER_INPUT:
+	{
 		m_ReceiveQueues[TgatServerMessage::PLAYER_INPUT].push(data);
 		break;
+	}
 	case TgatServerMessage::GAME_END:
+	{
 		m_ReceiveQueues[TgatServerMessage::GAME_END].push(data);
 		I(StateManager)->GoToFirstState();
 		I(StateManager)->AddState(new ResultState());
 		break;
+	}
+	case TgatServerMessage::PLAYER_INFO_CHANGED:
+	{
+		//m_ReceiveQueues[TgatServerMessage::PLAYER_INFO_CHANGED].push(data);
+
+		if (data.contains(JSON_PLAYER_NAME))
+			m_User->SetName(PLAYER_DD_ARG_NAME(data));
+
+		if (data.contains(JSON_PLAYER_PPP))
+			m_User->SetProfilePicturePath(PLAYER_DD_ARG_PPP(data));
+
+		if (data.contains(JSON_PLAYER_PPTP))
+			m_User->SetProfilePictureThumbPath(PLAYER_DD_ARG_PPTP(data));
+
+		if (data.contains(JSON_PLAYER_COLOR))
+			m_User->SetBorderColor(PLAYER_DD_ARG_COLOR(data));
+
+		break;
+	}
 	default:
 		break;
 	}
@@ -282,6 +308,7 @@ void NetworkManager::InitPlayerWithData(nlohmann::json& jsonData)
 	PlayerDisplayData data;
 	data.name = PLAYER_DD_ARG_NAME(jsonData);
 	data.profilePicturePath = PLAYER_DD_ARG_PPP(jsonData);
+	data.profilePictureThumbPath = PLAYER_DD_ARG_PPTP(jsonData);
 	data.color = PLAYER_DD_ARG_COLOR(jsonData);
 	m_User->SetDisplayData(data);
 }

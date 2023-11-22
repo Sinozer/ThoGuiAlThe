@@ -24,12 +24,14 @@ void UITextButton::HandleEvents(sf::Event& event)
 		return;
 
 	auto bounds = getGlobalBounds();
-	sf::Vector2f mousePos = sf::Vector2f((float)event.mouseButton.x, (float)event.mouseButton.y);
-	bool mouseInBounds = bounds.contains(mousePos);
+	sf::Vector2f mouseMovePos = sf::Vector2f((float)event.mouseMove.x, (float)event.mouseMove.y);
+	sf::Vector2f mouseClickPos = sf::Vector2f((float)event.mouseButton.x, (float)event.mouseButton.y);
+	bool mouseInMoveBounds = bounds.contains(mouseMovePos);
+	bool mouseInClickBounds = bounds.contains(mouseClickPos);
 
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
 	{
-		if (mouseInBounds)
+		if (mouseInClickBounds)
 		{
 			m_Callback();
 		}
@@ -39,7 +41,7 @@ void UITextButton::HandleEvents(sf::Event& event)
 		/****************************************************\
 		|**	[TODO] - Make this more efficient and costless **|
 		\****************************************************/
-		if (mouseInBounds)
+		if (mouseInMoveBounds)
 		{
 			setFillColor(sf::Color(255, 255, 255, 100));
 		}
