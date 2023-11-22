@@ -44,11 +44,6 @@ void Server::StartServer()
 	port = nullptr;
 
 	m_HttpManager->StartWebServer();
-
-	//SOCKET webServerSocket = m_HttpManager->GetWebServerSocket();
-	//char* webPort = m_HttpManager->GetWebPort();
-	//InitSocket(webServerSocket, webPort, MSG_WEB, FD_ACCEPT | FD_CLOSE | FD_READ);
-	//webPort = nullptr;
 }
 
 void Server::RunServer()

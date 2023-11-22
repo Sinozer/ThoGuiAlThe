@@ -22,6 +22,7 @@ const void StateManager::DestroyInstance()
 
 StateManager::StateManager() : m_NewState(nullptr), m_Adding(false), m_Removing(0), m_Clearing(false)
 {
+    InitializeCriticalSection(&m_StateCS);
 }
 
 StateManager::~StateManager()
@@ -33,12 +34,15 @@ StateManager::~StateManager()
 	}
 
 	DELPTR(m_NewState);
+	DeleteCriticalSection(&m_StateCS);
 }
 
 void StateManager::AddState(State* state)
 {
+	EnterCriticalSection(&m_StateCS);
 	m_Adding = true;
 	m_NewState = state;
+	LeaveCriticalSection(&m_StateCS);
 }
 
 void StateManager::RemoveState(unsigned char amount)
