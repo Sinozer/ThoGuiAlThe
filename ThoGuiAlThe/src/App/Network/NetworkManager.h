@@ -21,7 +21,6 @@ public:
 
 	const bool IsConnected() const { return m_Connected; }
 
-	std::queue<nlohmann::json>& GetReceiveQueue(TgatServerMessage type) { return m_ReceiveQueues[type]; }
 	bool ReceiveData(TgatServerMessage type, nlohmann::json& data);
 
 private:
