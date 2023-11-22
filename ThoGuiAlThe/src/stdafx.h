@@ -23,7 +23,7 @@
 #include <queue>
 /* ################# STANDARD ################# */
 
-
+#include "tgatLib.h"
 
 /* ##################  SELF  ################## */
 #include "App/Singleton/SingletonManager.h"
@@ -34,9 +34,6 @@
 #include "App/State/State.h"
 //#include "App/UI/Nodes/UIElements.h"
 /* ##################  SELF  ################## */
-
-#include "tgatLib.h"
-
 
 #if defined(DEBUG) | defined(_DEBUG)
 #include <crtdbg.h>

@@ -39,20 +39,13 @@ void JoinState::InitUi()
 	joinButton->setOutlineThickness(2.f);
 	joinButton->setOutlineColor(sf::Color::Black);
 	joinButton->SetCallback([idInput]() {
+
 		int id = std::atoi(idInput->getString().toAnsiString().c_str());
 
-		NetworkManager& networkManager = I(NetworkManager);
-		nlohmann::json eventData =
-		{
+		I(NetworkManager).SendData({
 			{JSON_EVENT_TYPE, TgatClientMessage::JOIN_SESSION},
 			{JSON_SESSION_ID, id}
-		};
-		TgatNetworkHelper::Message msg;
-		std::string strData = eventData.dump();
-		const int headerId = networkManager.HEADER_ID;
-		const int playerId = networkManager.GetPlayerId();
-		networkManager.CreateMessage(headerId, playerId, strData, msg);
-		networkManager.Send(msg);
+		});
 	});
 }
 void JoinState::Init()

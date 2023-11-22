@@ -69,7 +69,7 @@ void HttpManager::StartWebServer()
 
 void HttpManager::CloseWebServer()
 {
-	PostMessage(m_WebWindow, MSG_DESTROY, NULL, NULL);
+	SendMessage(m_WebWindow, MSG_NUKE, NULL, NULL);
 	WaitForSingleObject(m_ThreadHandle, INFINITE);
 
 	CloseHandle(m_ThreadHandle);
@@ -114,7 +114,7 @@ LRESULT HttpManager::WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 {
 	switch (uMsg) 
 	{
-		case MSG_DESTROY:
+		case MSG_NUKE:
 		{
 			DestroyWindow(I(Server).GetHttpManager()->m_WebWindow);
 			return 0;
