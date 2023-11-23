@@ -27,7 +27,8 @@ void ProfileState::InitUi()
 
 #pragma region PROFILE_NAME
 	// Name input
-	auto* pName = m_UiManager.AddTextInput("PLAYER_NAME", playerDisplayData.name);
+	auto* pName = m_UiManager.AddTextInput("PLAYER_NAME");
+	pName->setString(playerDisplayData.name);
 	pName->setCharacterSize(50);
 	pName->setPosition(
 		WINDOW_SCREEN_WIDTH / 2 - pName->getGlobalBounds().getSize().x / 2,
