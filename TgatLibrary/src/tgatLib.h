@@ -72,6 +72,8 @@ enum class TgatServerMessage
 
 	PLAYER_INFO_CHANGED = 6, // {"eventType": "PLAYER_INFO_CHANGED", "Player" : {"name": "name", "profilePicturePath": "path", "color": [0, 0, 0, 0]}
 
+	GAME_REPLAY = 7, // {"eventType": "GAME_REPLAY", "Player" : "playerId": uuid(0)}
+
 	BAD_SESSION_ID = 101, // {"eventType": "BAD_SESSION_ID"}
 	BAD = 500, // {"eventType": "BAD", error...}
 };
@@ -82,6 +84,7 @@ enum class TgatClientMessage
 	PLAYER_CHANGE_INFO = 1, // {"eventType": "PLAYER_CHANGE_INFO", "Player" : {"name": "name", "profilePicturePath": "path", "color": [0, 0, 0, 0]}
 	CREATE_SESSION = 2, // {"eventType": "CREATE_SESSION"}
 	JOIN_SESSION = 3, // {"eventType": "JOIN_SESSION", "Session" : "sessionId": uuid(0)}
+	REPLAY = 4, // {"eventType": "REPLAY"}
 };
 
 struct PlayerDisplayData

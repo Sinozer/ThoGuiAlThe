@@ -125,3 +125,21 @@ bool GameSession::IsWin() const
 
 	return false;
 }
+
+void GameSession::Replay()
+{
+	m_Board[0][0] = 0;
+	m_Board[0][1] = 0;
+	m_Board[0][2] = 0;
+	m_Board[1][0] = 0;
+	m_Board[1][1] = 0;
+	m_Board[1][2] = 0;
+	m_Board[2][0] = 0;
+	m_Board[2][1] = 0;
+	m_Board[2][2] = 0;
+
+	m_Turn = 0;
+	m_IsEnded = false;
+
+	m_ReplayerIds.clear();
+}
