@@ -52,8 +52,6 @@ private:
 	NetworkManager();
 	~NetworkManager() override;
 
-	void StartNetworkServer();
-
 	void Init();
 	void InitWindow();
 
@@ -69,6 +67,4 @@ private:
 	void ProcessMessages();
 
 	void SendNetworkData();
-	static DWORD WINAPI NetworkThread(LPVOID lpParam);
-	void NetworkMain();
 };

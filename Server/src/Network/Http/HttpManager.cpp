@@ -81,36 +81,6 @@ void HttpManager::InitHttpRequestHandlers()
 	m_HttpRequestHandlers.insert({ "/session", std::make_unique<SessionRequestHandler>() });
 }
 
-void HttpManager::InitWebWindow()
-{
-	WNDCLASSEX wcex =
-	{
-		.cbSize = sizeof(WNDCLASSEX),
-		.style = 0,
-		.lpfnWndProc = WebWndProc,
-		.cbClsExtra = 0,
-		.cbWndExtra = 0,
-		.hInstance = GetModuleHandle(nullptr),
-		.hIcon = nullptr,
-		.hCursor = nullptr,
-		.hbrBackground = nullptr,
-		.lpszMenuName = nullptr,
-		.lpszClassName = L"WebServerWindow",
-		.hIconSm = nullptr
-	};
-	RegisterClassEx(&wcex);
-
-	m_WebWindow = CreateWindowEx(0, L"WebServerWindow", L"WebServerWindow", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, GetModuleHandle(nullptr), nullptr);
-
-	if (m_WebWindow == nullptr)
-	{
-		LOG("CreateWindowEx failed with error: " << GetLastError());
-		throw std::exception("CreateWindowEx failed");
-	}
-	else
-		LOG("CreateWindowEx success");
-}
-
 LRESULT HttpManager::WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg) 
@@ -214,7 +184,7 @@ DWORD WINAPI HttpManager::WebServerThread(LPVOID lpParam)
 void HttpManager::WebMain()
 {
 	// Initialize the web server window
-	InitWebWindow();
+	I(Server).InitWindow(m_WebWindow, L"WebServerWindow", WebWndProc);
 
 	// Initialize the web server socket
 	I(Server).InitSocket(m_WebServerSocket, m_WebWindow, m_WebPort, MSG_WEB, FD_ACCEPT | FD_READ | FD_CLOSE);

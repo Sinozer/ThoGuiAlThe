@@ -36,20 +36,11 @@ public:
 
 	void HandleJson(const nlohmann::json& json);
 
-	bool SendToAllClients(const char* message, int messageSize);
-
-	const HWND& GetWindow() const { return m_hWnd; }
+	void InitWindow(HWND& window, std::wstring windowName, WNDPROC proc);
 
 private:
 	HttpManager* m_HttpManager;
 	GameNetworkManager* m_GameNetworkManager;
 	PlayerManager* m_PlayerManager;
 	GameManager* m_GameManager;
-
-	HWND m_hWnd;
-
-	void InitWindow();
-	void ProcessMessages();
-
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

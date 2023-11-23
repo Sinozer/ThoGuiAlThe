@@ -25,7 +25,6 @@ std::string SessionMethodHandler::BuildResponse(std::unordered_map<std::string, 
 		return RequestHandler::BadRequest();
 
 	uint32_t sessionID = (uint32_t)std::stoi(params["session"]);
-
 	I(Server).GetGameManager()->EnterCS();
 	GameSession* session = I(Server).GetGameManager()->GetActiveSessionById(sessionID);
 	if (session == nullptr)
@@ -34,15 +33,23 @@ std::string SessionMethodHandler::BuildResponse(std::unordered_map<std::string, 
 	uint8_t index = 0;
 	std::regex playerPattern("%PLAYERS%");
 	std::stringstream playersInfo;
-	for (auto&[_, player] : session->GetPlayers())
+	try 
 	{
-		playerIds[index].first = player->GetId();
-		playerIds[index].second = player->GetName();
-		playersInfo << "<p>" << playerIds[index].second << ": " << ((index == 0) ? "X" : "O");
-		playersInfo << "</p>";
-		++index;
+		for (auto& player : session->GetPlayers() | std::views::values)
+		{
+			playerIds[index].first = player->GetId();
+			playerIds[index].second = player->GetName();
+			playersInfo << "<p>" << playerIds[index].second << ": " << ((index == 0) ? "X" : "O");
+			playersInfo << "</p>";
+			++index;
+		}
+		fileContent = std::regex_replace(fileContent, playerPattern, playersInfo.str());
 	}
-	fileContent = std::regex_replace(fileContent, playerPattern, playersInfo.str());
+	catch (...)
+	{
+		I(Server).GetGameManager()->ExitCS();
+		return RequestHandler::ServerError();
+	}
 
 	// Replace placeholders with actual values using regex
 	for (int i = 0; i < GameSession::BOARD_SIZE; ++i)

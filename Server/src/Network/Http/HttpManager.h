@@ -26,7 +26,6 @@ private:
 private:
 	void InitHttpRequestHandlers();
 
-	void InitWebWindow();
 	static LRESULT CALLBACK WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void ProcessMessages();
 

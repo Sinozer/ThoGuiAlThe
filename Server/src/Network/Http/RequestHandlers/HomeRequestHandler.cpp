@@ -24,18 +24,25 @@ std::string HomeMethodHandler::BuildResponse(std::unordered_map<std::string, std
 	std::stringstream sessionLink;
 
 	I(Server).GetGameManager()->EnterCS();
-	const auto& sessions = I(Server).GetGameManager()->GetActiveSessions();
-	for (auto&[sessionId, session] : sessions)
-	{
-		std::string idStr = std::to_string(sessionId);
-		std::array<std::string, 2> playerNames;
-		uint8_t index = 0;
-		for (auto&[_, player] : session->GetPlayers())
+	try {
+		const auto& sessions = I(Server).GetGameManager()->GetActiveSessions();
+		for (auto&[sessionId, session] : sessions)
 		{
-			playerNames.at(index++) = player->GetName();
+			std::string idStr = std::to_string(sessionId);
+			std::array<std::string, 2> playerNames;
+			uint8_t index = 0;
+			for (auto&[_, player] : session->GetPlayers())
+			{
+				playerNames.at(index++) = player->GetName();
+			}
+			sessionLink << "<a href=\"/session?session=" << idStr << "\">" << idStr
+				<< ": " << (playerNames[0]) << " VS " << (playerNames[1]) << "</a><br>";
 		}
-		sessionLink << "<a href=\"/session?session=" << idStr << "\">" << idStr
-			<< ": " << (playerNames[0]) << " VS " << (playerNames[1]) << "</a><br>";
+	}
+	catch (...)
+	{
+		I(Server).GetGameManager()->ExitCS();
+		return RequestHandler::ServerError();
 	}
 	I(Server).GetGameManager()->ExitCS();
 
