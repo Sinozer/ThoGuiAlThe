@@ -33,6 +33,34 @@ void ResultState::InitUi()
 		title->setOutlineThickness(4.f);
 		title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
 
+		auto* replayButton = m_UiManager.AddTextButton("REPLAY_BUTTON", "REPLAY");
+		replayButton->setOutlineColor(sf::Color::Black);
+		replayButton->setOutlineThickness(2.f);
+		replayButton->setCharacterSize(50);
+		replayButton->setPosition(
+			WINDOW_SCREEN_WIDTH / 2 - replayButton->getGlobalBounds().width / 2,
+			WINDOW_SCREEN_HEIGHT / 2 - replayButton->getGlobalBounds().height / 2
+		);
+		replayButton->SetCallback([this]()
+			{
+				I(NetworkManager).SendData(
+					{
+						{JSON_EVENT_TYPE, TgatClientMessage::REPLAY},
+						{JSON_PLAYER_ID, I(NetworkManager).GetPlayerId()},
+						{JSON_SESSION_ID, I(NetworkManager).GetSessionId()}
+					}
+				);
+			});
+
+		auto* replayText = m_UiManager.AddText("REPLAY_TEXT", "0 / 2");
+		replayText->setCharacterSize(35);
+		replayText->setOutlineColor(sf::Color::Black);
+		replayText->setOutlineThickness(2.f);
+		replayText->setPosition(
+			replayButton->getPosition().x + replayButton->getGlobalBounds().width / 2 - replayText->getGlobalBounds().width / 2,
+			replayButton->getPosition().y + replayButton->getGlobalBounds().height * 1.05f
+		);
+
 		auto* menu = m_UiManager.AddTextButton("MENU", "MENU", [this]() { StateManager::GetInstance()->GoToFirstState(); });
 		menu->setOutlineColor(sf::Color::Black);
 		menu->setOutlineThickness(2.f);
@@ -66,6 +94,22 @@ void ResultState::UpdateUi(const float& dt)
 void ResultState::Update(const float& dt)
 {
 	UpdateUi(dt);
+
+	nlohmann::json data;
+
+	if (I(NetworkManager).ReceiveData(TgatServerMessage::GAME_REPLAY, data) == false)
+		return;
+
+	TGATPLAYERID playerId = data[JSON_PLAYER_ID];
+
+	auto* replayText = m_UiManager.GetText("REPLAY_TEXT");
+	replayText->setString("1 / 2");
+
+	if (playerId == I(NetworkManager).GetPlayerId())
+	{
+		auto* replayButton = m_UiManager.GetTextButton("REPLAY_BUTTON");
+		replayButton->SetActive(false);
+	}
 }
 
 void ResultState::RenderUi(sf::RenderTarget* target)
