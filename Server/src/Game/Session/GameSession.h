@@ -38,4 +38,12 @@ private:
 
 	bool IsFull() const;
 	bool IsWin() const;
+
+public:
+	const int GetReplayCount() const { return m_ReplayerIds.size(); }
+	void AddReplayer(TGATPLAYERID id) { m_ReplayerIds.push_back(id); }
+	void Replay();
+	bool IsReplayer(TGATPLAYERID id) const { return std::find(m_ReplayerIds.begin(), m_ReplayerIds.end(), id) != m_ReplayerIds.end(); }
+private:
+	std::vector<TGATPLAYERID> m_ReplayerIds;
 };

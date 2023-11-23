@@ -11,8 +11,6 @@ GameManager::GameManager()
 
 GameManager::~GameManager()
 {
-	for (auto& session : m_WaitingSessions)
-		DELPTR(session.second);
 
 	for (auto& session : m_ActiveSessions)
 		DELPTR(session.second);
@@ -111,4 +109,19 @@ GameSession* GameManager::GetActiveSessionById(uint32_t id) const
 	}
 
 	return it->second;
+}
+
+void GameManager::OnServerClose()
+{
+	for (auto& session : m_WaitingSessions | std::views::values)
+	{
+		DELPTR(session);
+	}
+	m_WaitingSessions.clear();
+
+	for (auto& session : m_ActiveSessions | std::views::values)
+	{
+		DELPTR(session);
+	}
+	m_ActiveSessions.clear();
 }

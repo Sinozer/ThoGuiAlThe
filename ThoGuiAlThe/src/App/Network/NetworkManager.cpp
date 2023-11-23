@@ -130,7 +130,9 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	{
 		m_SessionId = data[JSON_SESSION_ID];
 		LOG(JSON_SESSION_ID << ": " << m_SessionId);
-		StateManager::GetInstance()->AddState(new GameState());
+		StateManager* stateManager = I(StateManager);
+		stateManager->GoToFirstState();
+		stateManager->AddState(new GameState());
 		break;
 	}
 	case TgatServerMessage::PLAYER_INPUT:
@@ -149,6 +151,11 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	{
 		std::string d = data.dump();
 		m_ReceiveQueues[TgatServerMessage::PLAYER_INFO_CHANGED].push(data);
+		break;
+	}
+	case TgatServerMessage::GAME_REPLAY:
+	{
+		m_ReceiveQueues[TgatServerMessage::GAME_REPLAY].push(data);
 		break;
 	}
 	default:

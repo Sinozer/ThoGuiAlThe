@@ -19,6 +19,8 @@ public:
 	void EnterCS() { EnterCriticalSection(&m_ActiveSessionsLock); }
 	void ExitCS() { LeaveCriticalSection(&m_ActiveSessionsLock); }
 
+	void OnServerClose();
+
 private:
 	const int MAGIC_NUMBER;
 

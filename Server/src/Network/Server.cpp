@@ -56,8 +56,13 @@ void Server::CloseServer()
 {
 	DELPTR(m_HttpManager);
 	DELPTR(m_GameNetworkManager);
-	DELPTR(m_PlayerManager);
+
+	// Close all sessions, this will also disconnect and delete all players in sessions
+	m_GameManager->OnServerClose();
 	DELPTR(m_GameManager);
+
+	// Be sure to close all sessions first, otherwise, players will be deleted twice (in session and in player manager)
+	DELPTR(m_PlayerManager);
 }
 
 void Server::InitSocket(SOCKET& s, HWND window, const char* port, uint32_t msgType, long events)
@@ -294,6 +299,63 @@ void Server::HandleJson(const nlohmann::json& json)
 
 		m_GameManager->ExitCS();
 		m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+		break;
+	}
+	case TgatClientMessage::REPLAY:
+	{
+		if (json.contains(JSON_SESSION_ID) == false)
+		{
+			throw TgatException("Invalid JSON data, please add a JSON_SESSION_ID field");
+		}
+		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
+		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
+
+		session = m_GameManager->GetActiveSessionById(sessionId);
+		if (session == nullptr)
+		{
+			throw TgatException("Invalid session Id");
+			break;
+		}
+
+		if (m_GameNetworkManager->PlayerIdCheck(playerId, session) == false)
+		{
+			throw TgatException("Player did not exist in this session");
+			break;
+		}
+
+		if (session->IsReplayer(playerId) == true)
+		{
+			throw TgatException("Player is already a replayer");
+			break;
+		}
+
+		session->AddReplayer(playerId);
+
+		if (session->GetReplayCount() == 1)
+		{
+			packageToSend =
+			{
+				{JSON_EVENT_TYPE, TgatServerMessage::GAME_REPLAY},
+				{JSON_PLAYER_ID, (TGATPLAYERID)playerId},
+				{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+			};
+
+			m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+		}
+		else if (session->GetReplayCount() == GameSession::MAX_PLAYERS_PER_GAME)
+		{
+			session->Replay();
+
+			packageToSend =
+			{
+				{JSON_EVENT_TYPE, TgatServerMessage::SESSION_JOINED},
+				{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+			};
+
+			m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+		}
+
+
 		break;
 	}
 	case TgatClientMessage::PLAYER_CHANGE_INFO:

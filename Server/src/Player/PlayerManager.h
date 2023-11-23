@@ -18,6 +18,5 @@ public:
 
 private:
 	std::unordered_map<uint32_t, Player*> m_Players;
-	//std::unordered_set<Player> m_Players;
 };
 
