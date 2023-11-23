@@ -24,6 +24,7 @@ NetworkManager::NetworkManager()
 	Init();
 }
 
+
 NetworkManager& NetworkManager::GetInstance()
 {
 	if (s_Instance == nullptr)

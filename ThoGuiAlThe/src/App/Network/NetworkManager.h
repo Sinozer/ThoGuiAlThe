@@ -44,6 +44,8 @@ private:
 	std::queue<nlohmann::json> m_SendQueue;
 	std::unordered_map<TgatServerMessage, std::queue<nlohmann::json>> m_ReceiveQueues;
 
+	HANDLE m_NetworkHandle;
+
 	static NetworkManager* s_Instance;
 
 private:
@@ -57,10 +59,12 @@ private:
 
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 
+	static DWORD WINAPI NetworkThread(LPVOID lpParam);
+
+	void NetworkMain();
+
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void ProcessMessages();
 
 	void SendNetworkData();
-	static DWORD WINAPI NetworkThread(LPVOID lpParam);
-	void NetworkMain();
 };

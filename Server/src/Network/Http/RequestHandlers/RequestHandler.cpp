@@ -15,6 +15,11 @@ std::string RequestHandler::BadRequest()
 	return "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 0\r\n\r\n";
 }
 
+std::string RequestHandler::ServerError()
+{
+	return "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\n500 Internal Server Error";
+}
+
 std::unordered_map<std::string, std::string> RequestHandler::ParseParams(const std::string& paramString)
 {
 	std::unordered_map<std::string, std::string> params;

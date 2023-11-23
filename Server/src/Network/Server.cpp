@@ -13,8 +13,6 @@ Server::Server()
 	m_GameNetworkManager = new GameNetworkManager();
 	m_PlayerManager = new PlayerManager();
 	m_GameManager = new GameManager();
-
-	InitWindow();
 }
 
 Server::~Server()
@@ -26,8 +24,6 @@ Server::~Server()
 
 void Server::StartServer()
 {
-	m_GameNetworkManager->Init();
-
 	// Initialize Winsock
 	WSADATA wsaData;
 	if (int r = WSAStartup(MAKEWORD(2, 2), &wsaData); r != 0)
@@ -38,17 +34,23 @@ void Server::StartServer()
 	else
 		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
 
-	SOCKET serverSocket = m_GameNetworkManager->GetSocket();
-	char* port = m_GameNetworkManager->GetPort();
-	InitSocket(serverSocket, m_hWnd, port, MSG_SERVER, FD_ACCEPT);
-	port = nullptr;
-
+	m_GameNetworkManager->StartGameServer();
 	m_HttpManager->StartWebServer();
 }
 
 void Server::RunServer()
 {
-	ProcessMessages();
+	while (true)
+	{
+		if (_kbhit() && _getch() == VK_ESCAPE)
+		{
+			return;
+		}
+
+		// Add a sleep to avoid busy-waiting
+		Sleep(1);
+	}
+	m_GameNetworkManager->CloseGameServer();
 	m_HttpManager->CloseWebServer();
 }
 
@@ -145,7 +147,7 @@ void Server::AcceptNewPlayer(SOCKET socket)
 	else
 		LOG("accept success");
 
-	if (WSAAsyncSelect(newPlayer->GetSocket(), m_hWnd, MSG_CLIENT, FD_READ | FD_CLOSE) == SOCKET_ERROR)
+	if (WSAAsyncSelect(newPlayer->GetSocket(), GetGameNetworkManager()->GetWindow(), MSG_CLIENT, FD_READ | FD_CLOSE) == SOCKET_ERROR)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
 		closesocket(newPlayer->GetSocket());
@@ -397,28 +399,14 @@ void Server::HandleJson(const nlohmann::json& json)
 	}
 }
 
-bool Server::SendToAllClients(const char* data, int size)
-{
-	//for (SOCKET clientSocket : m_ClientSockets)
-	//{
-	//	std::cout << m_ClientSockets.size() << std::endl;
-	//	if (!SendToClient(clientSocket, data, size))
-	//	{
-	//		return false;
-	//	}
-	//}
-
-	return true;
-}
-
-void Server::InitWindow()
+void Server::InitWindow(HWND& window, std::wstring windowName, WNDPROC proc)
 {
 	// Create an invisible window for message processing
 	WNDCLASSEX wcex =
 	{
 		.cbSize = sizeof(WNDCLASSEX),
 		.style = 0,
-		.lpfnWndProc = WndProc,
+		.lpfnWndProc = proc,
 		.cbClsExtra = 0,
 		.cbWndExtra = 0,
 		.hInstance = GetModuleHandle(nullptr),
@@ -426,140 +414,18 @@ void Server::InitWindow()
 		.hCursor = nullptr,
 		.hbrBackground = nullptr,
 		.lpszMenuName = nullptr,
-		.lpszClassName = L"ServerWindow",
+		.lpszClassName = windowName.c_str(),
 		.hIconSm = nullptr
 	};
 	RegisterClassEx(&wcex);
 
-	m_hWnd = CreateWindowEx(0, L"ServerWindow", L"ServerWindow", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, GetModuleHandle(nullptr), nullptr);
+	window = CreateWindowEx(0, windowName.c_str(), windowName.c_str(), 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, GetModuleHandle(nullptr), nullptr);
 
-	if (m_hWnd == nullptr)
+	if (window == nullptr)
 	{
 		LOG("CreateWindowEx failed with error: " << GetLastError());
 		throw std::exception("CreateWindowEx failed");
 	}
 	else
 		LOG("CreateWindowEx success");
-}
-
-void Server::ProcessMessages()
-{
-	MSG msg{};
-	while (true)
-	{
-		if (_kbhit() && _getch() == VK_ESCAPE)
-		{
-			return;
-		}
-
-		// Peek message
-		while (PeekMessage(&msg, m_hWnd, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		// Add a sleep to avoid busy-waiting
-		Sleep(1);
-	}
-}
-
-LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-#pragma region ServerMessage
-	case MSG_SERVER:
-	{
-		if (WSAGETSELECTERROR(lParam))
-		{
-			LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
-			break;
-		}
-
-		switch (WSAGETSELECTEVENT(lParam))
-		{
-		case FD_ACCEPT:
-		{
-			SOCKET clientSocket = accept(wParam, nullptr, nullptr);
-			try
-			{
-				I(Server).AcceptNewPlayer(clientSocket); // Implicit construction of Player
-			}
-			catch (std::exception& e)
-			{
-				LOG(e.what());
-				break;
-			}
-			catch (...)
-			{
-				LOG("Unknown exception");
-				break;
-			}
-			break;
-		}
-		case FD_CLOSE:
-		{
-			LOG("FD_CLOSE");
-
-			break;
-		}
-		}
-
-		return 0;
-	}
-#pragma endregion
-#pragma region ClientMessage
-	case MSG_CLIENT:
-	{
-		if (WSAGETSELECTERROR(lParam))
-		{
-			LOG("FD_READ failed with error: " << WSAGetLastError());
-			break;
-		}
-
-		switch (WSAGETSELECTEVENT(lParam))
-		{
-		case FD_READ:
-		{
-			try
-			{
-				nlohmann::json jsonData;
-				if (I(Server).GetGameNetworkManager()->Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
-					LOG("WSAEWOULDBLOCK");
-				else
-					I(Server).HandleJson(jsonData);
-			}
-			catch (TgatException& e)
-			{
-				LOG(e.what());
-				I(Server).GetPlayerManager()->RemovePlayer(wParam);
-				break;
-			}
-			catch (nlohmann::json::exception& e)
-			{
-				LOG(e.what());
-				I(Server).GetPlayerManager()->RemovePlayer(wParam);
-				break;
-			}
-			catch (...)
-			{
-				LOG("Unknown exception");
-				I(Server).GetPlayerManager()->RemovePlayer(wParam);
-				break;
-			}
-
-			break;
-		}
-		case FD_WRITE:
-			break;
-		case FD_CLOSE:
-			I(Server).GetPlayerManager()->RemovePlayer(wParam);
-			break;
-		}
-		return 0;
-	}
-#pragma endregion
-	}
-	return DefWindowProc(hwnd, uMsg, wParam, lParam); // Call default message handler
 }

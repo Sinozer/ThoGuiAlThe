@@ -1,3 +1,6 @@
+#include <Windows.h>
+#include <stdio.h>
+#include <vector>
 #include "Network/Server.h"
 
 int main()
@@ -8,6 +11,7 @@ int main()
 #endif
 	Server::GetInstance().StartServer();
 	Server::GetInstance().RunServer();
+
 
 	return 0;
 }
