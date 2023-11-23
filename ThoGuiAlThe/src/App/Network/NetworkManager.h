@@ -2,6 +2,8 @@
 
 #include "Network/TgatNetworkHelper.h"
 
+class User;
+
 class NetworkManager : public TgatNetworkHelper
 {
 public:
@@ -9,27 +11,32 @@ public:
 
 	static const void DestroyInstance();
 
-	bool Connect();
+	bool Connect(std::string ipAddress = "localhost");
 	void Disconnect();
 	void Close();
 
 	void HandleData(nlohmann::json& jsonData);
 	void SendData(nlohmann::json&& jsonData);
+	bool ReceiveData(TgatServerMessage type, nlohmann::json& data);
+
+	void InitPlayerWithData(nlohmann::json& jsonData);
 
 	TGATPLAYERID GetPlayerId() const;
+	const PlayerDisplayData& GetPlayerDisplayData() const;
+	User* GetUser() const { return m_User; }
 	TGATSESSIONID GetSessionId() const;
 
 	const bool IsConnected() const { return m_Connected; }
-
-	bool ReceiveData(TgatServerMessage type, nlohmann::json& data);
-
+	const bool IsInit() const { return m_User != nullptr; }
 private:
-	TGATPLAYERID m_PlayerId;
-	TGATSESSIONID m_SessionId;
-	
-	bool m_Connected;
+	bool m_Connected = false;
+
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
+
+	User* m_User;
+
+	TGATSESSIONID m_SessionId;
 	
 	HANDLE m_NetworkThread;
 	CRITICAL_SECTION m_SendCS;
@@ -46,7 +53,7 @@ private:
 	void Init();
 	void InitWindow();
 
-	void CreateSocket();
+	void CreateSocket(std::string ipAddress = "localhost");
 
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 

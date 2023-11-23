@@ -152,7 +152,10 @@ void Server::AcceptNewPlayer(SOCKET socket)
 	nlohmann::json jsonData =
 	{
 		{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INIT},
-		//{JSON_PLAYER_ID, (TGATPLAYERID)newPlayer->GetId()}
+		{JSON_PLAYER_NAME, newPlayer->GetName()},
+		{JSON_PLAYER_PPP, newPlayer->GetProfilePicturePath()},
+		{JSON_PLAYER_PPTP, newPlayer->GetProfilePictureThumbPath()},
+		{JSON_PLAYER_COLOR, newPlayer->GetBorderColor()}
 	};
 
 	m_GameNetworkManager->SendDataToPlayer(newPlayer, jsonData);
@@ -236,7 +239,7 @@ void Server::HandleJson(const nlohmann::json& json)
 	}
 	case TgatClientMessage::JOIN_SESSION:
 	{
-		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
+		TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
 		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
 
 		Player* p2 = m_PlayerManager->GetPlayerById(playerId);
@@ -246,7 +249,7 @@ void Server::HandleJson(const nlohmann::json& json)
 		}
 		m_GameManager->EnterCS();
 		session = m_GameManager->GetWaitingSessionById(sessionId);
-		if (session == nullptr)
+		if (session == nullptr && sessionId != -1)
 		{
 			packageToSend =
 			{
@@ -254,6 +257,26 @@ void Server::HandleJson(const nlohmann::json& json)
 			};
 			m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
 			break;
+		}
+
+		if (sessionId == -1)
+		{
+			session = m_GameManager->GetFirstWaitingSession();
+			if (session == nullptr)
+			{
+				session = m_GameManager->CreateGameSession(p2);
+
+				packageToSend =
+				{
+					{JSON_EVENT_TYPE, TgatServerMessage::SESSION_CREATED},
+					{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+				};
+
+				m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
+				break;
+			}
+
+			sessionId = session->GetId();
 		}
 
 		m_GameManager->AddPlayerToGameSession(p2, sessionId);
@@ -266,6 +289,42 @@ void Server::HandleJson(const nlohmann::json& json)
 
 		m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
 		m_GameManager->ExitCS();
+		break;
+	}
+	case TgatClientMessage::PLAYER_CHANGE_INFO:
+	{
+		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
+		Player* p = m_PlayerManager->GetPlayerById(playerId);
+		if (p == nullptr)
+		{
+			throw TgatException("Invalid player Id");
+		}
+
+		std::string j = json.dump();
+		if (json.contains(JSON_PLAYER_NAME))
+			p->SetName(PLAYER_DD_ARG_NAME(json));
+
+		if (json.contains(JSON_PLAYER_PPP))
+			p->SetProfilePicturePath(PLAYER_DD_ARG_PPP(json));
+
+		if (json.contains(JSON_PLAYER_PPTP))
+			p->SetProfilePictureThumbPath(PLAYER_DD_ARG_PPTP(json));
+
+		if (json.contains(JSON_PLAYER_COLOR))
+			p->SetBorderColor(PLAYER_DD_ARG_COLOR(json));
+
+		packageToSend =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INFO_CHANGED},
+			{JSON_PLAYER_ID, (TGATPLAYERID)p->GetId()},
+			{JSON_PLAYER_NAME, p->GetName()},
+			{JSON_PLAYER_PPP, p->GetProfilePicturePath()},
+			{JSON_PLAYER_PPTP, p->GetProfilePictureThumbPath()},
+			{JSON_PLAYER_COLOR, p->GetBorderColor()}
+		};
+
+		m_GameNetworkManager->SendDataToPlayer(p, packageToSend);
+
 		break;
 	}
 	}

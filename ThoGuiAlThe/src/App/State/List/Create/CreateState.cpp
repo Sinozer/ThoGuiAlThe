@@ -67,6 +67,10 @@ void CreateState::Render(sf::RenderTarget* target)
 	RenderUi(target);
 }
 
+void CreateState::Resume()
+{
+}
+
 void CreateState::End()
 {
 }
