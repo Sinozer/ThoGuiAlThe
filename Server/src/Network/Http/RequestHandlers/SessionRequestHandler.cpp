@@ -30,6 +30,19 @@ std::string SessionMethodHandler::BuildResponse(std::unordered_map<std::string, 
 	GameSession* session = I(Server).GetGameManager()->GetActiveSessionById(sessionID);
 	if (session == nullptr)
 		return RequestHandler::BadRequest();
+	std::array<std::pair<uint32_t, std::string>, 2> playerIds;
+	uint8_t index = 0;
+	std::regex playerPattern("%PLAYERS%");
+	std::stringstream playersInfo;
+	for (auto&[_, player] : session->GetPlayers())
+	{
+		playerIds[index].first = player->GetId();
+		playerIds[index].second = player->GetName();
+		playersInfo << "<p>" << playerIds[index].second << ": " << ((index == 0) ? "X" : "O");
+		playersInfo << "</p>";
+		++index;
+	}
+	fileContent = std::regex_replace(fileContent, playerPattern, playersInfo.str());
 
 	// Replace placeholders with actual values using regex
 	for (int i = 0; i < GameSession::BOARD_SIZE; ++i)
@@ -37,9 +50,15 @@ std::string SessionMethodHandler::BuildResponse(std::unordered_map<std::string, 
 		for (int j = 0; j < GameSession::BOARD_SIZE; ++j)
 		{
 			// Generate the placeholder string that can be found in the html file
-			std::string placeholder = "%VALUE_" + std::to_string(i) + std::to_string(j) + "%";
+			std::string placeholder = "%VALUE_" + std::to_string(j) + std::to_string(i) + "%";
 			std::regex pattern(placeholder);
-			fileContent = std::regex_replace(fileContent, pattern, std::to_string(session->GetBoard()[i * GameSession::BOARD_SIZE + j]));
+			uint32_t cellValue = session->GetBoard()[i * GameSession::BOARD_SIZE + j];
+			if (cellValue == 0)
+				fileContent = std::regex_replace(fileContent, pattern, " ");
+			else if (cellValue == playerIds[0].first)
+				fileContent = std::regex_replace(fileContent, pattern, "O");
+			else if (cellValue == playerIds[1].first)
+				fileContent = std::regex_replace(fileContent, pattern, "X");
 		}
 	}
 	I(Server).GetGameManager()->ExitCS();

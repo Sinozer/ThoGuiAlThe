@@ -18,7 +18,6 @@ std::string HomeRequestHandler::HandleHttpRequest(std::unordered_map<std::string
 
 std::string HomeMethodHandler::BuildResponse(std::unordered_map<std::string, std::string>& params) const
 {
-
 	std::ifstream file("assets/index.html");
 	std::string fileContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 	std::regex pattern("%SESSIONS%");
@@ -29,15 +28,14 @@ std::string HomeMethodHandler::BuildResponse(std::unordered_map<std::string, std
 	for (auto&[sessionId, session] : sessions)
 	{
 		std::string idStr = std::to_string(sessionId);
-		std::array<uint32_t, 2> playerIds;
+		std::array<std::string, 2> playerNames;
 		uint8_t index = 0;
 		for (auto&[_, player] : session->GetPlayers())
 		{
-			playerIds.at(index++) = player->GetId();
+			playerNames.at(index++) = player->GetName();
 		}
 		sessionLink << "<a href=\"/session?session=" << idStr << "\">" << idStr
-			<< ": Player1 is " << std::to_string(playerIds[0])
-			<< " and Player2 is " << std::to_string(playerIds[1]) << "</a><br>";
+			<< ": " << (playerNames[0]) << " VS " << (playerNames[1]) << "</a><br>";
 	}
 	I(Server).GetGameManager()->ExitCS();
 
