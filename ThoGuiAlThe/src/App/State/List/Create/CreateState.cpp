@@ -10,10 +10,16 @@ void CreateState::InitBackground()
 }
 void CreateState::InitUi()
 {
+	auto* title = m_UiManager.AddText("TITLE", "Create");
+	title->setCharacterSize(100);
+	title->setOutlineColor(sf::Color::Black);
+	title->setOutlineThickness(4.f);
+	title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
+
 	auto* id = m_UiManager.AddText("ID", "Session id: " + std::to_string((int)I(NetworkManager).GetSessionId()));
 	id->setPosition(
-		WINDOW_SCREEN_WIDTH / 4 - id->getGlobalBounds().width / 2,
-		WINDOW_SCREEN_HEIGHT / 4 - id->getGlobalBounds().height / 2
+		WINDOW_SCREEN_WIDTH / 3 - id->getGlobalBounds().width / 2,
+		WINDOW_SCREEN_HEIGHT / 2
 	);
 	id->setCharacterSize(50);
 	id->setOutlineThickness(2.f);
@@ -22,7 +28,7 @@ void CreateState::InitUi()
 	auto* waiting = m_UiManager.AddText("Waiting", "Waiting for other player...");
 	waiting->setPosition(
 		WINDOW_SCREEN_WIDTH / 2 - waiting->getGlobalBounds().width / 2,
-		WINDOW_SCREEN_HEIGHT / 2 - waiting->getGlobalBounds().height / 2
+		WINDOW_SCREEN_HEIGHT / 2 + 100.f
 	);
 	waiting->setCharacterSize(30);
 	waiting->setOutlineThickness(2.f);
