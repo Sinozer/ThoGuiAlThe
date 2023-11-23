@@ -44,9 +44,7 @@ private:
 	HttpManager* m_HttpManager;
 	GameNetworkManager* m_GameNetworkManager;
 	PlayerManager* m_PlayerManager;
-
 	GameManager* m_GameManager;
-	std::unordered_map<uint32_t, GameSession*> m_GameSessions;
 
 	HWND m_hWnd;
 

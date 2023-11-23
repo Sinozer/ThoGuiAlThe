@@ -6,9 +6,10 @@ UITextInput::UITextInput()
 	setFont(AssetManager::GetInstance()->GetFont("DEFAULT"));
 }
 
-UITextInput::UITextInput(std::string text)
+UITextInput::UITextInput(std::string defaultText)
 {
-	setString(text);
+	m_DefaultText = defaultText;
+	setString(defaultText);
 	setFont(AssetManager::GetInstance()->GetFont("DEFAULT"));
 }
 
@@ -21,15 +22,59 @@ void UITextInput::HandleEvents(sf::Event& event)
 		m_Focus = getGlobalBounds().contains((float)event.mouseButton.x, (float)event.mouseButton.y);
 
 	if (!m_Focus)
+	{
+		if (getString().getSize() == 0 && m_DefaultText.size() > 0)
+			setString(m_DefaultText);
+
 		return;
+	}
+
+	if (getString() == m_DefaultText)
+		setString("");
 
 	if (event.type == sf::Event::TextEntered)
 	{
-		if (event.text.unicode == 8 && getString().getSize() > 0)
-			setString(getString().substring(0, getString().getSize() - 1));
+		if (event.text.unicode == 8)				// Backspace
+		{
+			if (getString().getSize() > 0)
+				setString(getString().substring(0, getString().getSize() - 1));
+			return;
+		}
 
-		else if (event.text.unicode != 8)
-			setString(getString() + event.text.unicode);
+		else if (event.text.unicode == 13)			// Enter
+		{
+			Validate();
+			return;
+		}
+
+		else if (event.text.unicode == 127)			// CTRL + Backspace
+		{
+			std::string text = getString();
+
+			size_t endPos = text.find_last_not_of(" ");
+			if (endPos == std::string::npos) {
+				text.clear();
+				setString(text);
+				return;
+			}
+
+			// Find the position of the space before the word to delete
+			size_t startPos = text.find_last_of(" ", endPos);
+			if (startPos == std::string::npos) {
+				text.clear();
+			}
+			else {
+				text.erase(startPos);
+			}
+			setString(text);
+			return;
+		}
+
+		else										// Any other character
+			if (event.text.unicode < 32 || event.text.unicode > 127)	// Ignore non-printable characters
+				return;
+
+		setString(getString() + event.text.unicode);
 	}
 }
 

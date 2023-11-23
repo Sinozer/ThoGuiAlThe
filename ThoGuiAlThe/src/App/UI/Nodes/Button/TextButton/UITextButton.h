@@ -1,7 +1,8 @@
 #pragma once
+#include "App/UI/Nodes/Button/UIButton.h"
 #include "App/UI/Nodes/Text/UIText.h"
 
-class UITextButton : public UIText
+class UITextButton : public UIButton, public UIText
 {
 public:
 	UITextButton();
@@ -12,10 +13,4 @@ public:
 	void HandleEvents(sf::Event& event);
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target);
-
-public:
-	void SetCallback(std::function<void()> callback);
-
-private:
-	std::function<void()> m_Callback;
 };

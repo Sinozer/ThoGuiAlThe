@@ -30,7 +30,7 @@ public:
 	UIImageButton* AddImageButton(const std::string& name, const std::string& textureName, const std::function<void()>& callback);
 
 	UITextInput* AddTextInput(const std::string& name);
-	UITextInput* AddTextInput(const std::string& name, const std::string& text);
+	UITextInput* AddTextInput(const std::string& name, const std::string& defaultText);
 
 	UIText* GetText(const std::string& name);
 	UIImage* GetImage(const std::string& name);

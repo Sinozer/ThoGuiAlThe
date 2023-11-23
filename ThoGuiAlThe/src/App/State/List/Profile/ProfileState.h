@@ -9,6 +9,7 @@ public:
 	void HandleEvents(sf::Event& event) override;
 	void Update(const float& dt) override;
 	void Render(sf::RenderTarget* target = nullptr) override;
+	void Resume() override;
 	void End() override;
 
 private:
@@ -19,5 +20,8 @@ private:
 	void HandleUiEvents(sf::Event& event) override;
 	void UpdateUi(const float& dt) override;
 	void RenderUi(sf::RenderTarget* target) override;
+
+private:
+	int m_ActualIndex = 0;
 };
 

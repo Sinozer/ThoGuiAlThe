@@ -90,6 +90,10 @@ void GameState::Render(sf::RenderTarget* target)
 	RenderGame(target);
 }
 
+void GameState::Resume()
+{
+}
+
 void GameState::End()
 {
 }

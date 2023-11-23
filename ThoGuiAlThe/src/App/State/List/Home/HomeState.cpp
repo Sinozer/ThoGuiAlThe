@@ -14,22 +14,52 @@ void HomeState::InitBackground()
 }
 void HomeState::InitUi()
 {
+#pragma region Not Connected
+	if (I(NetworkManager).IsConnected() == false)
+	{
+		auto* networkConnectionFailedButton = m_UiManager.AddImageButton("NETWORK_CONNECTION_FAILED", "RETRY_THUMB");
+		networkConnectionFailedButton->setPosition(WINDOW_SCREEN_WIDTH * 0.01f, WINDOW_SCREEN_HEIGHT / 100.f);
+
+		auto* networkConnectionFailedText = m_UiManager.AddText("NETWORK_CONNECTION_FAILED", "NETWORK CONNECTION FAILED");
+		networkConnectionFailedText->setCharacterSize(15);
+		networkConnectionFailedText->setOutlineColor(sf::Color::Black);
+		networkConnectionFailedText->setOutlineThickness(1.f);
+		networkConnectionFailedText->setPosition(networkConnectionFailedButton->getPosition().x + networkConnectionFailedButton->getGlobalBounds().width * 1.05f, networkConnectionFailedButton->getPosition().y);
+
+		networkConnectionFailedButton->SetCallback([this, networkConnectionFailedButton, networkConnectionFailedText]()
+			{
+				if (NetworkManager::GetInstance().Connect())
+				{
+					networkConnectionFailedButton->SetActive(false);
+					networkConnectionFailedText->SetActive(false);
+				}
+			}
+		);
+	}
 	auto* title = m_UiManager.AddText("TITLE", "THOGUIALTHE");
 	title->setCharacterSize(100);
 	title->setOutlineColor(sf::Color::Black);
 	title->setOutlineThickness(4.f);
 	title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
+#pragma endregion
 
-	auto* profile = m_UiManager.AddImageButton("PROFILE", "DEFAULT_THUMB", [this]() { StateManager::GetInstance()->AddState(new ProfileState()); });
-	profile->setPosition(WINDOW_SCREEN_WIDTH * 0.99f - profile->getGlobalBounds().width, WINDOW_SCREEN_HEIGHT / 100.f);
-	profile->SetOutlineThickness(3.f);
-	profile->SetOutlineColor(sf::Color::White);
+#pragma region Connected
+	if (I(NetworkManager).IsInit())
+	{
+		const PlayerDisplayData& playerDisplayData = I(NetworkManager).GetPlayerDisplayData();
 
-	auto* username = m_UiManager.AddTextInput("USERNAME", "{USERNAME}");
-	username->setCharacterSize(15);
-	username->setOutlineColor(sf::Color::Black);
-	username->setOutlineThickness(1.f);
-	username->setPosition(profile->getPosition().x - username->getGlobalBounds().width * 1.05f, profile->getPosition().y);
+		auto* profile = m_UiManager.AddImageButton("PROFILE", playerDisplayData.profilePictureThumbPath, [this]() { StateManager::GetInstance()->AddState(new ProfileState()); });
+		profile->setPosition(WINDOW_SCREEN_WIDTH * 0.99f - profile->getGlobalBounds().width, WINDOW_SCREEN_HEIGHT / 100.f);
+		profile->SetOutlineThickness(3.f);
+		profile->SetOutlineColor(sf::Color(playerDisplayData.color[0], playerDisplayData.color[1], playerDisplayData.color[2], playerDisplayData.color[3]));
+
+		auto* username = m_UiManager.AddTextInput("USERNAME", playerDisplayData.name);
+		username->setCharacterSize(15);
+		username->setOutlineColor(sf::Color::Black);
+		username->setOutlineThickness(1.f);
+		username->setPosition(profile->getPosition().x - username->getGlobalBounds().width * 1.05f, profile->getPosition().y);
+	}
+#pragma endregion
 
 	auto* start = m_UiManager.AddTextButton("START", "PLAY", [this]() { StateManager::GetInstance()->AddState(new SelectState()); });
 	start->setCharacterSize(50);
@@ -41,33 +71,30 @@ void HomeState::InitUi()
 	exit->setOutlineColor(sf::Color::Black);
 	exit->setOutlineThickness(2.f);
 	exit->setPosition(WINDOW_SCREEN_WIDTH / 2 - exit->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - exit->getGlobalBounds().height - 50.f);
-
-	if (NetworkManager::GetInstance().IsConnected())
-		return;
-
-	auto* networkConnectionFailedButton = m_UiManager.AddImageButton("NETWORK_CONNECTION_FAILED", "RETRY_THUMB");
-	networkConnectionFailedButton->setPosition(WINDOW_SCREEN_WIDTH * 0.01f, WINDOW_SCREEN_HEIGHT / 100.f);
-
-	auto* networkConnectionFailedText = m_UiManager.AddText("NETWORK_CONNECTION_FAILED", "NETWORK CONNECTION FAILED");
-	networkConnectionFailedText->setCharacterSize(15);
-	networkConnectionFailedText->setOutlineColor(sf::Color::Black);
-	networkConnectionFailedText->setOutlineThickness(1.f);
-	networkConnectionFailedText->setPosition(networkConnectionFailedButton->getPosition().x + networkConnectionFailedButton->getGlobalBounds().width * 1.05f, networkConnectionFailedButton->getPosition().y);
-
-	networkConnectionFailedButton->SetCallback([this, networkConnectionFailedButton, networkConnectionFailedText]()
-		{
-			if (NetworkManager::GetInstance().Connect())
-			{
-				networkConnectionFailedButton->SetActive(false);
-				networkConnectionFailedText->SetActive(false);
-			}
-		}
-	);
 }
 void HomeState::Init()
 {
 	InitBackground();
 	InitUi();
+}
+
+void HomeState::Resume()
+{
+	const PlayerDisplayData& playerDisplayData = I(NetworkManager).GetPlayerDisplayData();
+
+	auto* profile = m_UiManager.GetImageButton("PROFILE");
+	if (profile != nullptr)
+	{
+		profile->setTexture(I(AssetManager)->GetTexture(playerDisplayData.profilePictureThumbPath));
+		profile->SetOutlineColor(sf::Color(playerDisplayData.color[0], playerDisplayData.color[1], playerDisplayData.color[2], playerDisplayData.color[3]));
+	}
+
+	auto* username = m_UiManager.GetTextInput("USERNAME");
+	if (username != nullptr)
+	{
+		username->setString(playerDisplayData.name);
+		username->setPosition(profile->getPosition().x - username->getGlobalBounds().width * 1.05f, profile->getPosition().y);
+	}
 }
 
 void HomeState::End()

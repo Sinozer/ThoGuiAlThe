@@ -1,7 +1,7 @@
 #include "App.h"
 
 #include "Network/NetworkManager.h"
-#include "App/State/List/Home/HomeState.h"
+#include "App/State/List/Connect/ConnectState.h"
 
 App::App() : m_Event(), m_DeltaTime(0.f), m_StateManager(StateManager::GetInstance())
 {
@@ -17,15 +17,14 @@ void App::InitWindow()
 }
 void App::InitStates() const
 {
-	m_StateManager->AddState(new HomeState());
+	m_StateManager->AddState(new ConnectState());
 }
 void App::Init()
 {
-	NetworkManager::GetInstance().Connect();
 	InitWindow();
 	InitStates();
 
-	AssetManager* assetManager = AssetManager::GetInstance();
+	AssetManager* assetManager = I(AssetManager);
 
 	assetManager->LoadFont("DEFAULT", "assets/fonts/super_squad/super_squad.ttf");
 
@@ -79,6 +78,7 @@ void App::Run()
 
 		m_Window.display();
 	}
+	I(NetworkManager).Close();
 }
 
 void App::End() const

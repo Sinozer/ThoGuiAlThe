@@ -2,6 +2,8 @@
 
 #include "Network/TgatNetworkHelper.h"
 
+class User;
+
 class NetworkManager : public TgatNetworkHelper
 {
 public:
@@ -9,25 +11,37 @@ public:
 
 	static const void DestroyInstance();
 
-	bool Connect();
+	bool Connect(std::string ipAddress = "localhost");
 	void Disconnect();
+	void Close();
 
 	void HandleData(nlohmann::json& jsonData);
+	void SendData(nlohmann::json&& jsonData);
+	bool ReceiveData(TgatServerMessage type, nlohmann::json& data);
+
+	void InitPlayerWithData(nlohmann::json& jsonData);
 
 	TGATPLAYERID GetPlayerId() const;
+	const PlayerDisplayData& GetPlayerDisplayData() const;
+	User* GetUser() const { return m_User; }
 	TGATSESSIONID GetSessionId() const;
 
 	const bool IsConnected() const { return m_Connected; }
-
-	std::queue<nlohmann::json>& GetReceiveQueue(TgatServerMessage type) { return m_ReceiveQueues[type]; }
-
+	const bool IsInit() const { return m_User != nullptr; }
 private:
 	bool m_Connected = false;
 
 	addrinfo m_AddressInfo;
 	HWND m_hWnd;
-	TGATPLAYERID m_PlayerId;
+
+	User* m_User;
+
 	TGATSESSIONID m_SessionId;
+	
+	HANDLE m_NetworkThread;
+	CRITICAL_SECTION m_SendCS;
+	CRITICAL_SECTION m_ReceiveCS;
+	std::queue<nlohmann::json> m_SendQueue;
 	std::unordered_map<TgatServerMessage, std::queue<nlohmann::json>> m_ReceiveQueues;
 
 	HANDLE m_NetworkHandle;
@@ -43,7 +57,7 @@ private:
 	void Init();
 	void InitWindow();
 
-	void CreateSocket();
+	void CreateSocket(std::string ipAddress = "localhost");
 
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 
@@ -52,4 +66,9 @@ private:
 	void NetworkMain();
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	void ProcessMessages();
+
+	void SendNetworkData();
+	static DWORD WINAPI NetworkThread(LPVOID lpParam);
+	void NetworkMain();
 };
