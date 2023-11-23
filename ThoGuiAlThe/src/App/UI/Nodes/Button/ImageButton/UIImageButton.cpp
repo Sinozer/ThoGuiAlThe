@@ -78,16 +78,4 @@ void UIImageButton::Render(sf::RenderTarget* target)
 		return;
 
 	target->draw(*this);
-
-	if (m_OutlineThickness > 0.f)
-	{
-		sf::RectangleShape outline;
-		outline.setSize(sf::Vector2f(getGlobalBounds().width, getGlobalBounds().height));
-		outline.setFillColor(sf::Color::Transparent);
-		outline.setOutlineColor(m_OutlineColor);
-		outline.setOutlineThickness(m_OutlineThickness);
-		outline.setPosition(getPosition());
-
-		target->draw(outline);
-	}
 }
