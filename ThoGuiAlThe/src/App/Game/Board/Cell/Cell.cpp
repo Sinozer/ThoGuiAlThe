@@ -1,24 +1,22 @@
-#include "stdafx.h"
+#include "tgatLib.h"
 #include "Cell.h"
 
 #include "Constants.h"
+#include "App/Network/NetworkManager.h"
 
-Cell::Cell(sf::Vector2u position)
-	: m_Player(nullptr)
-	, m_Position(position)
+Cell::Cell(const sf::Vector2u position) : m_Player(nullptr), m_Position(position)
 {
 }
 
 Cell::~Cell()
-{
-}
+= default;
 
 void Cell::Init()
 {
 	setSize(sf::Vector2f(CELL_SIZE_X, CELL_SIZE_Y));
 	setPosition(
-		m_Position.x * CELL_SIZE_X + WINDOW_SCREEN_WIDTH / 2 - getGlobalBounds().width / 2 * BOARD_SIZE_X,
-		m_Position.y * CELL_SIZE_Y + WINDOW_SCREEN_HEIGHT / 1.5f - getGlobalBounds().height / 1.5f * BOARD_SIZE_Y
+		static_cast<float>(m_Position.x) * CELL_SIZE_X + WINDOW_SCREEN_WIDTH / 2 - getGlobalBounds().width / 2 * BOARD_SIZE_X,
+		static_cast<float>(m_Position.y) * CELL_SIZE_Y + WINDOW_SCREEN_HEIGHT / 1.5f - getGlobalBounds().height / 1.5f * BOARD_SIZE_Y
 	);
 	setFillColor(sf::Color::Transparent);
 	setOutlineThickness(1.f);
@@ -28,6 +26,15 @@ void Cell::Init()
 void Cell::HandleEvents(sf::Event* event)
 {
 	std::cout << "Cell clicked: " << m_Position.x << " " << m_Position.y << std::endl;
+	
+	I(NetworkManager).SendData(
+	{
+		{JSON_EVENT_TYPE, TgatClientMessage::PLAYER_INPUT},
+		{JSON_PLAYER_MOVE, {{"x", m_Position.x}, {"y", m_Position.y}}},
+		{JSON_PLAYER_ID, I(NetworkManager).GetPlayerId()},
+		{JSON_SESSION_ID, I(NetworkManager).GetSessionId()}
+	}
+	);
 }
 
 void Cell::Update(const float& dt)

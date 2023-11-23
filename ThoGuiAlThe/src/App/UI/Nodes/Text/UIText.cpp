@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "UIText.h"
 
 UIText::UIText()
@@ -15,9 +14,14 @@ UIText::UIText(std::string text)
 
 void UIText::Update(const float& dt)
 {
+	if (m_Active == false)
+		return;
 }
 
 void UIText::Render(sf::RenderTarget* target)
 {
+	if (m_Active == false)
+		return;
+
 	target->draw(*this);
 }

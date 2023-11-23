@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Player.h"
 
 Player::Player(sf::Color color)

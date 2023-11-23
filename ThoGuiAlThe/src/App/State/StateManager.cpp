@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "StateManager.h"
 
 #pragma region Singleton
@@ -17,27 +16,38 @@ const void StateManager::DestroyInstance()
 	if (s_Instance == nullptr)
 		return;
 
-	delete s_Instance;
-	s_Instance = nullptr;
+	DELPTR(s_Instance);
 }
 #pragma endregion
 
-StateManager::StateManager()
-	: m_Adding(false)
-	, m_Removing(false)
-	, m_NewState(nullptr)
+StateManager::StateManager() : m_NewState(nullptr), m_Adding(false), m_Removing(0), m_Clearing(false)
 {
+    InitializeCriticalSection(&m_StateCS);
+}
+
+StateManager::~StateManager()
+{
+	for (int i = 0; i < m_States.size(); i++)
+	{
+		DELPTR(m_States.top());
+		m_States.pop();
+	}
+
+	DELPTR(m_NewState);
+	DeleteCriticalSection(&m_StateCS);
 }
 
 void StateManager::AddState(State* state)
 {
+	EnterCriticalSection(&m_StateCS);
 	m_Adding = true;
 	m_NewState = state;
+	LeaveCriticalSection(&m_StateCS);
 }
 
-void StateManager::RemoveState()
+void StateManager::RemoveState(unsigned char amount)
 {
-	m_Removing = true;
+	m_Removing = amount;
 }
 
 void StateManager::RemoveAllStates()
@@ -45,12 +55,17 @@ void StateManager::RemoveAllStates()
 	m_Clearing = true;
 }
 
+void StateManager::GoToFirstState()
+{
+	m_Removing = (uint32_t)m_States.size() - 1;
+}
+
 bool StateManager::IsEmpty()
 {
 	return m_States.empty();
 }
 
-void StateManager::m_Add()
+void StateManager::Add()
 {
 	m_Adding = false;
 	m_States.push(m_NewState);
@@ -58,35 +73,46 @@ void StateManager::m_Add()
 
 	m_States.top()->Init();
 }
-void StateManager::m_Remove()
+void StateManager::Remove()
 {
-	m_Removing = false;
+	if (m_Removing > m_States.size())
+	{
+		Clear();
+		return;
+	}
 
-	m_States.top()->End();
-	delete m_States.top();
-	m_States.pop();
+	for (unsigned char i = 0; i < m_Removing; i++)
+	{
+		m_States.top()->End();
+		DELPTR(m_States.top());
+		m_States.pop();
+	}
+
+	m_States.top()->Resume();
+
+	m_Removing = 0;
 }
-void StateManager::m_Clear()
+void StateManager::Clear()
 {
 	m_Clearing = false;
 
 	while (!m_States.empty())
 	{
 		m_States.top()->End();
-		delete m_States.top();
+		DELPTR(m_States.top());
 		m_States.pop();
 	}
 }
 void StateManager::ProcessStateChanges()
 {
-	if (m_Removing && !m_States.empty())
-		m_Remove();
+	if (m_Removing > 0 && !m_States.empty())
+		Remove();
 
 	if (m_Clearing && !m_States.empty())
-		m_Clear();
+		Clear();
 
 	if (m_Adding)
-		m_Add();
+		Add();
 }
 
 State* StateManager::GetActiveState()

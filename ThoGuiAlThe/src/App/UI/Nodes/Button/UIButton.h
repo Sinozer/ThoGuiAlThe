@@ -1,18 +1,10 @@
 #pragma once
-#include "App/UI/Nodes/Text/UIText.h"
-
-class UIButton : public UIText
+class UIButton
 {
 public:
-	UIButton();
-	UIButton(std::string text);
-	UIButton(std::string text, std::function<void()> callback);
-	~UIButton() = default;
-
-	void HandleEvents(sf::Event& event);
-	void Update(const float& dt);
-	void Render(sf::RenderTarget* target);
-
-private:
+	void SetCallback(std::function<void()> callback) { m_Callback = callback; }
+	void OnClick() { if (m_Callback) m_Callback(); }
+protected:
 	std::function<void()> m_Callback;
 };
+
