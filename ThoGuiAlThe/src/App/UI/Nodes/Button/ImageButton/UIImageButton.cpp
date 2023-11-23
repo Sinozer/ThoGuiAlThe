@@ -74,8 +74,5 @@ void UIImageButton::Update(const float& dt)
 
 void UIImageButton::Render(sf::RenderTarget* target)
 {
-	if (m_Active == false)
-		return;
-
-	target->draw(*this);
+	UIImage::Render(target);
 }
