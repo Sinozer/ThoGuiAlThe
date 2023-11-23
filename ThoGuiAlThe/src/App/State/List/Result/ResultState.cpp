@@ -77,6 +77,10 @@ void ResultState::Render(sf::RenderTarget* target)
 	RenderUi(target);
 }
 
+void ResultState::Resume()
+{
+}
+
 void ResultState::End()
 {
 }

@@ -244,7 +244,7 @@ UITextInput* UIManager::AddTextInput(const std::string& name)
 	m_UiTextInputs[name] = new UITextInput();
 	return m_UiTextInputs[name];
 }
-UITextInput* UIManager::AddTextInput(const std::string& name, const std::string& text)
+UITextInput* UIManager::AddTextInput(const std::string& name, const std::string& defaultText)
 {
 	if (m_UiTextInputs.contains(name))
 	{
@@ -252,7 +252,7 @@ UITextInput* UIManager::AddTextInput(const std::string& name, const std::string&
 		return m_UiTextInputs[name];
 	}
 
-	m_UiTextInputs[name] = new UITextInput(text);
+	m_UiTextInputs[name] = new UITextInput(defaultText);
 	return m_UiTextInputs[name];
 }
 
@@ -266,6 +266,17 @@ UIText* UIManager::GetText(const std::string& name)
 	std::cout << "UIText with name: " << name << " does not exist!" << std::endl;
 	return nullptr;
 
+}
+
+UIImage* UIManager::GetImage(const std::string& name)
+{
+	if (m_UiImages.contains(name))
+	{
+		return m_UiImages[name];
+	}
+
+	std::cout << "UIImage with name: " << name << " does not exist!" << std::endl;
+	return nullptr;
 }
 
 UITextButton* UIManager::GetTextButton(const std::string& name)

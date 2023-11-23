@@ -1,14 +1,17 @@
 #pragma once
-class User
+
+#include "Player/DisplayablePlayer.h"
+
+class User : public DisplayablePlayer
 {
 public:
-	User() = default;
+	User(TGATPLAYERID id) : m_Id(id) { }
 	~User() = default;
 
+	[[nodiscard]] TGATPLAYERID GetId() const { return m_Id; }
+
 private:
-	std::string m_Name = "USER";
-	
-	std::string m_ProfilePictureName = "THUMB_DEFAULT";
-	sf::Color m_ProfilePictureOutlineColor = sf::Color::Transparent;
+	PlayerDisplayData m_displayData;
+	TGATPLAYERID m_Id;
 };
 

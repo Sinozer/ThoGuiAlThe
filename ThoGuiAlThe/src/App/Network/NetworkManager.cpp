@@ -1,3 +1,5 @@
+#include "App/User/User.h"
+
 #include "NetworkManager.h"
 
 #include "App/State/List/Create/CreateState.h"
@@ -6,7 +8,6 @@
 
 #include "Exceptions/TgatException.h"
 
-#define MSG_SERVER (WM_USER + 1)
 #define MSG_SEND (WM_APP)
 
 static constexpr char PORT[5] = "6969";
@@ -14,10 +15,12 @@ static constexpr char PORT[5] = "6969";
 NetworkManager* NetworkManager::s_Instance = nullptr;
 
 NetworkManager::NetworkManager() 
-	: TgatNetworkHelper(), m_PlayerId(-1), m_SessionId(-1), m_Connected(false),
-	m_AddressInfo{}, m_hWnd(nullptr), m_NetworkThread(nullptr),
-	m_SendCS{}, m_ReceiveCS{}, m_SendQueue(), m_ReceiveQueues()
+	: TgatNetworkHelper(), m_SessionId(-1), m_Connected(false),
+	m_AddressInfo{}, m_SendCS{}, m_ReceiveCS{}, m_SendQueue(), m_ReceiveQueues()
 {
+	m_hWnd = nullptr;
+	m_User = nullptr;
+	m_NetworkThread = nullptr;
 	Init();
 }
 
@@ -48,10 +51,10 @@ NetworkManager::~NetworkManager()
 	DeleteCriticalSection(&m_ReceiveCS);
 }
 
-bool NetworkManager::Connect()
+bool NetworkManager::Connect(std::string ipAddress)
 {
 	if (m_ServerSocket == INVALID_SOCKET)
-		CreateSocket();
+		CreateSocket(ipAddress);
 
 	// Connect to server
 	if (connect(m_ServerSocket, m_AddressInfo.ai_addr, (int)m_AddressInfo.ai_addrlen) == SOCKET_ERROR)
@@ -84,6 +87,7 @@ void NetworkManager::Disconnect()
 	// Disconnect from server
 	closesocket(m_ServerSocket);
 	m_Connected = false;
+	DELPTR(m_User);
 }
 
 void NetworkManager::Close()
@@ -111,27 +115,42 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	switch (type)
 	{
 	case TgatServerMessage::PLAYER_INIT:
-		m_PlayerId = data[JSON_PLAYER_ID];
-		LOG(JSON_PLAYER_ID << ": " << m_PlayerId);
+	{
+		m_ReceiveQueues[TgatServerMessage::PLAYER_INIT].push(data);
 		break;
+	}
 	case TgatServerMessage::SESSION_CREATED:
+	{
 		m_SessionId = data[JSON_SESSION_ID];
 		LOG(JSON_SESSION_ID << ": " << m_SessionId);
 		StateManager::GetInstance()->AddState(new CreateState());
 		break;
+	}
 	case TgatServerMessage::SESSION_JOINED:
+	{
 		m_SessionId = data[JSON_SESSION_ID];
 		LOG(JSON_SESSION_ID << ": " << m_SessionId);
 		StateManager::GetInstance()->AddState(new GameState());
 		break;
+	}
 	case TgatServerMessage::PLAYER_INPUT:
+	{
 		m_ReceiveQueues[TgatServerMessage::PLAYER_INPUT].push(data);
 		break;
+	}
 	case TgatServerMessage::GAME_END:
+	{
 		m_ReceiveQueues[TgatServerMessage::GAME_END].push(data);
 		I(StateManager)->GoToFirstState();
 		I(StateManager)->AddState(new ResultState());
 		break;
+	}
+	case TgatServerMessage::PLAYER_INFO_CHANGED:
+	{
+		std::string d = data.dump();
+		m_ReceiveQueues[TgatServerMessage::PLAYER_INFO_CHANGED].push(data);
+		break;
+	}
 	default:
 		break;
 	}
@@ -150,9 +169,28 @@ void NetworkManager::SendData(nlohmann::json&& jsonData)
 	LeaveCriticalSection(&m_SendCS);
 }
 
+bool NetworkManager::ReceiveData(TgatServerMessage type, nlohmann::json& data)
+{
+    EnterCriticalSection(&m_ReceiveCS);
+    if (m_ReceiveQueues[type].empty())
+    {
+        LeaveCriticalSection(&m_ReceiveCS);
+        return false;
+    }
+    data = nlohmann::json(std::move(m_ReceiveQueues[type].front()));
+    m_ReceiveQueues[type].pop();
+    LeaveCriticalSection(&m_ReceiveCS);
+    return true;
+}
+
 TGATPLAYERID NetworkManager::GetPlayerId() const
 {
-	return (TGATPLAYERID)m_PlayerId;
+	return m_User->GetId();
+}
+
+const PlayerDisplayData& NetworkManager::GetPlayerDisplayData() const
+{
+	return m_User->GetDisplayData();
 }
 
 TGATSESSIONID NetworkManager::GetSessionId() const
@@ -160,18 +198,41 @@ TGATSESSIONID NetworkManager::GetSessionId() const
 	return (TGATSESSIONID)m_SessionId;
 }
 
-bool NetworkManager::ReceiveData(TgatServerMessage type, nlohmann::json& data)
+void NetworkManager::CreateSocket(std::string ipAddress)
 {
-	EnterCriticalSection(&m_ReceiveCS);
-	if (m_ReceiveQueues[type].empty())
+	// Resolve address and port
+	addrinfo* result = NULL;
+	addrinfo hints{};
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	int iResult = getaddrinfo(ipAddress.c_str(), PORT, &hints, &result);
+
+	if (iResult != 0)
 	{
-		LeaveCriticalSection(&m_ReceiveCS);
-		return false;
+		LOG("getaddrinfo failed with error: " << iResult);
+		m_ServerSocket = INVALID_SOCKET;
+		return;
 	}
-	data = nlohmann::json(std::move(m_ReceiveQueues[type].front()));
-	m_ReceiveQueues[type].pop();
-	LeaveCriticalSection(&m_ReceiveCS);
-	return true;
+	else
+		LOG("getaddrinfo success");
+
+	// Socket creation
+	m_ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+
+	if (m_ServerSocket == INVALID_SOCKET)
+	{
+		LOG("socket failed with error: " << WSAGetLastError());
+		freeaddrinfo(result);
+		m_ServerSocket = INVALID_SOCKET;
+		return;
+	}
+	else
+		LOG("socket success");
+
+	m_AddressInfo = *result;
+	freeaddrinfo(result);
 }
 
 void NetworkManager::Init()
@@ -182,12 +243,14 @@ void NetworkManager::Init()
     // Create network thread
 	m_NetworkThread = CreateThread(nullptr, 0, NetworkThread, this, 0, nullptr);
 	if (m_NetworkThread == nullptr)
-	{
+    {
         LOG("CreateThread failed with error: " << GetLastError());
         throw std::exception("CreateThread failed");
     }
     else
         LOG("CreateThread success");
+
+	//CreateSocket();
 }
 
 void NetworkManager::InitWindow()
@@ -219,43 +282,6 @@ void NetworkManager::InitWindow()
 	}
 	else
 		LOG("CreateWindowEx success");
-}
-
-void NetworkManager::CreateSocket()
-{
-	// Resolve address and port
-	addrinfo* result = NULL;
-	addrinfo hints{};
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-
-	int iResult = getaddrinfo("localhost", PORT, &hints, &result);
-
-	if (iResult != 0)
-	{
-		LOG("getaddrinfo failed with error: " << iResult);
-		m_ServerSocket = INVALID_SOCKET;
-		return;
-	}
-	else
-		LOG("getaddrinfo success");
-
-	// Socket creation
-	m_ServerSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-
-	if (m_ServerSocket == INVALID_SOCKET)
-	{
-		LOG("socket failed with error: " << WSAGetLastError());
-		freeaddrinfo(result);
-		m_ServerSocket = INVALID_SOCKET;
-		return;
-	}
-	else
-		LOG("socket success");
-
-	m_AddressInfo = *result;
-	freeaddrinfo(result);
 }
 
 LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -317,6 +343,25 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
+void NetworkManager::InitPlayerWithData(nlohmann::json& jsonData)
+{
+	m_User = new User(jsonData[JSON_PLAYER_ID]);
+	LOG("Self was created with id : " << m_User->GetId());
+
+	if ((jsonData.contains(JSON_PLAYER_NAME) || jsonData.contains(JSON_PLAYER_PPP) || jsonData.contains(JSON_PLAYER_COLOR)) == false)
+	{
+		LOG("JSON_PLAYER_NAME or JSON_PLAYER_PPP or JSON_PLAYER_COLOR not found");
+		return;
+	}
+
+	PlayerDisplayData data;
+	data.name = PLAYER_DD_ARG_NAME(jsonData);
+	data.profilePicturePath = PLAYER_DD_ARG_PPP(jsonData);
+	data.profilePictureThumbPath = PLAYER_DD_ARG_PPTP(jsonData);
+	data.color = PLAYER_DD_ARG_COLOR(jsonData);
+	m_User->SetDisplayData(data);
+}
+
 void NetworkManager::ProcessMessages()
 {
 	MSG msg{};
@@ -341,7 +386,7 @@ void NetworkManager::SendNetworkData()
 	LeaveCriticalSection(&m_SendCS);
 }
 
-DWORD __stdcall NetworkManager::NetworkThread(LPVOID lpParam)
+DWORD WINAPI NetworkManager::NetworkThread(LPVOID lpParam)
 {
 	NetworkManager* networkManager = static_cast<NetworkManager*>(lpParam);
 	networkManager->NetworkMain();
@@ -363,7 +408,7 @@ void NetworkManager::NetworkMain()
 	else
 		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
 
-	Connect();
+	//Connect();
 
 	ProcessMessages();
 

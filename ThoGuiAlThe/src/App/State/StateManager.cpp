@@ -88,6 +88,8 @@ void StateManager::Remove()
 		m_States.pop();
 	}
 
+	m_States.top()->Resume();
+
 	m_Removing = 0;
 }
 void StateManager::Clear()

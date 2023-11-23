@@ -11,12 +11,14 @@ public:
 	void UpdateGameSession(uint32_t id, uint32_t playerId, int x, int y, nlohmann::json& returnJson);
 
 	GameSession* GetWaitingSessionById(uint32_t id) const;
+	GameSession* GetFirstWaitingSession() const { return m_WaitingSessions.begin()->second;}
+
 	GameSession* GetActiveSessionById(uint32_t id) const;
 
 private:
 	const int MAGIC_NUMBER = 7817;
 
-	std::map<uint32_t, GameSession*> m_WaitingSessions;
+	std::unordered_map<uint32_t, GameSession*> m_WaitingSessions;
 	std::unordered_map<uint32_t, GameSession*> m_ActiveSessions;
 
 	void EndGameSession(uint32_t id);

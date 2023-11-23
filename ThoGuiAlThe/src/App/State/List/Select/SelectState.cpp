@@ -89,6 +89,10 @@ void SelectState::Render(sf::RenderTarget* target)
 	RenderUi(target);
 }
 
+void SelectState::Resume()
+{
+}
+
 void SelectState::End()
 {
 }
