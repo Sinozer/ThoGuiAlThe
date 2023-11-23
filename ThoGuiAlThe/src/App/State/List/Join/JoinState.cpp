@@ -65,6 +65,16 @@ void JoinState::InitUi()
 				{JSON_SESSION_ID, -1}
 				});
 		});
+
+	auto* badId = m_UiManager.AddText("BadId", "Bad ID");
+	badId->setPosition(
+		WINDOW_SCREEN_WIDTH / 2 - badId->getGlobalBounds().getSize().x / 2,
+		WINDOW_SCREEN_HEIGHT / 1.5f + badId->getGlobalBounds().getSize().y / 2
+	);
+	badId->setFillColor(sf::Color::Red);
+	badId->setOutlineColor(sf::Color::Black);
+	badId->setOutlineThickness(2.f);
+	badId->SetActive(false);
 }
 void JoinState::Init()
 {
@@ -95,6 +105,14 @@ void JoinState::UpdateUi(const float& dt)
 void JoinState::Update(const float& dt)
 {
 	UpdateUi(dt);
+
+	NetworkManager& networkManager = I(NetworkManager);
+
+	nlohmann::json data;
+	if (networkManager.ReceiveData(TgatServerMessage::BAD_SESSION_ID, data) == false)
+		return;
+
+	m_UiManager.GetText("BadId")->SetActive(true);
 }
 
 void JoinState::RenderUi(sf::RenderTarget* target)

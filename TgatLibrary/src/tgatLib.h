@@ -76,6 +76,8 @@ enum class TgatServerMessage
 
 	SESSION_LEFT = 8, // {"eventType": "PLAYER_LEAVE_SESSION", "Player" : "playerId": uuid(0)}
 
+	PLAYER_INFO = 9, // {"eventType": "PLAYER_INFO", "Player" : {"name": "name", "profilePicturePath": "path", "color": [0, 0, 0, 0]}
+
 	BAD_SESSION_ID = 101, // {"eventType": "BAD_SESSION_ID"}
 	BAD = 500, // {"eventType": "BAD", error...}
 };

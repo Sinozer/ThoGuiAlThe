@@ -38,19 +38,6 @@ void SelectState::InitUi()
 	join->setOutlineColor(sf::Color::Black);
 	join->setOutlineThickness(2.f);
 	join->setPosition(WINDOW_SCREEN_WIDTH / 2 - join->getGlobalBounds().width / 2, create->getPosition().y + create->getGlobalBounds().height * 1.4f);
-
-
-	auto* bypass = m_UiManager.AddTextButton("BYPASS", "BYPASS", [this]() 
-		{ 
-			StateManager::GetInstance()->AddState(new GameState());
-			I(NetworkManager).SendData({
-				{JSON_EVENT_TYPE, TgatClientMessage::CREATE_SESSION}
-			});
-		});
-	bypass->setCharacterSize(50);
-	bypass->setOutlineColor(sf::Color::Black);
-	bypass->setOutlineThickness(2.f);
-	bypass->setPosition(WINDOW_SCREEN_WIDTH / 2 - bypass->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - bypass->getGlobalBounds().height - 100.f);
 }
 void SelectState::Init()
 {

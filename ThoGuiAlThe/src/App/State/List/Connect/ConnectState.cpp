@@ -41,8 +41,6 @@ void ConnectState::Init()
 {
 	InitBackground();
 	InitUi();
-
-	//Sleep(1000);
 }
 
 void ConnectState::Resume()

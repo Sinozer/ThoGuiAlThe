@@ -299,8 +299,36 @@ void Server::HandleJson(const nlohmann::json& json)
 			{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
 		};
 
-		m_GameManager->ExitCS();
 		m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+
+		Player* p1 = session->GetPlayers().begin()->second;
+		p2 = (--session->GetPlayers().end())->second;
+
+		packageToSend =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INFO},
+			{JSON_PLAYER_ID, (TGATPLAYERID)p2->GetId()},
+			{JSON_PLAYER_NAME, p2->GetName()},
+			{JSON_PLAYER_PPP, p2->GetProfilePicturePath()},
+			{JSON_PLAYER_PPTP, p2->GetProfilePictureThumbPath()},
+			{JSON_PLAYER_COLOR, p2->GetBorderColor()}
+		};
+
+		m_GameNetworkManager->SendDataToPlayer(p1, packageToSend);
+
+		packageToSend =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INFO},
+			{JSON_PLAYER_ID, (TGATPLAYERID)p1->GetId()},
+			{JSON_PLAYER_NAME, p1->GetName()},
+			{JSON_PLAYER_PPP, p1->GetProfilePicturePath()},
+			{JSON_PLAYER_PPTP, p1->GetProfilePictureThumbPath()},
+			{JSON_PLAYER_COLOR, p1->GetBorderColor()}
+		};
+
+		m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
+		// We know this is ugly but for now we will do it like this
+		m_GameManager->ExitCS();
 		break;
 	}
 	case TgatClientMessage::REPLAY:
@@ -343,6 +371,34 @@ void Server::HandleJson(const nlohmann::json& json)
 			};
 
 			m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+
+			Player* p1 = session->GetPlayers().begin()->second;
+			Player* p2 = (--session->GetPlayers().end())->second;
+
+			packageToSend =
+			{
+				{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INFO},
+				{JSON_PLAYER_ID, (TGATPLAYERID)p2->GetId()},
+				{JSON_PLAYER_NAME, p2->GetName()},
+				{JSON_PLAYER_PPP, p2->GetProfilePicturePath()},
+				{JSON_PLAYER_PPTP, p2->GetProfilePictureThumbPath()},
+				{JSON_PLAYER_COLOR, p2->GetBorderColor()}
+			};
+
+			m_GameNetworkManager->SendDataToPlayer(p1, packageToSend);
+
+			packageToSend =
+			{
+				{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INFO},
+				{JSON_PLAYER_ID, (TGATPLAYERID)p1->GetId()},
+				{JSON_PLAYER_NAME, p1->GetName()},
+				{JSON_PLAYER_PPP, p1->GetProfilePicturePath()},
+				{JSON_PLAYER_PPTP, p1->GetProfilePictureThumbPath()},
+				{JSON_PLAYER_COLOR, p1->GetBorderColor()}
+			};
+
+			m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
+			// We know this is ugly but for now we will do it like this
 		}
 		else if (session->GetReplayCount() == GameSession::MAX_PLAYERS_PER_GAME)
 		{
