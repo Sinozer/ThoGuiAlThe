@@ -2,7 +2,6 @@
 
 UITextButton::UITextButton()
 {
-	setString("DEFAULT STRING");
 	m_Callback = []() {};
 }
 

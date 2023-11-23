@@ -6,9 +6,10 @@ UITextInput::UITextInput()
 	setFont(AssetManager::GetInstance()->GetFont("DEFAULT"));
 }
 
-UITextInput::UITextInput(std::string text)
+UITextInput::UITextInput(std::string defaultText)
 {
-	setString(text);
+	m_DefaultText = defaultText;
+	setString(defaultText);
 	setFont(AssetManager::GetInstance()->GetFont("DEFAULT"));
 }
 
@@ -21,7 +22,15 @@ void UITextInput::HandleEvents(sf::Event& event)
 		m_Focus = getGlobalBounds().contains((float)event.mouseButton.x, (float)event.mouseButton.y);
 
 	if (!m_Focus)
+	{
+		if (getString().getSize() == 0 && m_DefaultText.size() > 0)
+			setString(m_DefaultText);
+
 		return;
+	}
+
+	if (getString() == m_DefaultText)
+		setString("");
 
 	if (event.type == sf::Event::TextEntered)
 	{

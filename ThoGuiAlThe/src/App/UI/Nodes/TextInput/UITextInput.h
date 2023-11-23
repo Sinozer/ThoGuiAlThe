@@ -5,7 +5,7 @@ class UITextInput : public UIText
 {
 public:
 	UITextInput();
-	UITextInput(std::string text);
+	UITextInput(std::string defaultText);
 	~UITextInput() = default;
 
 	void HandleEvents(sf::Event& event);

@@ -27,7 +27,7 @@ void ConnectState::InitUi()
 
 	auto* connectButton = m_UiManager.AddTextButton("CONNECT", "CONNECT");
 
-	auto* ipInput = m_UiManager.AddTextInput("IP_INPUT");
+	auto* ipInput = m_UiManager.AddTextInput("IP_INPUT", "Try something like '192.168.0.1'");
 	ipInput->setPosition(
 		ipText->getPosition().x + ipText->getGlobalBounds().width + 10.f,
 		ipText->getPosition().y
