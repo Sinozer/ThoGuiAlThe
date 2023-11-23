@@ -15,6 +15,8 @@ public:
 
 	GameSession* GetActiveSessionById(uint32_t id) const;
 
+	void OnServerClose();
+
 private:
 	const int MAGIC_NUMBER = 7817;
 

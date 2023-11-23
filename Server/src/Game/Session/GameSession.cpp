@@ -1,6 +1,9 @@
 #include "Player/Player.h"
 #include "GameSession.h"
 
+#include "Network/Server.h"
+#include "Player/PlayerManager.h"
+
 GameSession::GameSession() : m_Board(), m_Players(), m_Turn(0), m_Id(0), m_IsEnded(false)
 {
 	for (int i = 0; i < BOARD_SIZE; i++)
@@ -11,6 +14,12 @@ GameSession::GameSession() : m_Board(), m_Players(), m_Turn(0), m_Id(0), m_IsEnd
 GameSession::~GameSession()
 {
 	m_Spectators.clear();
+	
+	for (auto& player : m_Players | std::views::values)
+	{
+		I(Server).GetPlayerManager()->RemovePlayer(player);
+		NULLPTR(player)
+	}
 	m_Players.clear();
 }
 
