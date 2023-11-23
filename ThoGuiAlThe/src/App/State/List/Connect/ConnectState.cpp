@@ -25,13 +25,15 @@ void ConnectState::InitUi()
 		WINDOW_SCREEN_HEIGHT / 2 - ipText->getGlobalBounds().height / 2 - 50.f
 	);
 
+	auto* connectButton = m_UiManager.AddTextButton("CONNECT", "CONNECT");
+
 	auto* ipInput = m_UiManager.AddTextInput("IP_INPUT");
 	ipInput->setPosition(
 		ipText->getPosition().x + ipText->getGlobalBounds().width + 10.f,
 		ipText->getPosition().y
 	);
+	ipInput->SetOnValid([connectButton]() {connectButton->OnClick(); });
 
-	auto* connectButton = m_UiManager.AddTextButton("CONNECT", "CONNECT");
 	connectButton->setPosition(
 		WINDOW_SCREEN_WIDTH / 2 - connectButton->getGlobalBounds().width / 2,
 		WINDOW_SCREEN_HEIGHT / 2 - connectButton->getGlobalBounds().height / 2 + 50.f

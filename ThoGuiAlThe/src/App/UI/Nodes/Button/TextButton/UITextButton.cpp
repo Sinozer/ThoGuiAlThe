@@ -65,8 +65,3 @@ void UITextButton::Render(sf::RenderTarget* target)
 
 	target->draw(*this);
 }
-
-void UITextButton::SetCallback(std::function<void()> callback)
-{
-	m_Callback = callback;
-}

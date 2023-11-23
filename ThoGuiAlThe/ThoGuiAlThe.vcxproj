@@ -42,6 +42,7 @@
     </ClCompile>
     <ClCompile Include="src\App\UI\Nodes\TextInput\UITextInput.cpp" />
     <ClCompile Include="src\App\User\User.cpp" />
+    <ClCompile Include="src\App\UI\Nodes\Button\UIButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App\State\List\Connect\ConnectState.h" />
@@ -73,6 +74,7 @@
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\App\UI\Nodes\TextInput\UITextInput.h" />
     <ClInclude Include="src\App\User\User.h" />
+    <ClInclude Include="src\App\UI\Nodes\Button\UIButton.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

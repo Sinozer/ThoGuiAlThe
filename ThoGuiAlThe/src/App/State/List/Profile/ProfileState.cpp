@@ -23,6 +23,8 @@ void ProfileState::InitUi()
 
 	const PlayerDisplayData& playerDisplayData = I(NetworkManager).GetPlayerDisplayData();
 
+	auto* save = m_UiManager.AddTextButton("SaveBtn", "SAVE");
+
 #pragma region PROFILE_NAME
 	// Name input
 	auto* pName = m_UiManager.AddTextInput("PLAYER_NAME", playerDisplayData.name);
@@ -33,6 +35,7 @@ void ProfileState::InitUi()
 	);
 	pName->setOutlineThickness(2.f);
 	pName->setOutlineColor(sf::Color::Black);
+	pName->SetOnValid([save]() { save->OnClick(); });
 #pragma endregion
 
 #pragma region PROFILE_PICTURE
@@ -78,7 +81,6 @@ void ProfileState::InitUi()
 #pragma endregion
 
 #pragma region SAVE_BUTTON
-	auto* save = m_UiManager.AddTextButton("SaveBtn", "SAVE");
 	save->setCharacterSize(50);
 	save->setOutlineThickness(2.f);
 	save->setOutlineColor(sf::Color::Black);
