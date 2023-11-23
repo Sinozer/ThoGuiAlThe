@@ -1,4 +1,5 @@
 #include "GameState.h"
+#include "App/Network/NetworkManager.h"
 
 GameState::GameState()
 {
@@ -50,8 +51,13 @@ void GameState::HandleEvents(sf::Event& event)
 	if (event.type == sf::Event::KeyPressed)
 		if (event.key.code == sf::Keyboard::Escape)
 		{
-			StateManager::GetInstance()->RemoveState();
-			return;
+			NetworkManager& networkManager = I(NetworkManager);
+			networkManager.SendData(
+				{
+					{JSON_EVENT_TYPE, TgatClientMessage::LEAVE_SESSION},
+					{JSON_SESSION_ID, networkManager.GetSessionId()},
+					{JSON_PLAYER_ID, networkManager.GetPlayerId()}
+				});
 		}
 	HandleUiEvents(event);
 	HandleGameEvents(event);
@@ -69,6 +75,26 @@ void GameState::Update(const float& dt)
 {
 	UpdateUi(dt);
 	UpdateGame(dt);
+
+	StateManager* stateManager = I(StateManager);
+	NetworkManager& networkManager = I(NetworkManager);
+
+	nlohmann::json data;
+	if (networkManager.ReceiveData(TgatServerMessage::SESSION_LEFT, data) == false)
+		return;
+
+	bool self = data[JSON_PLAYER_ID] == networkManager.GetPlayerId();
+
+	if (self == true)
+	{
+
+	}
+	else
+	{
+
+	}
+
+	stateManager->GoToFirstState();
 }
 
 void GameState::RenderUi(sf::RenderTarget* target)

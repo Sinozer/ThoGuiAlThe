@@ -74,6 +74,8 @@ enum class TgatServerMessage
 
 	GAME_REPLAY = 7, // {"eventType": "GAME_REPLAY", "Player" : "playerId": uuid(0)}
 
+	SESSION_LEFT = 8, // {"eventType": "PLAYER_LEAVE_SESSION", "Player" : "playerId": uuid(0)}
+
 	BAD_SESSION_ID = 101, // {"eventType": "BAD_SESSION_ID"}
 	BAD = 500, // {"eventType": "BAD", error...}
 };
@@ -85,6 +87,8 @@ enum class TgatClientMessage
 	CREATE_SESSION = 2, // {"eventType": "CREATE_SESSION"}
 	JOIN_SESSION = 3, // {"eventType": "JOIN_SESSION", "Session" : "sessionId": uuid(0)}
 	REPLAY = 4, // {"eventType": "REPLAY"}
+	LEAVE_SESSION = 5, // {"eventType": "LEAVE_SESSION"}
+	PLAYER_DISCONNECT = 6, // {"eventType": "PLAYER_DISCONNECT", "Player" : "playerId": uuid(0)}
 };
 
 struct PlayerDisplayData

@@ -89,7 +89,7 @@ void HomeState::Resume()
 		profile->SetOutlineColor(sf::Color(playerDisplayData.color[0], playerDisplayData.color[1], playerDisplayData.color[2], playerDisplayData.color[3]));
 	}
 
-	auto* username = m_UiManager.GetTextInput("USERNAME");
+	auto* username = m_UiManager.GetText("USERNAME");
 	if (username != nullptr)
 	{
 		username->setString(playerDisplayData.name);

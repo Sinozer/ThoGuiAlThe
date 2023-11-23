@@ -114,6 +114,11 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	TgatServerMessage type = data[JSON_EVENT_TYPE].get<TgatServerMessage>();
 	switch (type)
 	{
+	case TgatServerMessage::PLAYER_DISCONNECT:
+	{
+		m_ReceiveQueues[TgatServerMessage::PLAYER_DISCONNECT].push(data);
+		break;
+	}
 	case TgatServerMessage::PLAYER_INIT:
 	{
 		m_ReceiveQueues[TgatServerMessage::PLAYER_INIT].push(data);
@@ -133,6 +138,17 @@ void NetworkManager::HandleData(nlohmann::json& data)
 		StateManager* stateManager = I(StateManager);
 		stateManager->GoToFirstState();
 		stateManager->AddState(new GameState());
+		break;
+	}
+	case TgatServerMessage::SESSION_LEFT:
+	{
+		std::string d = data.dump();
+		if (data[JSON_SESSION_ID] != GetSessionId() && data[JSON_SESSION_ID] != -1)
+			return;
+
+		m_ReceiveQueues[TgatServerMessage::SESSION_LEFT].push(data);
+
+		m_SessionId = -1;
 		break;
 	}
 	case TgatServerMessage::PLAYER_INPUT:

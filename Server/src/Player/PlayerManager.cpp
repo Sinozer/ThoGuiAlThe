@@ -30,8 +30,8 @@ void PlayerManager::RemovePlayer(Player* player)
 {
 	nlohmann::json jsonData =
 	{
-		{"eventType", TgatServerMessage::PLAYER_DISCONNECT},
-		{"message", "bye bye"}
+		{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_DISCONNECT},
+		{JSON_PLAYER_ID, (TGATPLAYERID)player->GetId()}
 	};
 
 	I(Server).GetGameNetworkManager()->SendDataToPlayer(player, jsonData);

@@ -14,6 +14,30 @@ GameSession* GameManager::CreateGameSession(Player* p1)
 	return session;
 }
 
+void GameManager::RemoveGameSession(uint32_t id)
+{
+	bool isWaiting = true;
+
+	auto it = m_WaitingSessions.find(id);
+	if (it == m_WaitingSessions.end())
+	{
+		it = m_ActiveSessions.find(id);
+		if (it == m_ActiveSessions.end())
+		{
+			//TODO send invalid session id
+			LOG("Invalid session id : GameManager::RemoveGameSession()");
+			return;
+		}
+		isWaiting = false;
+	}
+
+	DELPTR(it->second);
+	if (isWaiting)
+		m_WaitingSessions.erase(it);
+	else
+		m_ActiveSessions.erase(it);
+}
+
 void GameManager::AddPlayerToGameSession(Player* p2, uint32_t id)
 {
 	GameSession* session = nullptr;

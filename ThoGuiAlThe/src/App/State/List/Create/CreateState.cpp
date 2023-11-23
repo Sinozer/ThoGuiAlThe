@@ -47,7 +47,14 @@ void CreateState::HandleEvents(sf::Event& event)
 	if (event.key.code != sf::Keyboard::Escape)
 		return;
 
-	StateManager::GetInstance()->RemoveState(); // Delete session on server
+	//StateManager::GetInstance()->RemoveState(); // Delete session on server
+	I(NetworkManager).SendData(
+		{
+			{ JSON_EVENT_TYPE, TgatClientMessage::LEAVE_SESSION },
+			{ JSON_SESSION_ID, I(NetworkManager).GetSessionId()},
+			{ JSON_PLAYER_ID, I(NetworkManager).GetPlayerId() }
+		}
+	);
 }
 
 void CreateState::UpdateUi(const float& dt)
@@ -56,6 +63,14 @@ void CreateState::UpdateUi(const float& dt)
 void CreateState::Update(const float& dt)
 {
 	UpdateUi(dt);
+
+	NetworkManager& networkManager = I(NetworkManager);
+
+	nlohmann::json data;
+	if (networkManager.ReceiveData(TgatServerMessage::SESSION_LEFT, data) == false)
+		return;
+
+	I(StateManager)->GoToFirstState();
 }
 
 void CreateState::RenderUi(sf::RenderTarget* target)

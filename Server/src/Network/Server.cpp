@@ -386,6 +386,50 @@ void Server::HandleJson(const nlohmann::json& json)
 
 		break;
 	}
+	case TgatClientMessage::LEAVE_SESSION:
+	{
+		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
+		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
+
+		session = m_GameManager->GetWaitingSessionById(sessionId);
+		if (session == nullptr)
+		{
+			session = m_GameManager->GetActiveSessionById(sessionId);
+			if (session == nullptr)
+			{
+				packageToSend =
+				{
+					{JSON_EVENT_TYPE, TgatServerMessage::SESSION_LEFT},
+					{JSON_PLAYER_ID, (TGATPLAYERID)playerId},
+					{JSON_SESSION_ID, (TGATSESSIONID)-1},
+				};
+
+				m_GameNetworkManager->SendDataToPlayer(m_PlayerManager->GetPlayerById(playerId), packageToSend);
+				break;
+			}
+		}
+
+		if (m_GameNetworkManager->PlayerIdCheck(playerId, session) == false)
+		{
+			throw TgatException("Player did not exist in this session");
+			break;
+		}
+
+		Player* p = m_PlayerManager->GetPlayerById(playerId);
+
+		packageToSend =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::SESSION_LEFT},
+			{JSON_PLAYER_ID, (TGATPLAYERID)playerId},
+			{JSON_SESSION_ID, (TGATSESSIONID)sessionId},
+		};
+
+		m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+
+		m_GameManager->RemoveGameSession(sessionId);
+
+		break;
+	}
 	}
 }
 

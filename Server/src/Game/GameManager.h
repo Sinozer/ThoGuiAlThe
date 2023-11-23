@@ -7,6 +7,7 @@ public:
 	~GameManager();
 
 	GameSession* CreateGameSession(Player* p1);
+	void RemoveGameSession(uint32_t id);
 	void AddPlayerToGameSession(Player* p2, uint32_t id = -1);
 	void UpdateGameSession(uint32_t id, uint32_t playerId, int x, int y, nlohmann::json& returnJson);
 
