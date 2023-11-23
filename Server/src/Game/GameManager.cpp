@@ -123,6 +123,16 @@ GameSession* GameManager::GetWaitingSessionById(uint32_t id) const
 	return it->second;
 }
 
+GameSession* GameManager::GetFirstWaitingSession() const
+{
+	if (m_WaitingSessions.empty())
+	{
+		LOG("No waiting session : GameManager::GetFirstWaitingSession()");
+		return nullptr;
+	}
+	return m_WaitingSessions.begin()->second;
+}
+
 GameSession* GameManager::GetActiveSessionById(uint32_t id) const
 {
 	auto it = m_ActiveSessions.find(id);

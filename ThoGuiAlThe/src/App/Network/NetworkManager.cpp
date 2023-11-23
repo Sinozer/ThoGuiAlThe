@@ -175,6 +175,16 @@ void NetworkManager::HandleData(nlohmann::json& data)
 		m_ReceiveQueues[TgatServerMessage::GAME_REPLAY].push(data);
 		break;
 	}
+	case TgatServerMessage::BAD_SESSION_ID:
+	{
+		m_ReceiveQueues[TgatServerMessage::BAD_SESSION_ID].push(data);
+		break;
+	}
+	case TgatServerMessage::PLAYER_INFO:
+	{
+		m_ReceiveQueues[TgatServerMessage::PLAYER_INFO].push(data);
+		break;
+	}
 	default:
 		break;
 	}

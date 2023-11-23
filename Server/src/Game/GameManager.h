@@ -12,7 +12,7 @@ public:
 	void UpdateGameSession(uint32_t id, uint32_t playerId, int x, int y, nlohmann::json& returnJson);
 
 	GameSession* GetWaitingSessionById(uint32_t id) const;
-	GameSession* GetFirstWaitingSession() const { return m_WaitingSessions.begin()->second;}
+	GameSession* GetFirstWaitingSession() const;
 
 	GameSession* GetActiveSessionById(uint32_t id) const;
 	std::unordered_map<uint32_t, GameSession*> GetActiveSessions() const { return m_ActiveSessions; }

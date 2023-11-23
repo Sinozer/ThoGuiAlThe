@@ -12,12 +12,18 @@ void JoinState::InitBackground()
 }
 void JoinState::InitUi()
 {
+	auto* title = m_UiManager.AddText("TITLE", "Join");
+	title->setCharacterSize(100);
+	title->setOutlineColor(sf::Color::Black);
+	title->setOutlineThickness(4.f);
+	title->setPosition(WINDOW_SCREEN_WIDTH / 2 - title->getGlobalBounds().width / 2, 100.f);
+
 	auto* joinButton = m_UiManager.AddTextButton("JoinButton", "Join");
 
 	auto* idText = m_UiManager.AddText("ID", "Enter ID: ");
 	idText->setPosition(
-		WINDOW_SCREEN_WIDTH / 4 - idText->getGlobalBounds().getSize().x / 2,
-		WINDOW_SCREEN_HEIGHT / 2 - idText->getGlobalBounds().getSize().y / 2
+		WINDOW_SCREEN_WIDTH / 3 - idText->getGlobalBounds().width / 2,
+		WINDOW_SCREEN_HEIGHT / 2
 	);
 	idText->setCharacterSize(50);
 	idText->setOutlineThickness(2.f);
@@ -25,7 +31,7 @@ void JoinState::InitUi()
 
 	auto* idInput = m_UiManager.AddTextInput("IDInput", "XXXXXXXX");
 	idInput->setPosition(
-		idText->getPosition().x + idText->getGlobalBounds().getSize().x * 1.1f,
+		idText->getPosition().x + idText->getGlobalBounds().width + 10.f,
 		idText->getPosition().y
 	);
 	idInput->setCharacterSize(50);
@@ -65,6 +71,16 @@ void JoinState::InitUi()
 				{JSON_SESSION_ID, -1}
 				});
 		});
+
+	auto* badId = m_UiManager.AddText("BadId", "Bad ID");
+	badId->setPosition(
+		WINDOW_SCREEN_WIDTH / 2 - badId->getGlobalBounds().getSize().x / 2,
+		WINDOW_SCREEN_HEIGHT / 1.5f + badId->getGlobalBounds().getSize().y / 2
+	);
+	badId->setFillColor(sf::Color::Red);
+	badId->setOutlineColor(sf::Color::Black);
+	badId->setOutlineThickness(2.f);
+	badId->SetActive(false);
 }
 void JoinState::Init()
 {
@@ -95,6 +111,14 @@ void JoinState::UpdateUi(const float& dt)
 void JoinState::Update(const float& dt)
 {
 	UpdateUi(dt);
+
+	NetworkManager& networkManager = I(NetworkManager);
+
+	nlohmann::json data;
+	if (networkManager.ReceiveData(TgatServerMessage::BAD_SESSION_ID, data) == false)
+		return;
+
+	m_UiManager.GetText("BadId")->SetActive(true);
 }
 
 void JoinState::RenderUi(sf::RenderTarget* target)

@@ -74,30 +74,5 @@ void UIImageButton::Update(const float& dt)
 
 void UIImageButton::Render(sf::RenderTarget* target)
 {
-	if (m_Active == false)
-		return;
-
-	target->draw(*this);
-
-	if (m_OutlineThickness > 0.f)
-	{
-		sf::RectangleShape outline;
-		outline.setSize(sf::Vector2f(getGlobalBounds().width, getGlobalBounds().height));
-		outline.setFillColor(sf::Color::Transparent);
-		outline.setOutlineColor(m_OutlineColor);
-		outline.setOutlineThickness(m_OutlineThickness);
-		outline.setPosition(getPosition());
-
-		target->draw(outline);
-	}
-}
-
-void UIImageButton::SetOutlineThickness(float thickness)
-{
-	m_OutlineThickness = thickness;
-}
-
-void UIImageButton::SetOutlineColor(sf::Color color)
-{
-	m_OutlineColor = color;
+	UIImage::Render(target);
 }
