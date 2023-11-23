@@ -12,6 +12,8 @@ void JoinState::InitBackground()
 }
 void JoinState::InitUi()
 {
+	auto* joinButton = m_UiManager.AddTextButton("JoinButton", "Join");
+
 	auto* idText = m_UiManager.AddText("ID", "Enter ID: ");
 	idText->setPosition(
 		WINDOW_SCREEN_WIDTH / 4 - idText->getGlobalBounds().getSize().x / 2,
@@ -29,8 +31,8 @@ void JoinState::InitUi()
 	idInput->setCharacterSize(50);
 	idInput->setOutlineThickness(2.f);
 	idInput->setOutlineColor(sf::Color::Black);
+	idInput->SetOnValid([joinButton]() { joinButton->OnClick(); });
 
-	auto* joinButton = m_UiManager.AddTextButton("JoinButton", "Join");
 	joinButton->setPosition(
 		WINDOW_SCREEN_WIDTH / 2 - joinButton->getGlobalBounds().getSize().x / 2,
 		WINDOW_SCREEN_HEIGHT / 1.5f + joinButton->getGlobalBounds().getSize().y / 2
@@ -53,7 +55,30 @@ void JoinState::InitUi()
 		const int playerId = networkManager.GetPlayerId();
 		networkManager.CreateMessage(headerId, playerId, strData, msg);
 		networkManager.Send(msg);
-	});
+		});
+
+	auto* randJoinButton = m_UiManager.AddTextButton("RandJoinButton", "Random");
+	randJoinButton->setPosition(
+		joinButton->getPosition().x - randJoinButton->getGlobalBounds().getSize().x / 2,
+		joinButton->getPosition().y + joinButton->getGlobalBounds().getSize().y * 1.5f
+	);
+	randJoinButton->setCharacterSize(50);
+	randJoinButton->setOutlineThickness(2.f);
+	randJoinButton->setOutlineColor(sf::Color::Black);
+	randJoinButton->SetCallback([]() {
+		NetworkManager& networkManager = I(NetworkManager);
+		nlohmann::json eventData =
+		{
+			{JSON_EVENT_TYPE, TgatClientMessage::JOIN_SESSION},
+			{JSON_SESSION_ID, -1}
+		};
+		TgatNetworkHelper::Message msg;
+		std::string strData = eventData.dump();
+		const int headerId = networkManager.HEADER_ID;
+		const int playerId = networkManager.GetPlayerId();
+		networkManager.CreateMessage(headerId, playerId, strData, msg);
+		networkManager.Send(msg);
+		});
 }
 void JoinState::Init()
 {

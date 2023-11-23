@@ -241,7 +241,7 @@ void Server::HandleJson(const nlohmann::json& json)
 	}
 	case TgatClientMessage::JOIN_SESSION:
 	{
-		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
+		TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
 		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
 
 		Player* p2 = m_PlayerManager->GetPlayerById(playerId);
@@ -251,7 +251,7 @@ void Server::HandleJson(const nlohmann::json& json)
 		}
 
 		session = m_GameManager->GetWaitingSessionById(sessionId);
-		if (session == nullptr)
+		if (session == nullptr && sessionId != -1)
 		{
 			packageToSend =
 			{
@@ -259,6 +259,26 @@ void Server::HandleJson(const nlohmann::json& json)
 			};
 			m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
 			break;
+		}
+
+		if (sessionId == -1)
+		{
+			session = m_GameManager->GetFirstWaitingSession();
+			if (session == nullptr)
+			{
+				session = m_GameManager->CreateGameSession(p2);
+
+				packageToSend =
+				{
+					{JSON_EVENT_TYPE, TgatServerMessage::SESSION_CREATED},
+					{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+				};
+
+				m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
+				break;
+			}
+
+			sessionId = session->GetId();
 		}
 
 		m_GameManager->AddPlayerToGameSession(p2, sessionId);
