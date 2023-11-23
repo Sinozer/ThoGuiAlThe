@@ -53,7 +53,7 @@ void HomeState::InitUi()
 		profile->SetOutlineThickness(3.f);
 		profile->SetOutlineColor(sf::Color(playerDisplayData.color[0], playerDisplayData.color[1], playerDisplayData.color[2], playerDisplayData.color[3]));
 
-		auto* username = m_UiManager.AddText("USERNAME", playerDisplayData.name);
+		auto* username = m_UiManager.AddText("USERNAME", playerDisplayData.name + " #" + std::to_string(I(NetworkManager).GetPlayerId()));
 		username->setCharacterSize(15);
 		username->setOutlineColor(sf::Color::Black);
 		username->setOutlineThickness(1.f);
@@ -92,7 +92,7 @@ void HomeState::Resume()
 	auto* username = m_UiManager.GetText("USERNAME");
 	if (username != nullptr)
 	{
-		username->setString(playerDisplayData.name);
+		username->setString(playerDisplayData.name + " #" + std::to_string(I(NetworkManager).GetPlayerId()));
 		username->setPosition(profile->getPosition().x - username->getGlobalBounds().width * 1.05f, profile->getPosition().y);
 	}
 }
