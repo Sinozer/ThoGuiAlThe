@@ -45,10 +45,10 @@ NetworkManager::~NetworkManager()
 	WSACleanup();
 }
 
-bool NetworkManager::Connect()
+bool NetworkManager::Connect(std::string ipAddress)
 {
 	if (m_ServerSocket == INVALID_SOCKET)
-		CreateSocket();
+		CreateSocket(ipAddress);
 
 	// Connect to server
 	if (connect(m_ServerSocket, m_AddressInfo.ai_addr, (int)m_AddressInfo.ai_addrlen) == SOCKET_ERROR)
@@ -97,7 +97,7 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	{
 	case TgatServerMessage::PLAYER_INIT:
 	{
-		InitPlayerWithData(data);
+		m_ReceiveQueues[TgatServerMessage::PLAYER_INIT].push(data);
 		break;
 	}
 	case TgatServerMessage::SESSION_CREATED:
@@ -129,7 +129,6 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	case TgatServerMessage::PLAYER_INFO_CHANGED:
 	{
 		m_ReceiveQueues[TgatServerMessage::PLAYER_INFO_CHANGED].push(data);
-
 		break;
 	}
 	default:
@@ -152,7 +151,7 @@ TGATSESSIONID NetworkManager::GetSessionId() const
 	return (TGATSESSIONID)m_SessionId;
 }
 
-void NetworkManager::CreateSocket()
+void NetworkManager::CreateSocket(std::string ipAddress)
 {
 	// Resolve address and port
 	addrinfo* result = NULL;
@@ -161,7 +160,7 @@ void NetworkManager::CreateSocket()
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	int iResult = getaddrinfo("localhost", PORT, &hints, &result);
+	int iResult = getaddrinfo(ipAddress.c_str(), PORT, &hints, &result);
 
 	if (iResult != 0)
 	{
@@ -204,7 +203,7 @@ void NetworkManager::Init()
 	else
 		LOG("WSAStartup success. Status: " << wsaData.szSystemStatus);
 
-	CreateSocket();
+	//CreateSocket();
 }
 
 void NetworkManager::InitWindow()

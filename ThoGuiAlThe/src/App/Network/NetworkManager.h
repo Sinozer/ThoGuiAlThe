@@ -11,10 +11,12 @@ public:
 
 	static const void DestroyInstance();
 
-	bool Connect();
+	bool Connect(std::string ipAddress = "localhost");
 	void Disconnect();
 
 	void HandleData(nlohmann::json& jsonData);
+
+	void InitPlayerWithData(nlohmann::json& jsonData);
 
 	TGATPLAYERID GetPlayerId() const;
 	const PlayerDisplayData& GetPlayerDisplayData() const;
@@ -46,9 +48,8 @@ private:
 	void Init();
 	void InitWindow();
 
-	void CreateSocket();
+	void CreateSocket(std::string ipAddress = "localhost");
 
-	void InitPlayerWithData(nlohmann::json& jsonData);
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

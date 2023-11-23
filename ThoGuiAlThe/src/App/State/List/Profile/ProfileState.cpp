@@ -181,7 +181,7 @@ void ProfileState::Update(const float& dt)
 		if (data.contains(JSON_PLAYER_COLOR))
 			user->SetBorderColor(PLAYER_DD_ARG_COLOR(data));
 
-		networkManager.GetReceiveQueue(TgatServerMessage::PLAYER_INFO_CHANGED).pop();
+		q.pop();
 		I(StateManager)->RemoveState();
 	}
 }

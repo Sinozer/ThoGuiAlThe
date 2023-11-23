@@ -21,7 +21,6 @@ void App::InitStates() const
 }
 void App::Init()
 {
-	I(NetworkManager).Connect();
 	InitWindow();
 	InitStates();
 

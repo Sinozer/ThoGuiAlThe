@@ -13,11 +13,33 @@ void ConnectState::InitBackground()
 }
 void ConnectState::InitUi()
 {
-	auto* connectText = m_UiManager.AddText("CONNECTING", "CONNECTING TO SERVER ...");
+	/*auto* connectText = m_UiManager.AddText("CONNECTING", "CONNECTING TO SERVER ...");
 	connectText->setCharacterSize(15);
 	connectText->setOutlineColor(sf::Color::Black);
 	connectText->setOutlineThickness(1.f);
-	connectText->setPosition(WINDOW_SCREEN_WIDTH / 2 - connectText->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - connectText->getGlobalBounds().height - 300.f);
+	connectText->setPosition(WINDOW_SCREEN_WIDTH / 2 - connectText->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - connectText->getGlobalBounds().height - 300.f);*/
+
+	auto* ipText = m_UiManager.AddText("IP", "IP : ");
+	ipText->setPosition(
+		WINDOW_SCREEN_WIDTH / 4 - ipText->getGlobalBounds().width / 2,
+		WINDOW_SCREEN_HEIGHT / 2 - ipText->getGlobalBounds().height / 2 - 50.f
+	);
+
+	auto* ipInput = m_UiManager.AddTextInput("IP_INPUT");
+	ipInput->setPosition(
+		ipText->getPosition().x + ipText->getGlobalBounds().width + 10.f,
+		ipText->getPosition().y
+	);
+
+	auto* connectButton = m_UiManager.AddTextButton("CONNECT", "CONNECT");
+	connectButton->setPosition(
+		WINDOW_SCREEN_WIDTH / 2 - connectButton->getGlobalBounds().width / 2,
+		WINDOW_SCREEN_HEIGHT / 2 - connectButton->getGlobalBounds().height / 2 + 50.f
+	);
+	connectButton->SetCallback([ipInput]()
+		{
+			I(NetworkManager).Connect(ipInput->getString());
+		});
 }
 void ConnectState::Init()
 {
@@ -51,10 +73,24 @@ void ConnectState::UpdateUi(const float& dt)
 void ConnectState::Update(const float& dt)
 {
 	UpdateUi(dt);
-	if (I(NetworkManager).IsInit())
-	{
-		I(StateManager)->AddState(new HomeState());
-	}
+
+	NetworkManager& networkManager = I(NetworkManager);
+
+	auto& q = networkManager.GetReceiveQueue(TgatServerMessage::PLAYER_INIT);
+
+	if (q.empty() == true)
+		return;
+
+	nlohmann::json& data = q.front();
+
+	networkManager.InitPlayerWithData(data);
+
+	q.pop();
+
+	StateManager* stateManager = I(StateManager);
+
+	stateManager->RemoveAllStates();
+	stateManager->AddState(new HomeState());
 }
 
 void ConnectState::RenderUi(sf::RenderTarget* target)
