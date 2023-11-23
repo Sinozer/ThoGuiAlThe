@@ -91,13 +91,3 @@ void UIImageButton::Render(sf::RenderTarget* target)
 		target->draw(outline);
 	}
 }
-
-void UIImageButton::SetOutlineThickness(float thickness)
-{
-	m_OutlineThickness = thickness;
-}
-
-void UIImageButton::SetOutlineColor(sf::Color color)
-{
-	m_OutlineColor = color;
-}

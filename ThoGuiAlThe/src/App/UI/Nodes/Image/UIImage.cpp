@@ -23,3 +23,13 @@ void UIImage::Render(sf::RenderTarget* target)
 
 	target->draw(*this);
 }
+
+void UIImage::SetOutlineThickness(float thickness)
+{
+	m_OutlineThickness = thickness;
+}
+
+void UIImage::SetOutlineColor(sf::Color color)
+{
+	m_OutlineColor = color;
+}

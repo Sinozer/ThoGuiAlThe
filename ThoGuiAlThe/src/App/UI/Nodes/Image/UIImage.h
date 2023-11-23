@@ -10,4 +10,12 @@ public:
 
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target);
+
+public:
+	void SetOutlineThickness(float thickness);
+	void SetOutlineColor(sf::Color color);
+
+protected:
+	float m_OutlineThickness = 0.f;
+	sf::Color m_OutlineColor = sf::Color::Black;
 };
