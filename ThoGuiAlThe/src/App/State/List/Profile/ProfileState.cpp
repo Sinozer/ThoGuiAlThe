@@ -40,6 +40,8 @@ void ProfileState::InitUi()
 
 #pragma region PROFILE_PICTURE
 	auto* picture = m_UiManager.AddImage("PLAYER_PICTURE", playerDisplayData.profilePicturePath);
+	picture->SetOutlineColor(sf::Color(playerDisplayData.color[0], playerDisplayData.color[1], playerDisplayData.color[2], playerDisplayData.color[3]));
+	picture->SetOutlineThickness(4.f);
 	picture->setPosition(
 		WINDOW_SCREEN_WIDTH / 2.f - picture->getGlobalBounds().width / 2.f,
 		pName->getPosition().y + pName->getGlobalBounds().getSize().y * 1.25f
