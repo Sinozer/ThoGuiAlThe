@@ -1,5 +1,6 @@
 #include "HomeRequestHandler.h"
-#pragma once
+#include "Network/Server.h"
+#include "Game/GameManager.h"
 
 HomeRequestHandler::HomeRequestHandler()
 {
@@ -17,26 +18,28 @@ std::string HomeRequestHandler::HandleHttpRequest(std::unordered_map<std::string
 
 std::string HomeMethodHandler::BuildResponse(std::unordered_map<std::string, std::string>& params) const
 {
-	int customValues[3][3] = {
-	{00, 01, 02},
-	{10, 11, 12},
-	{20, 21, 22}
-	};
-
 	std::ifstream file("assets/index.html");
 	std::string fileContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	std::regex pattern("%SESSIONS%");
+	std::stringstream sessionLink;
 
-	// Replace placeholders with actual values using regex
-	for (int i = 0; i < 3; ++i)
+	I(Server).GetGameManager()->EnterCS();
+	const auto& sessions = I(Server).GetGameManager()->GetActiveSessions();
+	for (auto&[sessionId, session] : sessions)
 	{
-		for (int j = 0; j < 3; ++j)
+		std::string idStr = std::to_string(sessionId);
+		std::array<std::string, 2> playerNames;
+		uint8_t index = 0;
+		for (auto&[_, player] : session->GetPlayers())
 		{
-			// Generate the placeholder string that can be found in the html file
-			std::string placeholder = "%VALUE_" + std::to_string(i) + std::to_string(j) + "%";
-			std::regex pattern(placeholder);
-			fileContent = std::regex_replace(fileContent, pattern, std::to_string(customValues[i][j]));
+			playerNames.at(index++) = player->GetName();
 		}
+		sessionLink << "<a href=\"/session?session=" << idStr << "\">" << idStr
+			<< ": " << (playerNames[0]) << " VS " << (playerNames[1]) << "</a><br>";
 	}
+	I(Server).GetGameManager()->ExitCS();
+
+	fileContent = std::regex_replace(fileContent, pattern, sessionLink.str());
 
 	std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + std::to_string(fileContent.size()) + "\r\n\r\n" + fileContent;
 	return response;

@@ -6,7 +6,7 @@ class GameSession
 {
 public:
 	static constexpr int MAX_PLAYERS_PER_GAME = 2;
-private:
+public:
 	static constexpr int BOARD_SIZE = 3;
 
 public:
@@ -22,6 +22,8 @@ public:
 
 	bool IsEnded() const { return m_IsEnded; }
 	std::unordered_map<uint32_t, Player*>& GetPlayers() { return m_Players; }
+
+	uint32_t* GetBoard() { return &m_Board[0][0]; }
 
 private:
 	std::unordered_map<uint32_t, Player*> m_Players;

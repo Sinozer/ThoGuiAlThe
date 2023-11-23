@@ -10,6 +10,7 @@ public:
 
 	static std::string MethodNotAllowed();
 	static std::string NotFound();
+	static std::string BadRequest();
 	static std::unordered_map<std::string, std::string> ParseParams(const std::string& paramString);
 protected:
 	std::unordered_map<std::string, std::unique_ptr<IHandleMethod>> m_HttpMethodHandlers;

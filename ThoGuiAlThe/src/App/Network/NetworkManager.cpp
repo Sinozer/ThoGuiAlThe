@@ -95,7 +95,7 @@ void NetworkManager::Close()
 	SendMessage(m_hWnd, MSG_NUKE, 0, 0);
 	if (WaitForSingleObject(m_NetworkThread, 10000) == WAIT_TIMEOUT)
 	{
-        LOG("Network thread did not close in time");
+		LOG("Network thread did not close in time");
 		TerminateThread(m_NetworkThread, 0);
 	}
 
@@ -247,17 +247,15 @@ void NetworkManager::Init()
 	InitializeCriticalSection(&m_SendCS);
 	InitializeCriticalSection(&m_ReceiveCS);
 
-    // Create network thread
+	// Create network thread
 	m_NetworkThread = CreateThread(nullptr, 0, NetworkThread, this, 0, nullptr);
 	if (m_NetworkThread == nullptr)
-    {
-        LOG("CreateThread failed with error: " << GetLastError());
-        throw std::exception("CreateThread failed");
-    }
-    else
-        LOG("CreateThread success");
-
-	//CreateSocket();
+	{
+		LOG("CreateThread failed with error: " << GetLastError());
+		throw std::exception("CreateThread failed");
+	}
+	else
+		LOG("CreateThread success");
 }
 
 void NetworkManager::InitWindow()
@@ -297,19 +295,19 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	{
 	case MSG_NUKE:
 	{
-        DestroyWindow(GetInstance().m_hWnd);
-        return 0;
-    }
+		DestroyWindow(GetInstance().m_hWnd);
+		return 0;
+	}
 	case WM_DESTROY:
 	{
-        PostQuitMessage(0);
-        return 0;
-    }
+		PostQuitMessage(0);
+		return 0;
+	}
 	case MSG_SEND:
 	{
 		GetInstance().SendNetworkData();
 		return 0;
-    }
+	}
 	case MSG_SERVER:
 	{
 		if (WSAGETSELECTERROR(lParam))
