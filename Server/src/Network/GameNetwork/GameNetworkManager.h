@@ -39,6 +39,7 @@ private:
 
 	void ProcessMessages();
 	static DWORD WINAPI GameNetworkThread(LPVOID lpParam);
+	void SendDataWithCriticalSection();
 	void GameNetworkMain();
 };
 

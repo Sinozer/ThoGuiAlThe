@@ -102,10 +102,8 @@ void GameNetworkManager::ProcessMessages()
 
 DWORD WINAPI GameNetworkManager::GameNetworkThread(LPVOID lpParam)
 {
-	EnterCriticalSection(&GameNetCS);
 	GameNetworkManager* gameNetwork = static_cast<GameNetworkManager*>(lpParam);
 	gameNetwork->GameNetworkMain();
-	LeaveCriticalSection(&GameNetCS);
 	return 1;
 }
 
@@ -125,7 +123,7 @@ void GameNetworkManager::GameNetworkMain()
 	m_ServerSocket = INVALID_SOCKET;
 
 	//Unregister the network server window class
-	UnregisterClass(L"WebNetworkServer", nullptr);
+	UnregisterClass(L"GameNetworkWindow", nullptr);
 }
 
 
