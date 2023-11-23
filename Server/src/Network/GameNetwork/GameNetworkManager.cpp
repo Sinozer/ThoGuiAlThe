@@ -11,7 +11,7 @@
 #include "Game/Session/GameSession.h"
 
 GameNetworkManager::GameNetworkManager()
-	: TgatNetworkHelper(), m_Port("6969"), m_ServerSocket(INVALID_SOCKET),
+	: TgatNetworkHelper(), m_Port("6969"),
 	m_ThreadID(0)
 {
 	m_ThreadHandle = nullptr;

@@ -31,7 +31,6 @@ public:
 private:
 	char m_Port[5];
 
-	SOCKET m_ServerSocket;
 	HANDLE m_ThreadHandle;
 	HWND m_GameWindow; 
 	DWORD m_ThreadID;
