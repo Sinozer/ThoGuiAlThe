@@ -13,6 +13,9 @@ public:
 	void Update(const float& dt);
 	void Render(sf::RenderTarget* target);
 
+public:
+	void SetCallback(std::function<void()> callback);
+
 private:
 	std::function<void()> m_Callback;
 };

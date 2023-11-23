@@ -12,6 +12,7 @@ Server::Server()
 	m_HttpManager = new HttpManager();
 	m_GameNetworkManager = new GameNetworkManager();
 	m_PlayerManager = new PlayerManager();
+	m_GameManager = new GameManager();
 
 	InitWindow();
 }
@@ -61,8 +62,8 @@ void Server::CloseServer()
 	DELPTR(m_HttpManager);
 	DELPTR(m_GameNetworkManager);
 	DELPTR(m_PlayerManager);
+	DELPTR(m_GameManager);
 }
-
 
 void Server::InitSocket(SOCKET& s, HWND window, const char* port, uint32_t msgType, long events)
 {
@@ -75,7 +76,7 @@ void Server::InitSocket(SOCKET& s, HWND window, const char* port, uint32_t msgTy
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE; // For wildcard IP address
 
-	if (int r = getaddrinfo("localhost", port, &hints, &result); r != 0)
+	if (int r = getaddrinfo(nullptr, port, &hints, &result); r != 0)
 	{
 		LOG("getaddrinfo failed with error: " << r);
 		WSACleanup();
@@ -134,19 +135,20 @@ void Server::InitSocket(SOCKET& s, HWND window, const char* port, uint32_t msgTy
 		LOG("WSAAsyncSelect server success");
 }
 
-void Server::AcceptNewPlayer(Player newPlayer)
+void Server::AcceptNewPlayer(SOCKET socket)
 {
-	if (newPlayer.GetSocket() == INVALID_SOCKET)
+	Player* newPlayer = new Player(socket);
+	if (newPlayer->GetSocket() == INVALID_SOCKET)
 	{
 		throw std::exception("accept failed");
 	}
 	else
 		LOG("accept success");
 
-	if (WSAAsyncSelect(newPlayer.GetSocket(), m_hWnd, MSG_CLIENT, FD_READ | FD_CLOSE) == SOCKET_ERROR)
+	if (WSAAsyncSelect(newPlayer->GetSocket(), m_hWnd, MSG_CLIENT, FD_READ | FD_CLOSE) == SOCKET_ERROR)
 	{
 		LOG("WSAAsyncSelect failed with error: " << WSAGetLastError());
-		closesocket(newPlayer.GetSocket());
+		closesocket(newPlayer->GetSocket());
 		throw std::exception("WSAAsyncSelect failed");
 	}
 	else
@@ -154,8 +156,8 @@ void Server::AcceptNewPlayer(Player newPlayer)
 
 	nlohmann::json jsonData =
 	{
-		{"eventType", TgatServerMessage::PLAYER_INIT},
-		{"playerId", (TGATPLAYERID)newPlayer.GetId()}
+		{JSON_EVENT_TYPE, TgatServerMessage::PLAYER_INIT},
+		//{JSON_PLAYER_ID, (TGATPLAYERID)newPlayer->GetId()}
 	};
 
 	m_GameNetworkManager->SendDataToPlayer(newPlayer, jsonData);
@@ -163,12 +165,113 @@ void Server::AcceptNewPlayer(Player newPlayer)
 	m_PlayerManager->AddPlayer(newPlayer);
 }
 
-
 void Server::HandleJson(const nlohmann::json& json)
 {
 	LOG("Received JSON data: " << json.dump());
-}
 
+	TgatClientMessage eventType = json[JSON_EVENT_TYPE].get<TgatClientMessage>();
+	if (json.contains(JSON_PLAYER_ID) == false)
+	{
+		throw TgatException("Invalid JSON data, no JSON_PLAYER_ID field was found. Event type : " + (int)eventType);
+	}
+
+	GameSession* session = nullptr;
+	nlohmann::json packageToSend;
+
+	switch (eventType)
+	{
+	case TgatClientMessage::PLAYER_INPUT:
+	{
+		if (json.contains(JSON_PLAYER_MOVE) == false || json.contains(JSON_SESSION_ID) == false)
+		{
+			throw TgatException("Invalid JSON data, please add a JSON_PLAYER_MOVE and JSON_SESSION_ID field");
+		}
+		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
+		const nlohmann::json& move = json[JSON_PLAYER_MOVE];
+
+		session = m_GameManager->GetActiveSessionById(sessionId);
+
+		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
+		if (m_GameNetworkManager->PlayerIdCheck(playerId, session) == false)
+		{
+			throw TgatException("Player did not exist in this session");
+		}
+
+		session->Update(playerId, PLAYER_MOVE_ARGS(move), packageToSend);
+
+		TgatServerMessage type = packageToSend[JSON_EVENT_TYPE].get<TgatServerMessage>();
+		if (type == TgatServerMessage::BAD)
+		{
+			m_GameNetworkManager->SendDataToPlayer(m_PlayerManager->GetPlayerById(playerId), packageToSend);
+			break;
+		}
+
+		if (session != nullptr)
+			m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+		else
+		{
+			throw TgatException("No session found");
+		}
+
+		break;
+	}
+	case TgatClientMessage::CREATE_SESSION:
+	{
+		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
+		Player* p1 = m_PlayerManager->GetPlayerById(playerId);
+		if (p1 == nullptr)
+		{
+			throw TgatException("Invalid player Id");
+		}
+
+		session = m_GameManager->CreateGameSession(p1);
+
+		packageToSend =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::SESSION_CREATED},
+			{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+		};
+
+		m_GameNetworkManager->SendDataToPlayer(p1, packageToSend);
+
+		break;
+	}
+	case TgatClientMessage::JOIN_SESSION:
+	{
+		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
+		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
+
+		Player* p2 = m_PlayerManager->GetPlayerById(playerId);
+		if (p2 == nullptr)
+		{
+			throw TgatException("Invalid player Id");
+		}
+
+		session = m_GameManager->GetWaitingSessionById(sessionId);
+		if (session == nullptr)
+		{
+			packageToSend =
+			{
+				{JSON_EVENT_TYPE, TgatServerMessage::BAD_SESSION_ID}
+			};
+			m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
+			break;
+		}
+
+		m_GameManager->AddPlayerToGameSession(p2, sessionId);
+
+		packageToSend =
+		{
+			{JSON_EVENT_TYPE, TgatServerMessage::SESSION_JOINED},
+			{JSON_SESSION_ID, (TGATSESSIONID)session->GetId()},
+		};
+
+		m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
+
+		break;
+	}
+	}
+}
 
 bool Server::SendToAllClients(const char* data, int size)
 {
@@ -183,7 +286,6 @@ bool Server::SendToAllClients(const char* data, int size)
 
 	return true;
 }
-
 
 void Server::InitWindow()
 {
@@ -242,98 +344,98 @@ LRESULT Server::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
-	#pragma region ServerMessage
-		case MSG_SERVER:
+#pragma region ServerMessage
+	case MSG_SERVER:
+	{
+		if (WSAGETSELECTERROR(lParam))
 		{
-			if (WSAGETSELECTERROR(lParam))
+			LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
+			break;
+		}
+
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_ACCEPT:
+		{
+			SOCKET clientSocket = accept(wParam, nullptr, nullptr);
+			try
 			{
-				LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
+				I(Server).AcceptNewPlayer(clientSocket); // Implicit construction of Player
+			}
+			catch (std::exception& e)
+			{
+				LOG(e.what());
+				break;
+			}
+			catch (...)
+			{
+				LOG("Unknown exception");
+				break;
+			}
+			break;
+		}
+		case FD_CLOSE:
+		{
+			LOG("FD_CLOSE");
+
+			break;
+		}
+		}
+
+		return 0;
+	}
+#pragma endregion
+#pragma region ClientMessage
+	case MSG_CLIENT:
+	{
+		if (WSAGETSELECTERROR(lParam))
+		{
+			LOG("FD_READ failed with error: " << WSAGetLastError());
+			break;
+		}
+
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_READ:
+		{
+			try
+			{
+				nlohmann::json jsonData;
+				if (I(Server).GetGameNetworkManager()->Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
+					LOG("WSAEWOULDBLOCK");
+				else
+					I(Server).HandleJson(jsonData);
+			}
+			catch (TgatException& e)
+			{
+				LOG(e.what());
+				I(Server).GetPlayerManager()->RemovePlayer(wParam);
+				break;
+			}
+			catch (nlohmann::json::exception& e)
+			{
+				LOG(e.what());
+				I(Server).GetPlayerManager()->RemovePlayer(wParam);
+				break;
+			}
+			catch (...)
+			{
+				LOG("Unknown exception");
+				I(Server).GetPlayerManager()->RemovePlayer(wParam);
 				break;
 			}
 
-			switch (WSAGETSELECTEVENT(lParam))
-			{
-				case FD_ACCEPT:
-				{
-					SOCKET clientSocket = accept(wParam, nullptr, nullptr);
-					try
-					{
-						I(Server).AcceptNewPlayer(clientSocket);
-					}
-					catch (std::exception& e)
-					{
-						LOG(e.what());
-						break;
-					}
-					catch (...)
-					{
-						LOG("Unknown exception");
-						break;
-					}
-					break;
-				}
-				case FD_CLOSE:
-				{
-					LOG("FD_CLOSE");
-
-					break;
-				}
-			}
-
-			return 0;
+			break;
 		}
-	#pragma endregion
-	#pragma region ClientMessage
-		case MSG_CLIENT:
-		{
-			if (WSAGETSELECTERROR(lParam))
-			{
-				LOG("FD_READ failed with error: " << WSAGetLastError());
-				break;
-			}
-
-			switch (WSAGETSELECTEVENT(lParam))
-			{
-				case FD_READ:
-				{
-					try
-					{
-						nlohmann::json jsonData;
-						if (I(Server).GetGameNetworkManager()->Receive((SOCKET)wParam, jsonData) == WSAEWOULDBLOCK)
-							LOG("WSAEWOULDBLOCK");
-						else
-							I(Server).HandleJson(jsonData);
-					}
-					catch (TgatException& e)
-					{
-						LOG(e.what());
-						I(Server).GetPlayerManager()->RemovePlayer(wParam);
-						break;
-					}
-					catch (nlohmann::json::exception& e)
-					{
-						LOG(e.what());
-						I(Server).GetPlayerManager()->RemovePlayer(wParam);
-						break;
-					}
-					catch (...)
-					{
-						LOG("Unknown exception");
-						I(Server).GetPlayerManager()->RemovePlayer(wParam);
-						break;
-					}
-
-					break;
-				}
-				case FD_WRITE:
-					break;
-				case FD_CLOSE:
-					I(Server).GetPlayerManager()->RemovePlayer(wParam);
-					break;
-			}
-			return 0;
+		case FD_WRITE:
+			break;
+		case FD_CLOSE:
+			I(Server).GetPlayerManager()->RemovePlayer(wParam);
+			break;
 		}
-		#pragma endregion
+		return 0;
+	}
+#pragma endregion
 	}
 	return DefWindowProc(hwnd, uMsg, wParam, lParam); // Call default message handler
 }
