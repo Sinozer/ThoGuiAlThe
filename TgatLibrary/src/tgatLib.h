@@ -5,11 +5,12 @@
 #include <WinSock2.h>
 #include <Winerror.h>
 #include <WS2tcpip.h>
-
+#include <Synchapi.h>
+#include <minwinbase.h>
 #define MSG_SERVER (WM_USER + 1)
 #define MSG_CLIENT (WM_USER + 2)
 #define MSG_WEB (WM_USER + 3)
-#define MSG_DESTROY (WM_USER + 4)
+#define MSG_NUKE (WM_USER + 4)
 /* ##################  WINSOCK  ############### */
 
 /* #################  UTILITY  ################ */

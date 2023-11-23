@@ -10,6 +10,7 @@
 /* ################# STANDARD ################# */
 #include <functional>
 #include <iostream>
+#include <queue>
 
 #include <map>
 #include <vector>
@@ -17,6 +18,8 @@
 #include <string>
 #include <queue>
 /* ################# STANDARD ################# */
+
+#include "tgatLib.h"
 
 /* ################  CONSTANTS  ############### */
 #include "constants.h"
@@ -31,9 +34,6 @@
 #include "App/State/State.h"
 //#include "App/UI/Nodes/UIElements.h"
 /* ##################  SELF  ################## */
-
-#include "tgatLib.h"
-
 
 #if defined(DEBUG) | defined(_DEBUG)
 #include <crtdbg.h>

@@ -78,6 +78,7 @@ void App::Run()
 
 		m_Window.display();
 	}
+	I(NetworkManager).Close();
 }
 
 void App::End() const

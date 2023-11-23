@@ -84,26 +84,20 @@ void ProfileState::InitUi()
 	save->setCharacterSize(50);
 	save->setOutlineThickness(2.f);
 	save->setOutlineColor(sf::Color::Black);
-	save->SetCallback([this, pName]() {
-		NetworkManager& networkManager = I(NetworkManager);
-		User* user = networkManager.GetUser();
-
-		user->SetName(pName->getString());
-
-		nlohmann::json eventData =
+	save->SetCallback([this, pName]()
 		{
-			{JSON_EVENT_TYPE, TgatClientMessage::PLAYER_CHANGE_INFO},
-			{JSON_PLAYER_NAME, pName->getString().toAnsiString()},
-			{JSON_PLAYER_PPP, PROFILE_PICTURES[m_ActualIndex]},
-			{JSON_PLAYER_PPTP, PROFILE_PICTURES[m_ActualIndex] + "_THUMB"},
-			//{JSON_PLAYER_COLOR, /*TODO*/}
-		};
-		TgatNetworkHelper::Message msg;
-		std::string strData = eventData.dump();
-		const int headerId = networkManager.HEADER_ID;
-		const int playerId = networkManager.GetPlayerId();
-		networkManager.CreateMessage(headerId, playerId, strData, msg);
-		networkManager.Send(msg);
+			NetworkManager& networkManager = I(NetworkManager);
+			User* user = networkManager.GetUser();
+
+			user->SetName(pName->getString());
+
+			networkManager.SendData({
+				{JSON_EVENT_TYPE, TgatClientMessage::PLAYER_CHANGE_INFO},
+				{JSON_PLAYER_NAME, pName->getString().toAnsiString()},
+				{JSON_PLAYER_PPP, PROFILE_PICTURES[m_ActualIndex]},
+				{JSON_PLAYER_PPTP, PROFILE_PICTURES[m_ActualIndex] + "_THUMB"},
+				//{JSON_PLAYER_COLOR, /*TODO*/}
+				});
 		});
 
 	save->setPosition(
@@ -163,29 +157,26 @@ void ProfileState::Update(const float& dt)
 {
 	UpdateUi(dt);
 
-	auto& q = I(NetworkManager).GetReceiveQueue(TgatServerMessage::PLAYER_INFO_CHANGED);
-
 	NetworkManager& networkManager = I(NetworkManager);
 	User* user = networkManager.GetUser();
-	if (q.empty() == false)
-	{
-		nlohmann::json& data = q.front();
 
-		if (data.contains(JSON_PLAYER_NAME))
-			user->SetName(PLAYER_DD_ARG_NAME(data));
+	nlohmann::json data;
+	if (networkManager.ReceiveData(TgatServerMessage::PLAYER_INFO_CHANGED, data) == false)
+		return;
 
-		if (data.contains(JSON_PLAYER_PPP))
-			user->SetProfilePicturePath(PLAYER_DD_ARG_PPP(data));
+	if (data.contains(JSON_PLAYER_NAME))
+		user->SetName(PLAYER_DD_ARG_NAME(data));
 
-		if (data.contains(JSON_PLAYER_PPTP))
-			user->SetProfilePictureThumbPath(PLAYER_DD_ARG_PPTP(data));
+	if (data.contains(JSON_PLAYER_PPP))
+		user->SetProfilePicturePath(PLAYER_DD_ARG_PPP(data));
 
-		if (data.contains(JSON_PLAYER_COLOR))
-			user->SetBorderColor(PLAYER_DD_ARG_COLOR(data));
+	if (data.contains(JSON_PLAYER_PPTP))
+		user->SetProfilePictureThumbPath(PLAYER_DD_ARG_PPTP(data));
 
-		q.pop();
-		I(StateManager)->RemoveState();
-	}
+	if (data.contains(JSON_PLAYER_COLOR))
+		user->SetBorderColor(PLAYER_DD_ARG_COLOR(data));
+
+	I(StateManager)->RemoveState();
 }
 
 void ProfileState::RenderBackground(sf::RenderTarget* target)

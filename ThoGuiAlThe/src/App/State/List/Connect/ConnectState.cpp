@@ -13,12 +13,6 @@ void ConnectState::InitBackground()
 }
 void ConnectState::InitUi()
 {
-	/*auto* connectText = m_UiManager.AddText("CONNECTING", "CONNECTING TO SERVER ...");
-	connectText->setCharacterSize(15);
-	connectText->setOutlineColor(sf::Color::Black);
-	connectText->setOutlineThickness(1.f);
-	connectText->setPosition(WINDOW_SCREEN_WIDTH / 2 - connectText->getGlobalBounds().width / 2, WINDOW_SCREEN_HEIGHT - connectText->getGlobalBounds().height - 300.f);*/
-
 	auto* ipText = m_UiManager.AddText("IP", "IP : ");
 	ipText->setPosition(
 		WINDOW_SCREEN_WIDTH / 4 - ipText->getGlobalBounds().width / 2,
@@ -48,7 +42,7 @@ void ConnectState::Init()
 	InitBackground();
 	InitUi();
 
-	Sleep(1000);
+	//Sleep(1000);
 }
 
 void ConnectState::Resume()
@@ -78,16 +72,11 @@ void ConnectState::Update(const float& dt)
 
 	NetworkManager& networkManager = I(NetworkManager);
 
-	auto& q = networkManager.GetReceiveQueue(TgatServerMessage::PLAYER_INIT);
-
-	if (q.empty() == true)
+	nlohmann::json data;
+	if (networkManager.ReceiveData(TgatServerMessage::PLAYER_INIT, data) == false)
 		return;
 
-	nlohmann::json& data = q.front();
-
 	networkManager.InitPlayerWithData(data);
-
-	q.pop();
 
 	StateManager* stateManager = I(StateManager);
 

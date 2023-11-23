@@ -30,7 +30,8 @@ public:
 private:
 	std::stack<State*> m_States;
 
-	State* m_NewState;
+	State* m_NewState; 
+	CRITICAL_SECTION m_StateCS;
 
 	bool m_Adding;
 	uint32_t m_Removing;

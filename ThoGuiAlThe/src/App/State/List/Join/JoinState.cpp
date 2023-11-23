@@ -40,21 +40,14 @@ void JoinState::InitUi()
 	joinButton->setCharacterSize(50);
 	joinButton->setOutlineThickness(2.f);
 	joinButton->setOutlineColor(sf::Color::Black);
-	joinButton->SetCallback([idInput]() {
-		int id = std::atoi(idInput->getString().toAnsiString().c_str());
-
-		NetworkManager& networkManager = I(NetworkManager);
-		nlohmann::json eventData =
+	joinButton->SetCallback([idInput]()
 		{
-			{JSON_EVENT_TYPE, TgatClientMessage::JOIN_SESSION},
-			{JSON_SESSION_ID, id}
-		};
-		TgatNetworkHelper::Message msg;
-		std::string strData = eventData.dump();
-		const int headerId = networkManager.HEADER_ID;
-		const int playerId = networkManager.GetPlayerId();
-		networkManager.CreateMessage(headerId, playerId, strData, msg);
-		networkManager.Send(msg);
+			int id = std::atoi(idInput->getString().toAnsiString().c_str());
+
+			I(NetworkManager).SendData({
+				{JSON_EVENT_TYPE, TgatClientMessage::JOIN_SESSION},
+				{JSON_SESSION_ID, id}
+				});
 		});
 
 	auto* randJoinButton = m_UiManager.AddTextButton("RandJoinButton", "Random");
@@ -65,19 +58,12 @@ void JoinState::InitUi()
 	randJoinButton->setCharacterSize(50);
 	randJoinButton->setOutlineThickness(2.f);
 	randJoinButton->setOutlineColor(sf::Color::Black);
-	randJoinButton->SetCallback([]() {
-		NetworkManager& networkManager = I(NetworkManager);
-		nlohmann::json eventData =
+	randJoinButton->SetCallback([]()
 		{
-			{JSON_EVENT_TYPE, TgatClientMessage::JOIN_SESSION},
-			{JSON_SESSION_ID, -1}
-		};
-		TgatNetworkHelper::Message msg;
-		std::string strData = eventData.dump();
-		const int headerId = networkManager.HEADER_ID;
-		const int playerId = networkManager.GetPlayerId();
-		networkManager.CreateMessage(headerId, playerId, strData, msg);
-		networkManager.Send(msg);
+			I(NetworkManager).SendData({
+				{JSON_EVENT_TYPE, TgatClientMessage::JOIN_SESSION},
+				{JSON_SESSION_ID, -1}
+				});
 		});
 }
 void JoinState::Init()
