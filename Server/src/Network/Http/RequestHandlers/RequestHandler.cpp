@@ -10,6 +10,11 @@ std::string RequestHandler::NotFound()
 	return "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\n404 Not Found";
 }
 
+std::string RequestHandler::BadRequest()
+{
+	return "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nContent-Length: 0\r\n\r\n";
+}
+
 std::unordered_map<std::string, std::string> RequestHandler::ParseParams(const std::string& paramString)
 {
 	std::unordered_map<std::string, std::string> params;

@@ -87,6 +87,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Network\Http\RequestHandlers\SessionRequestHandler.cpp" />
     <ClCompile Include="src\Game\Session\GameSession.cpp" />
     <ClCompile Include="src\Network\Http\HttpManager.cpp" />
     <ClCompile Include="src\Player\PlayerManager.cpp" />
@@ -103,6 +104,7 @@
     <ClCompile Include="ThreadManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Network\Http\RequestHandlers\SessionRequestHandler.h" />
     <ClInclude Include="src\Game\Session\GameSession.h" />
     <ClInclude Include="src\Network\Http\HttpManager.h" />
     <ClInclude Include="src\Player\PlayerManager.h" />
@@ -119,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\index.html" />
+    <None Include="assets\session.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

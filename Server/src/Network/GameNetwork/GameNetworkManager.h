@@ -42,4 +42,3 @@ private:
 	void SendDataWithCriticalSection();
 	void GameNetworkMain();
 };
-

@@ -51,6 +51,9 @@
     <ClCompile Include="src\Game\Session\GameSession.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="src\Network\Http\RequestHandlers\SessionRequestHandler.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stdafx.h">
@@ -92,8 +95,12 @@
     <ClInclude Include="src\Game\Session\GameSession.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="src\Network\Http\RequestHandlers\SessionRequestHandler.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\session.html" />
     <None Include="assets\index.html" />
   </ItemGroup>
 </Project>

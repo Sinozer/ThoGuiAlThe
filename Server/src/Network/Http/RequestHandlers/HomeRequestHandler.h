@@ -7,7 +7,7 @@ public:
 	HomeRequestHandler();
 	~HomeRequestHandler() {}
 
-	std::string HandleHttpRequest(std::unordered_map<std::string, std::string>& route, const std::string& method) override;
+	virtual std::string HandleHttpRequest(std::unordered_map<std::string, std::string>& route, const std::string& method) override final;
 };
 
 class HomeMethodHandler : public IHandleMethod

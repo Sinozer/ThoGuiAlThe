@@ -2,7 +2,7 @@
 
 #include "HttpManager.h"
 
-#include "Network/Http/RequestHandlers/HomeRequestHandler.h"
+#include "HttpInclude.h"
 #include "Network/Server.h"
 
 HttpManager::HttpManager()
@@ -78,6 +78,7 @@ void HttpManager::CloseWebServer()
 void HttpManager::InitHttpRequestHandlers()
 {
 	m_HttpRequestHandlers.insert({ "/", std::make_unique<HomeRequestHandler>() });
+	m_HttpRequestHandlers.insert({ "/session", std::make_unique<SessionRequestHandler>() });
 }
 
 void HttpManager::InitWebWindow()

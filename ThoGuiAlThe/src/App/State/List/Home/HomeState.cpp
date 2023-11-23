@@ -53,7 +53,7 @@ void HomeState::InitUi()
 		profile->SetOutlineThickness(3.f);
 		profile->SetOutlineColor(sf::Color(playerDisplayData.color[0], playerDisplayData.color[1], playerDisplayData.color[2], playerDisplayData.color[3]));
 
-		auto* username = m_UiManager.AddTextInput("USERNAME", playerDisplayData.name);
+		auto* username = m_UiManager.AddText("USERNAME", playerDisplayData.name);
 		username->setCharacterSize(15);
 		username->setOutlineColor(sf::Color::Black);
 		username->setOutlineThickness(1.f);
