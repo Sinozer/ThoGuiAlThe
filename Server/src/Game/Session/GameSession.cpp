@@ -17,9 +17,9 @@ GameSession::~GameSession()
 	
 	for (auto& player : m_Players | std::views::values)
 	{
-		I(Server).GetPlayerManager()->RemovePlayer(player);
 		NULLPTR(player)
 	}
+
 	m_Players.clear();
 }
 
@@ -33,6 +33,12 @@ void GameSession::Init(Player* p1, int magic)
 void GameSession::AddPlayer(Player* p2)
 {
 	m_Players.emplace(std::make_pair(1, p2));
+}
+
+void GameSession::RemovePlayer(Player* player)
+{
+	m_Players[player->GetId()] = nullptr;
+	m_Players.erase(player->GetId());
 }
 
 void GameSession::Update(uint32_t playerId, int x, int y, nlohmann::json& returnJson)

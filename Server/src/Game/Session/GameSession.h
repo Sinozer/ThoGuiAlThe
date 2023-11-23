@@ -18,6 +18,7 @@ public:
 	// Returns ID
 	void Init(Player* p1, int magic);
 	void AddPlayer(Player* p2);
+	void RemovePlayer(Player* player);
 	void Update(uint32_t playerId, int x, int y, nlohmann::json& returnJson);
 
 	bool IsEnded() const { return m_IsEnded; }
