@@ -56,8 +56,13 @@ void Server::CloseServer()
 {
 	DELPTR(m_HttpManager);
 	DELPTR(m_GameNetworkManager);
-	DELPTR(m_PlayerManager);
+
+	// Close all sessions, this will also disconnect and delete all players in sessions
+	m_GameManager->OnServerClose();
 	DELPTR(m_GameManager);
+
+	// Be sure to close all sessions first, otherwise, players will be deleted twice (in session and in player manager)
+	DELPTR(m_PlayerManager);
 }
 
 void Server::InitSocket(SOCKET& s, HWND window, const char* port, uint32_t msgType, long events)
