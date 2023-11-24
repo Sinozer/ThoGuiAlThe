@@ -1,6 +1,6 @@
 # ThoGuiAlThe
 ## Context 
-This project was made for the course of Windows Online Programing and Multi-Threading.
+This project was made for the course of Windows Online Programming and Multi-Threading.
 The goal was to create a basic Tic Tac Toe game with a GUI and a server that can handle multiple games at the same time.
 
 ## Features
