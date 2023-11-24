@@ -2,6 +2,7 @@
 
 #include "NetworkManager.h"
 
+#include "App/State/List/Connect/ConnectState.h"
 #include "App/State/List/Create/CreateState.h"
 #include "App/State/List/Game/GameState.h"
 #include "App/State/List/Result/ResultState.h"
@@ -337,12 +338,6 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	}
 	case MSG_SERVER:
 	{
-		if (WSAGETSELECTERROR(lParam))
-		{
-			LOG("FD_ACCEPT failed with error: " << WSAGetLastError());
-			break;
-		}
-
 		switch (WSAGETSELECTEVENT(lParam))
 		{
 		case FD_READ:
@@ -365,6 +360,9 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		{
 			LOG("FD_CLOSE");
 			GetInstance().Disconnect();
+			StateManager* stateManager = I(StateManager);
+			stateManager->RemoveAllStates();
+			stateManager->AddState(new ConnectState());
 			break;
 		}
 		}
