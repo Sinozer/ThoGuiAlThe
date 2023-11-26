@@ -11,10 +11,8 @@
 #include "Game/Session/GameSession.h"
 
 GameNetworkManager::GameNetworkManager()
-	: TgatNetworkHelper(), m_Port("6969"),
-	m_ThreadID(0)
+	: TgatNetworkHelper(), m_Port("6969"), m_Thread()
 {
-	m_ThreadHandle = nullptr;
 	m_GameWindow = nullptr;
 }
 
@@ -76,22 +74,13 @@ bool GameNetworkManager::PlayerIdCheck(TGATPLAYERID playerId, GameSession* sessi
 
 void GameNetworkManager::StartGameServer()
 {
-	m_ThreadHandle = CreateThread(nullptr, 0, GameNetworkThread, this, 0, nullptr);
-	if (m_ThreadHandle == nullptr)
-	{
-		LOG("CreateWebThread failed with error: " << GetLastError());
-		throw std::exception("CreateThread failed");
-	}
-	else
-		LOG("CreateWebThread success");
+	m_Thread = TgatThread([this]() { GameNetworkMain(); });
 }
 
 void GameNetworkManager::CloseGameServer()
 {
 	SendMessage(m_GameWindow, MSG_NUKE, 0, 0);
-	WaitForSingleObject(m_ThreadHandle, INFINITE);
-
-	CloseHandle(m_ThreadHandle);
+	m_Thread.Join();
 }
 
 void GameNetworkManager::ProcessMessages()
@@ -102,13 +91,6 @@ void GameNetworkManager::ProcessMessages()
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-}
-
-DWORD WINAPI GameNetworkManager::GameNetworkThread(LPVOID lpParam)
-{
-	GameNetworkManager* gameNetwork = static_cast<GameNetworkManager*>(lpParam);
-	gameNetwork->GameNetworkMain();
-	return 0;
 }
 
 void GameNetworkManager::GameNetworkMain()

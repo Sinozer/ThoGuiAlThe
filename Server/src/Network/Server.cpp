@@ -44,7 +44,7 @@ void Server::RunServer()
 	{
 		if (_kbhit() && _getch() == VK_ESCAPE)
 		{
-			return;
+			break;
 		}
 
 		// Add a sleep to avoid busy-waiting

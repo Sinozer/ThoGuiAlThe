@@ -17,11 +17,10 @@ NetworkManager* NetworkManager::s_Instance = nullptr;
 
 NetworkManager::NetworkManager() 
 	: TgatNetworkHelper(), m_SessionId(-1), m_Connected(false),
-	m_AddressInfo{}, m_SendCS{}, m_ReceiveCS{}, m_SendQueue(), m_ReceiveQueues()
+	m_AddressInfo{}, m_NetworkThread(), m_SendCS{}, m_ReceiveCS{}, m_SendQueue(), m_ReceiveQueues()
 {
 	m_hWnd = nullptr;
 	m_User = nullptr;
-	m_NetworkThread = nullptr;
 	Init();
 }
 
@@ -95,13 +94,7 @@ void NetworkManager::Disconnect()
 void NetworkManager::Close()
 {
 	SendMessage(m_hWnd, MSG_NUKE, 0, 0);
-	if (WaitForSingleObject(m_NetworkThread, 10000) == WAIT_TIMEOUT)
-	{
-		LOG("Network thread did not close in time");
-		TerminateThread(m_NetworkThread, 0);
-	}
-
-	CloseHandle(m_NetworkThread);
+	m_NetworkThread.Join();
 	UnregisterClass(L"ServerWindow", GetModuleHandle(nullptr));
 }
 
@@ -269,14 +262,7 @@ void NetworkManager::Init()
 	InitializeCriticalSection(&m_ReceiveCS);
 
 	// Create network thread
-	m_NetworkThread = CreateThread(nullptr, 0, NetworkThread, this, 0, nullptr);
-	if (m_NetworkThread == nullptr)
-	{
-		LOG("CreateThread failed with error: " << GetLastError());
-		throw std::exception("CreateThread failed");
-	}
-	else
-		LOG("CreateThread success");
+	m_NetworkThread = TgatThread([this] { NetworkMain(); });
 }
 
 void NetworkManager::InitWindow()
@@ -399,7 +385,7 @@ void NetworkManager::ProcessMessages()
 void NetworkManager::SendNetworkData()
 {
 	// send data on network thread
-	EnterCriticalSection(&m_SendCS);
+	CriticalSectionScope csScope{ m_SendCS };
 	TgatNetworkHelper::Message msg;
 	std::string strData = m_SendQueue.front().dump();
 	const int headerId = HEADER_ID;
@@ -407,14 +393,6 @@ void NetworkManager::SendNetworkData()
 	CreateMessage(headerId, playerId, strData, msg);
 	Send(msg);
 	m_SendQueue.pop();
-	LeaveCriticalSection(&m_SendCS);
-}
-
-DWORD WINAPI NetworkManager::NetworkThread(LPVOID lpParam)
-{
-	NetworkManager* networkManager = static_cast<NetworkManager*>(lpParam);
-	networkManager->NetworkMain();
-	return 0;
 }
 
 void NetworkManager::NetworkMain()

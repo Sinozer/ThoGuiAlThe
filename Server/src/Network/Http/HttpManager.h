@@ -19,8 +19,7 @@ private:
 	char m_WebPort[5];
 	SOCKET m_WebServerSocket;
 	HWND m_WebWindow;
-	DWORD m_ThreadID;
-	HANDLE m_ThreadHandle;
+	TgatThread m_Thread;
 	std::unordered_map<std::string, std::unique_ptr<RequestHandler>> m_HttpRequestHandlers;
 
 private:
@@ -29,6 +28,5 @@ private:
 	static LRESULT CALLBACK WebWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void ProcessMessages();
 
-	static DWORD WINAPI WebServerThread(LPVOID lpParam);
 	void WebMain();
 };

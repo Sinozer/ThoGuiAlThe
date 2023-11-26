@@ -36,6 +36,9 @@
     <ClInclude Include="src\TgatLibInclude.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Async\TgatThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Network\TgatNetworkHelper.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Player\DisplayablePlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Async\TgatThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
