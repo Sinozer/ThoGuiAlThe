@@ -114,6 +114,7 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	}
 
 	TgatServerMessage type = data[JSON_EVENT_TYPE].get<TgatServerMessage>();
+	CriticalSectionScope csScope{ m_ReceiveCS };
 	switch (type)
 	{
 	case TgatServerMessage::PLAYER_DISCONNECT:
@@ -144,7 +145,6 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	}
 	case TgatServerMessage::SESSION_LEFT:
 	{
-		std::string d = data.dump();
 		if (data[JSON_SESSION_ID] != GetSessionId() && data[JSON_SESSION_ID] != -1)
 			return;
 
@@ -167,7 +167,6 @@ void NetworkManager::HandleData(nlohmann::json& data)
 	}
 	case TgatServerMessage::PLAYER_INFO_CHANGED:
 	{
-		std::string d = data.dump();
 		m_ReceiveQueues[TgatServerMessage::PLAYER_INFO_CHANGED].push(data);
 		break;
 	}
@@ -193,29 +192,23 @@ void NetworkManager::HandleData(nlohmann::json& data)
 
 void NetworkManager::SendData(nlohmann::json&& jsonData)
 {
-	// emplace data in queue on the main thread
 	// Enter critical section
-	EnterCriticalSection(&m_SendCS);	
+	CriticalSectionScope csScope{ m_SendCS };
 	
 	m_SendQueue.emplace(std::move(jsonData));
 	PostMessage(m_hWnd, MSG_SEND, 0, 0);
-
-	// Leave critical section
-	LeaveCriticalSection(&m_SendCS);
 }
 
 bool NetworkManager::ReceiveData(TgatServerMessage type, nlohmann::json& data)
 {
-    EnterCriticalSection(&m_ReceiveCS);
-    if (m_ReceiveQueues[type].empty())
-    {
-        LeaveCriticalSection(&m_ReceiveCS);
-        return false;
-    }
-    data = nlohmann::json(std::move(m_ReceiveQueues[type].front()));
-    m_ReceiveQueues[type].pop();
-    LeaveCriticalSection(&m_ReceiveCS);
-    return true;
+	CriticalSectionScope csScope{ m_ReceiveCS };
+	if (m_ReceiveQueues[type].empty())
+	{
+		return false;
+	}
+	data = nlohmann::json(std::move(m_ReceiveQueues[type].front()));
+	m_ReceiveQueues[type].pop();
+	return true;
 }
 
 TGATPLAYERID NetworkManager::GetPlayerId() const

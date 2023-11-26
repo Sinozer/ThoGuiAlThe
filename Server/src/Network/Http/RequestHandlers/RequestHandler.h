@@ -6,7 +6,7 @@ class RequestHandler
 public:
 	virtual ~RequestHandler() = default;
 
-	virtual std::string HandleHttpRequest(std::unordered_map<std::string, std::string>& params, const std::string& method) = 0;
+	virtual std::string HandleHttpRequest(std::unordered_map<std::string, std::string>& params, const std::string& method);
 
 	static std::string MethodNotAllowed();
 	static std::string NotFound();
