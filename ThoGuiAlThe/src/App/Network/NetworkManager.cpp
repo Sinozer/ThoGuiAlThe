@@ -352,6 +352,7 @@ LRESULT NetworkManager::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			}
 			catch (TgatException& e)
 			{
+				UNREFERENCED_PARAMETER(e);
 				LOG(e.what());
 			}
 			break;

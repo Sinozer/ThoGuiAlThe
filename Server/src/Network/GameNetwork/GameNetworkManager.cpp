@@ -34,6 +34,7 @@ void GameNetworkManager::SendDataToPlayer(Player* player, nlohmann::json& data)
 	}
 	catch (const TgatException& e)
 	{
+		UNREFERENCED_PARAMETER(e);
 		LOG(e.what());
 	}
 }
@@ -163,6 +164,7 @@ LRESULT GameNetworkManager::GameWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, 
 			}
 			catch (std::exception& e)
 			{
+				UNREFERENCED_PARAMETER(e);
 				LOG(e.what());
 				break;
 			}
@@ -207,12 +209,14 @@ LRESULT GameNetworkManager::GameWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, 
 			}
 			catch (TgatException& e)
 			{
+				UNREFERENCED_PARAMETER(e);
 				LOG(e.what());
 				I(Server).GetPlayerManager()->RemovePlayer(wParam);
 				break;
 			}
 			catch (nlohmann::json::exception& e)
 			{
+				UNREFERENCED_PARAMETER(e);
 				LOG(e.what());
 				I(Server).GetPlayerManager()->RemovePlayer(wParam);
 				break;
