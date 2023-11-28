@@ -54,7 +54,7 @@ void ProfileState::InitUi()
 	pictureLeftSelector->setOutlineColor(sf::Color::Black);
 	pictureLeftSelector->SetCallback([this, picture]() {
 		if (m_ActualIndex == 0)
-			m_ActualIndex = PROFILE_PICTURES.size() - 1;
+			m_ActualIndex = (int)PROFILE_PICTURES.size() - 1;
 		else
 			m_ActualIndex--;
 
@@ -118,7 +118,7 @@ void ProfileState::Init()
 	{
 		if (names[i] == actualName)
 		{
-			m_ActualIndex = i;
+			m_ActualIndex = (int)i;
 			break;
 		}
 	}

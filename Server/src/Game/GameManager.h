@@ -17,8 +17,7 @@ public:
 	GameSession* GetActiveSessionById(uint32_t id) const;
 	std::unordered_map<uint32_t, GameSession*> GetActiveSessions() const { return m_ActiveSessions; }
 
-	void EnterCS() { EnterCriticalSection(&m_ActiveSessionsLock); }
-	void ExitCS() { LeaveCriticalSection(&m_ActiveSessionsLock); }
+	CriticalSectionScope GetActiveSessionsCSScope() { return { m_ActiveSessionsLock }; }
 
 	void OnServerClose();
 

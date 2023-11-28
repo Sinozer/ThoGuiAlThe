@@ -38,13 +38,11 @@ private:
 
 	TGATSESSIONID m_SessionId;
 	
-	HANDLE m_NetworkThread;
+	TgatThread m_NetworkThread;
 	CRITICAL_SECTION m_SendCS;
 	CRITICAL_SECTION m_ReceiveCS;
 	std::queue<nlohmann::json> m_SendQueue;
 	std::unordered_map<TgatServerMessage, std::queue<nlohmann::json>> m_ReceiveQueues;
-
-	HANDLE m_NetworkHandle;
 
 	static NetworkManager* s_Instance;
 

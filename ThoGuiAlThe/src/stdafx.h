@@ -19,7 +19,7 @@
 #include <queue>
 /* ################# STANDARD ################# */
 
-#include "tgatLib.h"
+#include "TgatLibInclude.h"
 
 /* ################  CONSTANTS  ############### */
 #include "constants.h"

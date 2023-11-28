@@ -18,8 +18,6 @@ public:
 	[[nodiscard]] SOCKET& GetSocket() { return m_ServerSocket; }
 	[[nodiscard]] char* GetPort() { return m_Port; }
 	[[nodiscard]] HWND& GetWindow() { return m_GameWindow; }
-	[[nodiscard]] DWORD& GetThreadID() { return m_ThreadID; }
-	[[nodiscard]] HANDLE& GetThreadHandle() { return m_ThreadHandle; }
 	
 	void StartGameServer();
 	void CloseGameServer();
@@ -31,15 +29,13 @@ public:
 private:
 	char m_Port[5];
 
-	HANDLE m_ThreadHandle;
-	HWND m_GameWindow; 
-	DWORD m_ThreadID;
+	HWND m_GameWindow;
+	TgatThread m_Thread;
 
 	bool PlayerIdCheck(TGATPLAYERID playerId) override;
 	bool PlayerIdCheck(TGATPLAYERID playerId, GameSession* session);
 
 	void ProcessMessages();
-	static DWORD WINAPI GameNetworkThread(LPVOID lpParam);
 	void GameNetworkMain();
 
 	static LRESULT CALLBACK GameWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

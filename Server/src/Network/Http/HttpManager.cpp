@@ -7,8 +7,7 @@
 
 HttpManager::HttpManager()
 	: m_WebPort("9669"), m_WebServerSocket(INVALID_SOCKET),
-	m_WebWindow(nullptr),
-	m_ThreadID(0), m_ThreadHandle(nullptr),
+	m_WebWindow(nullptr), m_Thread(),
 	m_HttpRequestHandlers()
 {
 	InitHttpRequestHandlers();
@@ -57,22 +56,13 @@ void HttpManager::HandleHttpRequest(std::string request, SOCKET socket)
 
 void HttpManager::StartWebServer()
 {
-	m_ThreadHandle = CreateThread(nullptr, 0, WebServerThread, this, 0, &m_ThreadID);
-	if (m_ThreadHandle == nullptr)
-	{
-        LOG("CreateWebThread failed with error: " << GetLastError());
-        throw std::exception("CreateThread failed");
-    }
-    else
-        LOG("CreateWebThread success");
+	m_Thread = TgatThread([this]() { WebMain(); });
 }
 
 void HttpManager::CloseWebServer()
 {
 	SendMessage(m_WebWindow, MSG_NUKE, NULL, NULL);
-	WaitForSingleObject(m_ThreadHandle, INFINITE);
-
-	CloseHandle(m_ThreadHandle);
+	m_Thread.Join();
 }
 
 void HttpManager::InitHttpRequestHandlers()
@@ -172,13 +162,6 @@ void HttpManager::ProcessMessages()
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-}
-
-DWORD WINAPI HttpManager::WebServerThread(LPVOID lpParam)
-{
-	HttpManager* httpManager = static_cast<HttpManager*>(lpParam);
-	httpManager->WebMain();
-	return 0;
 }
 
 void HttpManager::WebMain()

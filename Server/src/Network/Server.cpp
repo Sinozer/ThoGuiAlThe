@@ -44,7 +44,7 @@ void Server::RunServer()
 	{
 		if (_kbhit() && _getch() == VK_ESCAPE)
 		{
-			return;
+			break;
 		}
 
 		// Add a sleep to avoid busy-waiting
@@ -194,13 +194,12 @@ void Server::HandleJson(const nlohmann::json& json)
 		const TGATSESSIONID sessionId = json[JSON_SESSION_ID].get<TGATSESSIONID>();
 		const nlohmann::json& move = json[JSON_PLAYER_MOVE];
 
-		m_GameManager->EnterCS();
+		CriticalSectionScope cs = m_GameManager->GetActiveSessionsCSScope();
 		session = m_GameManager->GetActiveSessionById(sessionId);
 
 		const TGATPLAYERID playerId = json[JSON_PLAYER_ID].get<TGATPLAYERID>();
 		if (m_GameNetworkManager->PlayerIdCheck(playerId, session) == false)
 		{
-			m_GameManager->ExitCS();
 			throw TgatException("Player did not exist in this session");
 		}
 
@@ -210,7 +209,6 @@ void Server::HandleJson(const nlohmann::json& json)
 		if (type == TgatServerMessage::BAD)
 		{
 			m_GameNetworkManager->SendDataToPlayer(m_PlayerManager->GetPlayerById(playerId), packageToSend);
-			m_GameManager->ExitCS();
 			break;
 		}
 
@@ -218,10 +216,8 @@ void Server::HandleJson(const nlohmann::json& json)
 			m_GameNetworkManager->SendDataToAllPlayersInSession(session, packageToSend);
 		else
 		{
-			m_GameManager->ExitCS();
 			throw TgatException("No session found");
 		}
-		m_GameManager->ExitCS();
 
 		break;
 	}
@@ -233,9 +229,11 @@ void Server::HandleJson(const nlohmann::json& json)
 		{
 			throw TgatException("Invalid player Id");
 		}
-		m_GameManager->EnterCS();
-		TGATSESSIONID id = m_GameManager->CreateGameSession(p1)->GetId();
-		m_GameManager->ExitCS();
+		TGATSESSIONID id = -1;
+		{
+			CriticalSectionScope cs = m_GameManager->GetActiveSessionsCSScope();
+			id = m_GameManager->CreateGameSession(p1)->GetId();
+		}
 
 		packageToSend =
 		{
@@ -257,7 +255,7 @@ void Server::HandleJson(const nlohmann::json& json)
 		{
 			throw TgatException("Invalid player Id");
 		}
-		m_GameManager->EnterCS();
+		CriticalSectionScope cs = m_GameManager->GetActiveSessionsCSScope();
 		session = m_GameManager->GetWaitingSessionById(sessionId);
 		if (session == nullptr && sessionId != -1)
 		{
@@ -266,7 +264,6 @@ void Server::HandleJson(const nlohmann::json& json)
 				{JSON_EVENT_TYPE, TgatServerMessage::BAD_SESSION_ID}
 			};
 			m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
-			m_GameManager->ExitCS();
 			break;
 		}
 
@@ -284,7 +281,6 @@ void Server::HandleJson(const nlohmann::json& json)
 				};
 
 				m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
-				m_GameManager->ExitCS();
 				break;
 			}
 
@@ -328,7 +324,6 @@ void Server::HandleJson(const nlohmann::json& json)
 
 		m_GameNetworkManager->SendDataToPlayer(p2, packageToSend);
 		// We know this is ugly but for now we will do it like this
-		m_GameManager->ExitCS();
 		break;
 	}
 	case TgatClientMessage::REPLAY:

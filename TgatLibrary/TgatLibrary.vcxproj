@@ -143,11 +143,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Async\CriticalSectionScope.h" />
     <ClInclude Include="src\Player\DisplayablePlayer.h" />
     <ClInclude Include="src\external\JSON\json.hpp" />
     <ClInclude Include="src\Exceptions\TgatException.h" />
     <ClInclude Include="src\Network\TgatNetworkHelper.h" />
     <ClInclude Include="src\tgatLib.h" />
+    <ClInclude Include="src\TgatLibInclude.h" />
+    <ClInclude Include="src\Async\TgatThread.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Player\DisplayablePlayer.cpp" />
@@ -157,6 +160,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Async\TgatThread.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

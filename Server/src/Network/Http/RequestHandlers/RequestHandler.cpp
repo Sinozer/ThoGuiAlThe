@@ -1,5 +1,14 @@
 #include "RequestHandler.h"
 
+std::string RequestHandler::HandleHttpRequest(std::unordered_map<std::string, std::string>& params, const std::string& method)
+{
+	if (m_HttpMethodHandlers.contains(method) == false)
+	{
+		return RequestHandler::MethodNotAllowed();
+	}
+	return m_HttpMethodHandlers[method]->BuildResponse(params);
+}
+
 std::string RequestHandler::MethodNotAllowed()
 {
 	return "HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/plain\r\n\r\n405 Method Not Allowed";
