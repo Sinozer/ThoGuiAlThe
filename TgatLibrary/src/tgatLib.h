@@ -1,5 +1,10 @@
 #pragma once
 
+/* ##################  STD  ################# */
+#include <tuple>
+#include <utility>
+/* ##################  STD  ################# */
+
 /* ##################  WINSOCK  ############### */
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <WinSock2.h>

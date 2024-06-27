@@ -17,4 +17,4 @@
 #include <WS2tcpip.h>
 /* ##################  WINSOCK  ################## */
 
-#include "tgatLib.h"
+#include "TgatLibInclude.h"
